@@ -7,18 +7,6 @@ WORKDIR /app
 # Copy the entire project to the container
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
-
-# Copy Prisma schema file
-COPY prisma ./prisma/
-
-# Install Prisma CLI
-RUN npm install prisma --save-dev
-
-# Generate Prisma client
-RUN npx prisma generate
-
 COPY . .
 
 # Build your Next.js application
