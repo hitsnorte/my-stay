@@ -61,7 +61,7 @@ export async function POST(request) {
       uniqueId // Adicionar o UUID ao payload
     };
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
-    const link = `https://stay.mypms.pt/confirmedReservation?token=${token}`;
+    const link = `http://localhost:3000/confirmedReservation?token=${token}`;
 
     // Inserir registro na tabela stayRecords
     const stayRecord = await prisma.stayRecords.create({

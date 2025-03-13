@@ -1,32 +1,38 @@
 version: '3.8'
 
 services:
-  # Serviço para a aplicação Next.js
+  # Serviço Next.js
   nextjs:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "3005:3000"
-    environment:
-      - DATABASE_URL=mysql://micro:Nextjs.2024@db:3306/extensions
+    env_file:
+      - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
-  # Serviço para o banco de dados MySQL
+  # Serviço MySQL
   db:
-    image: mysql:5.7
+    image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: extensions
-      MYSQL_USER: micro
-      MYSQL_PASSWORD: Nextjs.2024
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - db-data:/var/lib/mysql
     ports:
       - "3306:3306"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
 
 volumes:
   db-data:

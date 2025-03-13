@@ -1,23 +1,40 @@
-# Use an official Node.js runtime as a parent image
-FROM node:18-alpine
+# Etapa 1: Builder
+FROM node:18-alpine AS builder
 
-# Set the working directory
+# Definir diretório de trabalho
 WORKDIR /app
 
-# Copy package.json and package-lock.json first to leverage Docker layer caching
+# Copiar arquivos de dependências
 COPY package.json package-lock.json ./
 
-# Install dependencies explicitly
+# Instalar dependências do projeto (inclusive Prisma)
 RUN npm install
 
-# Copy the rest of the application files
+# Copiar o esquema do Prisma e gerar o cliente
+COPY prisma ./prisma/
+RUN npx prisma generate
+
+# Copiar o restante do código para a etapa de build
 COPY . .
 
-# Build the Next.js application
+# Construir a aplicação Next.js
 RUN npm run build
 
-# Expose the port Next.js runs on
+# Etapa 2: Runtime (Imagem final)
+FROM node:18-alpine AS runner
+
+# Definir diretório de trabalho
+WORKDIR /app
+
+# Copiar apenas os arquivos necessários da etapa builder
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+
+# Expor a porta do Next.js
 EXPOSE 3000
 
-# Start the application
+# Comando para iniciar a aplicação
 CMD npm run start
