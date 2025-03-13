@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model counter {
+  id          Int    @id @default(autoincrement())
+  counterName String @db.VarChar(255)
+  count       Int?   @default(0)
+  propertyID  Int
+}
+
+model properties {
+  propertyID               Int               @id @default(autoincrement())
+  propertyTag              String            @unique(map: "propertyTag_UNIQUE") @db.VarChar(100)
+  propertyName             String            @db.VarChar(100)
+  propertyServer           String            @db.VarChar(2048)
+  propertyPort             Int?
+  propertyConnectionString String?           @db.VarChar(2048)
+  mpehotel                 Int?
+  hotelName                String?           @db.VarChar(255)
+  hotelTermsEN             String?           @db.VarChar(2048)
+  hotelPhone               String?           @db.VarChar(20)
+  hotelEmail               String?           @db.VarChar(255)
+  hotelAddress             String?           @db.VarChar(255)
+  hotelPostalCode          String?           @db.VarChar(255)
+  hotelRNET                String?           @db.VarChar(50)
+  hotelNIF                 String?           @db.VarChar(50)
+  passeIni                 String?           @db.VarChar(255)
+  pdfFilePath              String?           @db.VarChar(255)
+  hotelTermsPT             String?           @db.VarChar(2048)
+  hotelTermsES             String?           @db.VarChar(2048)
+  propertyPortStay         Int?
+  hasStay                  Boolean           @default(false)
+  replyEmail               String?           @db.VarChar(255)
+  replyPassword            String?           @db.VarChar(255)
+  sendingServer            String?           @db.VarChar(2048)
+  sendingPort              Int?
+  usersProperties          usersProperties[]
+}
+
+model requestRecords {
+  requestID       Int      @id @default(autoincrement())
+  requestBody     String   @db.Text
+  requestType     String   @db.VarChar(8192)
+  requestDateTime DateTime @db.DateTime(0)
+  responseStatus  String?  @db.VarChar(20)
+  responseBody    String?  @db.Text
+  propertyID      Int
+  seen            Boolean?
+  uniqueKey       String?  @db.VarChar(255)
+  seenAt          DateTime @default(dbgenerated("(_utf8mb4\\'1900-01-01 00:00:00\\')")) @db.DateTime(0)
+}
+
+model requestRecordsArrivals {
+  requestID       Int      @id @default(autoincrement())
+  requestBody     Json
+  requestType     String   @db.VarChar(20)
+  requestDateTime DateTime @db.DateTime(0)
+  responseStatus  String?  @db.VarChar(20)
+  responseBody    String?  @db.Text
+  propertyID      Int
+}
+
+model requestRecordsDepartures {
+  requestID       Int      @id @default(autoincrement())
+  requestBody     Json
+  requestType     String   @db.VarChar(8192)
+  requestDateTime DateTime @db.DateTime(0)
+  responseStatus  String?  @db.VarChar(20)
+  responseBody    String?  @db.Text
+  propertyID      Int
+}
+
+model requestRecordsInHouses {
+  requestID       Int      @id @default(autoincrement())
+  requestBody     Json
+  requestType     String   @db.VarChar(8192)
+  requestDateTime DateTime @db.DateTime(0)
+  responseStatus  String?  @db.VarChar(20)
+  responseBody    String?  @db.Text
+  propertyID      Int
+}
+
+model users {
+  userID          Int               @id @default(autoincrement())
+  firstName       String            @db.VarChar(50)
+  secondName      String            @db.VarChar(50)
+  email           String            @unique(map: "email") @db.VarChar(100)
+  password        String            @db.VarChar(255)
+  createdAt       DateTime?         @default(now()) @db.Timestamp(0)
+  propertyID      Int?
+  pin             String?           @db.VarChar(255)
+  permissions     Int               @default(0)
+  expirationDate  DateTime?         @default(dbgenerated("'2222-01-01'")) @db.Date
+  usersProperties usersProperties[]
+}
+
+model usersProperties {
+  userID      Int
+  propertyID  Int
+  propertyTag String     @db.VarChar(10)
+  properties  properties @relation(fields: [propertyID], references: [propertyID], onDelete: Cascade)
+  users       users      @relation(fields: [userID], references: [userID], onDelete: Cascade)
+
+  @@id([userID, propertyID, propertyTag])
+  @@index([propertyID], map: "usersProperties_propertyID_fkey")
+}
+
+model stayRecords {
+  stayID          Int      @id @default(autoincrement())
+  requestBody     String   @db.Text
+  requestType     String   @db.VarChar(8192)
+  requestDateTime DateTime @db.DateTime(0)
+  requestStatus   String?  @db.VarChar(20)
+  responseBody    String?  @db.Text
+  propertyID      Int
+  token           String?  @db.VarChar(512)
+}
