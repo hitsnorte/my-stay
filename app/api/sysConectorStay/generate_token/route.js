@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
-import { v4 as uuidv4 } from "uuid"; // Importa a função para gerar UUIDs
+import { v4 as uuidv4 } from "uuid";
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
@@ -10,6 +10,7 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const userEmail = body.email;
+
     if (!userEmail) {
       return new NextResponse(
         JSON.stringify({ error: "O campo 'email' é obrigatório!" }),
@@ -19,14 +20,17 @@ export async function POST(request) {
 
     const { searchParams } = new URL(request.url);
     const propertyTag = searchParams.get("propertyTag");
-    if (!propertyTag) {
+    const resNo = searchParams.get("resNo");
+    const mpeHotel = searchParams.get("mpeHotel");
+
+    if (!propertyTag || !resNo || !mpeHotel) {
       return new NextResponse(
-        JSON.stringify({ error: "Parâmetro propertyTag não foi fornecido!" }),
+        JSON.stringify({ error: "Parâmetros obrigatórios ausentes: propertyTag, resNo, mpeHotel" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // Buscar dados da propriedade
+    // Buscar dados da propriedade no banco
     const property = await prisma.properties.findUnique({
       where: { propertyTag },
       select: {
@@ -39,6 +43,7 @@ export async function POST(request) {
         sendingPort: true,
       },
     });
+
     if (!property) {
       return new NextResponse(
         JSON.stringify({ error: "PropertyTag não encontrado no banco de dados" }),
@@ -47,27 +52,28 @@ export async function POST(request) {
     }
 
     const { propertyServer, propertyPort, propertyID, replyEmail, replyPassword, sendingServer, sendingPort } = property;
+    const uniqueId = uuidv4();
 
-    // Gerar um UUID exclusivo para cada requisição
-    const uniqueId = uuidv4(); // UUID único para cada requisição
-
-    // Criar token único com o UUID gerado
-    const payload = { 
-      propertyTag, 
-      propertyID, 
-      replyEmail, 
-      sendingServer, 
-      sendingPort, 
-      uniqueId // Adicionar o UUID ao payload
+    // Criar token com os novos parâmetros
+    const payload = {
+      propertyTag,
+      propertyID,
+      replyEmail,
+      sendingServer,
+      sendingPort,
+      resNo, // Adicionado ao token
+      mpeHotel, // Adicionado ao token
+      uniqueId,
     };
+    
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
-    const link = `http://localhost:3000/confirmedReservation?token=${token}`;
+    const link = `http://localhost:3000/reservation/reservation?token=${token}`;
 
-    // Inserir registro na tabela stayRecords
+    // Inserir no banco de dados
     const stayRecord = await prisma.stayRecords.create({
       data: {
         requestBody: JSON.stringify(body),
-        responseBody: JSON.stringify(body),
+        responseBody: JSON.stringify({ message: "E-mail enviado", link }),
         requestType: request.method,
         requestDateTime: new Date(),
         requestStatus: "200",
@@ -93,7 +99,6 @@ export async function POST(request) {
       html: `<p>Clique no link para confirmar sua reserva: <a href="${link}">MyStay</a></p>`,
     };
 
-    // Enviar o e-mail
     await transporter.sendMail(mailOptions);
 
     return new NextResponse(

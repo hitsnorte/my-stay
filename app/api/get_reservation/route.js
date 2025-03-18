@@ -31,6 +31,7 @@ export async function GET(request) {
     const stayRecord = await prisma.stayRecords.findFirst({
       where: { token },
       select: {
+        stayID: true,
         requestBody: true, // Pegando apenas o requestBody
       },
     });

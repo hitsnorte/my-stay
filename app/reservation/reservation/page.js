@@ -1,33 +1,44 @@
 "use client";
 
 import { Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-// importação de icons
+// Importação de ícones
 import { IoChevronBackOutline } from "react-icons/io5";
 import { IoMdRefresh } from "react-icons/io";
 import { FaCalendarAlt, FaRegCalendarCheck } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 
 function ReservationContent() {
-    const searchParams = useSearchParams();
     const router = useRouter();
-    const token = searchParams.get("token");
+    const [token, setToken] = useState(null);
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
+    const [stayRecord, setStayRecord] = useState("");
 
     useEffect(() => {
-        if (!token) {
+        // Recupera o token da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlToken = urlParams.get("token");
+
+        // Se não houver token na URL, redireciona para a página inicial
+        if (!urlToken) {
             router.push("/");
             return;
         }
 
+        // Armazenar o token no sessionStorage
+        sessionStorage.setItem("reservationToken", urlToken);
+
+        setToken(urlToken);
+
+        // Faz a requisição para buscar os dados da reserva usando o token
         const fetchData = async () => {
             try {
-                const response = await axios.get(`/api/get_reservation?token=${token}`);
-                console.log(response.data);
+                const response = await axios.get(`/api/get_reservation?token=${urlToken}`);
+                setStayRecord(response.data.stayID);
                 setData(JSON.parse(response.data.requestBody));
             } catch (err) {
                 setError("Erro ao buscar os dados da reserva");
@@ -35,7 +46,7 @@ function ReservationContent() {
         };
 
         fetchData();
-    }, [token, router]);
+    }, [router]);
 
     // Função para converter a string de data para um formato correto
     const parseDate = (dateStr) => {
@@ -73,8 +84,8 @@ function ReservationContent() {
             ) : data ? (
                 <>
                     <div className="bg-[#8F857D] flex flex-row justify-between items-center h-12 pl-64 pr-64">
-                        <IoChevronBackOutline size={20} color="white" />
-                        <p className="font-bold text-white">Reservation {data.protelReservationID}</p>
+                        <IoChevronBackOutline size={20} color="white" onClick={() => router.push("/")} />
+                        <p className="font-bold text-white">Reservation {data.protelBookingID}</p>
                         <IoMdRefresh size={20} color="white" onClick={() => window.location.reload()} />
                     </div>
                     <div className="flex flex-col justify-center items-center">
@@ -82,14 +93,14 @@ function ReservationContent() {
                         <div className="flex flex-row gap-4 items-center mt-4">
                             <div className="flex flex-row items-center font-bold">
                                 <p className="text-5xl">{checkIn.day}</p>
-                                <div>
+                                <div className="text-left">
                                     <p>{checkIn.weekDay}</p>
                                     <p>{checkIn.month}</p>
                                 </div>
                             </div>
                             <p>{numNights} Night(s)</p>
                             <div className="flex flex-row items-center font-bold">
-                                <div>
+                                <div className="text-right">
                                     <p>{checkOut.weekDay}</p>
                                     <p>{checkOut.month}</p>
                                 </div>
@@ -98,12 +109,15 @@ function ReservationContent() {
                         </div>
                         <div className="flex flex-row gap-2 items-center text-[#8F857D] mt-4">
                             <MdEmail />
-                            <p className="font-bold">Contact us</p>
+                            <a href={`./contact-us?email=${encodeURIComponent(data?.protelGuestEmail)}`} className="font-bold">Contact us</a>
                             <MdEmail />
                         </div>
                         <div className="flex justify-center mt-4">
                             <div className="flex flex-row gap-6">
-                                <div className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#DECBB7] w-48 h-48 text-center text-sm">
+                                <div 
+                                className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#DECBB7] w-48 h-48 text-center text-sm cursor-pointer"
+                                onClick={() => router.push("./details")}
+                                >
                                     <FaCalendarAlt size={35} />
                                     <p className="uppercase">Reservation</p>
                                 </div>
