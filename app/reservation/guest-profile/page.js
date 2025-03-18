@@ -13,6 +13,7 @@ import { BsShieldLockFill } from "react-icons/bs";
 
 import { jwtDecode } from "jwt-decode";
 
+import Select from "react-select";
 
 // Função para formatar a data
 const formatDate = (dateStr) => {
@@ -21,6 +22,19 @@ const formatDate = (dateStr) => {
     return `${day}/${month}/${year}`;
 };
 
+const customStyles = {
+    control: (provided) => ({
+        ...provided,
+        border: "1px solid #D1D5DB",
+        borderRadius: "0.375rem",
+        padding: "1px 4px",
+        boxShadow: "none",
+        width: "200px",
+        '&:hover': {
+            borderColor: "black"
+        },
+    })
+};
 export default function GuestProfile() {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
@@ -45,6 +59,8 @@ export default function GuestProfile() {
 
     const [propertyID, setPropertyID] = useState(null);
     const [guestName, setGuestName] = useState("");
+
+    const [countryOptions, setCountryOptions] = useState([]);
 
     useEffect(() => {
         // Acesso ao sessionStorage só no lado do cliente
@@ -175,6 +191,28 @@ export default function GuestProfile() {
         }
     };
 
+    const fetchNationalities = async () => {
+        try {
+            const response = await axios.get(`/api/sysConectorStay/get_countries?propertyID=${propertyID}`);
+            const nationalities = response.data;
+    
+            const formattedOptions = nationalities
+                .map((country) => ({
+                    value: country.codenr, // ID do país
+                    label: country.land    // Nome do país
+                }))
+                .sort((a, b) => a.label.localeCompare(b.label)); // Ordena alfabeticamente
+    
+            setCountryOptions(formattedOptions);
+        } catch (error) {
+            console.error("Erro ao buscar nacionalidades:", error);
+        }
+    };
+    
+    useEffect(() => {
+        fetchNationalities();
+    }, []);
+    
     return (
         <main>
             {error ? (
@@ -240,12 +278,20 @@ export default function GuestProfile() {
                             </div>
                             <div className="flex flex-row justify-between">
                                 <p>Nationality</p>
-                                <input
+                                {/* <input
                                     type="text"
                                     value={renderGuestData("nationality")}
                                     onChange={(e) => setNationality(e.target.value)}
                                     className="text-right focus:outline-none" // Alinha o texto à direita
+                                /> */}
+                                <Select
+                                    options={countryOptions}
+                                    value={countryOptions.find(option => option.label === renderGuestData("nationality")) || null}
+                                    onChange={(selectedOption) => setNationality(selectedOption.label)}
+                                    isSearchable
+                                    styles={customStyles}
                                 />
+
                             </div>
                         </div>
                         {/* ADDRESS */}

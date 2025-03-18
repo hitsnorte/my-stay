@@ -24,7 +24,7 @@ export async function POST(request) {
     // Buscar propertyServer e propertyPort no banco de dados
     const property = await prisma.properties.findUnique({
       where: { propertyID: propertyIDInt },
-      select: { propertyServer: true, propertyPort: true },
+      select: { propertyServer: true, propertyPortStay: true },
     });
 
     if (!property) {
@@ -34,10 +34,10 @@ export async function POST(request) {
       );
     }
 
-    const { propertyServer, propertyPort } = property;
+    const { propertyServer, propertyPortStay } = property;
 
     // Construir a URL para envio dos dados
-    const url = `http://${propertyServer}:${propertyPort}/pp_xml_ckit_submitguestprofile`;
+    const url = `http://${propertyServer}:${propertyPortStay}/pp_xml_ckit_submitguestprofile`;
     console.log("Enviando dados para:", url);
 
     // Enviar os dados para o servidor do hotel
