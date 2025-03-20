@@ -121,7 +121,9 @@ function ReservationContent() {
                                     <FaCalendarAlt size={35} />
                                     <p className="uppercase">Reservation</p>
                                 </div>
-                                <div className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#DECBB7] w-48 h-48 text-center text-sm">
+                                <div className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#DECBB7] w-48 h-48 text-center text-sm cursor-pointer"
+                                onClick={() => router.push("./prepare-check-in")}
+                                >
                                     <FaRegCalendarCheck size={35} />
                                     <p className="uppercase">Prepare check-in</p>
                                 </div>

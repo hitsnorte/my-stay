@@ -25,8 +25,7 @@ const formatDate = (dateStr) => {
 const customStyles = {
     control: (provided) => ({
         ...provided,
-        border: "1px solid #D1D5DB",
-        borderRadius: "0.375rem",
+        border: "none",
         padding: "1px 4px",
         boxShadow: "none",
         width: "200px",
@@ -61,6 +60,8 @@ export default function GuestProfile() {
     const [guestName, setGuestName] = useState("");
 
     const [countryOptions, setCountryOptions] = useState([]);
+    const [salutationOptions, setSalutationOptions] = useState([]);
+    const [docTypeOptions, setDocTypeOptions] = useState([]);
 
     useEffect(() => {
         // Acesso ao sessionStorage só no lado do cliente
@@ -192,27 +193,61 @@ export default function GuestProfile() {
     };
 
     const fetchNationalities = async () => {
-        try {
-            const response = await axios.get(`/api/sysConectorStay/get_countries?propertyID=${propertyID}`);
-            const nationalities = response.data;
+        const response = await axios.get(`/api/sysConectorStay/get_countries?propertyID=${propertyID}`);
+        return response.data;
+    };
     
-            const formattedOptions = nationalities
-                .map((country) => ({
-                    value: country.codenr, // ID do país
-                    label: country.land    // Nome do país
-                }))
-                .sort((a, b) => a.label.localeCompare(b.label)); // Ordena alfabeticamente
+    const fetchSalutation = async () => {
+        const response = await axios.get(`/api/sysConectorStay/get_salutation?propertyID=${propertyID}`);
+        return response.data;
+    };
     
-            setCountryOptions(formattedOptions);
-        } catch (error) {
-            console.error("Erro ao buscar nacionalidades:", error);
-        }
+    const fetchDocType = async () => {
+        const response = await axios.get(`/api/sysConectorStay/get_doc_type?propertyID=${propertyID}`);
+        return response.data;
     };
     
     useEffect(() => {
-        fetchNationalities();
-    }, []);
+        if (propertyID) {
+            // Usando Promise.all para fazer as três requisições ao mesmo tempo
+            Promise.all([fetchNationalities(), fetchSalutation(), fetchDocType()])
+                .then(([nationalities, salutations, docTypes]) => {
+                    // Processando nacionalidades
+                    const formattedCountryOptions = nationalities
+                        .map((country) => ({
+                            value: country.codenr, // ID do país
+                            label: country.land    // Nome do país
+                        }))
+                        .sort((a, b) => a.label.localeCompare(b.label)); // Ordena alfabeticamente
     
+                    setCountryOptions(formattedCountryOptions);
+    
+                    // Processando saudações
+                    const formattedSalutationOptions = salutations
+                        .map((salutation) => ({
+                            value: salutation.codenr, // ID da saudação
+                            label: salutation.land    // Nome da saudação
+                        }))
+                        .sort((a, b) => a.label.localeCompare(b.label)); // Ordena alfabeticamente
+    
+                    setSalutationOptions(formattedSalutationOptions);
+    
+                    // Processando tipos de documentos
+                    const formattedDocTypeOptions = docTypes
+                        .map((docType) => ({
+                            value: docType.codenr,  // ID do tipo de documento
+                            label: docType.land     // Nome do tipo de documento
+                        }))
+                        .sort((a, b) => a.label.localeCompare(b.label)); // Ordena alfabeticamente
+    
+                    setDocTypeOptions(formattedDocTypeOptions);
+                })
+                .catch((error) => {
+                    console.log("Erro ao buscar nacionalidades, saudações ou tipos de documentos:", error);
+                });
+        }
+    }, [propertyID]);    
+
     return (
         <main>
             {error ? (
@@ -232,21 +267,29 @@ export default function GuestProfile() {
                         {/* PERSONAL DATA */}
                         <div className="flex flex-row items-center mb-4 gap-4">
                             <FaClipboardUser size={30} color="#e6ac27" />
-                            <p className="font-bold text-xl text-[#e6ac27]">Personal data</p>
+                            <p className="font-bold text-xl text-[#e6ac27]">Guest Details</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <div className="flex flex-row justify-between">
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Salutation</p>
-                                <input
+                                {/* <input
                                     type="text"
                                     value={renderGuestData("salutation")}
                                     onChange={(e) => setSalutation(e.target.value)}
-                                    className="text-right focus:outline-none" // Alinha o texto à direita
+                                    className="text-right focus:outline-none"
+                                /> */}
+                                <Select
+                                    options={salutationOptions}
+                                    value={salutationOptions.find(option => option.label === renderGuestData("salutation")) || null}
+                                    onChange={(selectedOption) => setSalutation(selectedOption.label)}
+                                    isSearchable
+                                    styles={customStyles}
                                 />
                             </div>
+
                             {guestName !== "Unknown guest" && (
                                 <>
-                                    <div className="flex flex-row justify-between">
+                                    <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                         <p>Last Name</p>
                                         <input
                                             type="text"
@@ -256,7 +299,7 @@ export default function GuestProfile() {
                                         />
                                     </div>
 
-                                    <div className="flex flex-row justify-between">
+                                    <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                         <p>First Name</p>
                                         <input
                                             type="text"
@@ -267,7 +310,7 @@ export default function GuestProfile() {
                                     </div>
                                 </>
                             )}
-                            <div className="flex flex-row justify-between">
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Date of birth</p>
                                 <input
                                     type="date" // Isso garante que apenas a data será exibida (sem horas)
@@ -276,7 +319,7 @@ export default function GuestProfile() {
                                     className="text-right focus:outline-none" // Alinha o texto à direita
                                 />
                             </div>
-                            <div className="flex flex-row justify-between">
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Nationality</p>
                                 {/* <input
                                     type="text"
@@ -291,7 +334,6 @@ export default function GuestProfile() {
                                     isSearchable
                                     styles={customStyles}
                                 />
-
                             </div>
                         </div>
                         {/* ADDRESS */}
@@ -300,23 +342,30 @@ export default function GuestProfile() {
                             <p className="font-bold text-xl text-[#e6ac27]">Address</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <div className="flex flex-row justify-between">
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Country</p>
-                                <input
+                                {/* <input
                                     type="text"
                                     value={renderGuestData("country")}
                                     onChange={(e) => setCountry(e.target.value)}
                                     className="text-right focus:outline-none" // Alinha o texto à direita
+                                /> */}
+                                <Select
+                                    options={countryOptions}
+                                    value={countryOptions.find(option => option.label === renderGuestData("country")) || null}
+                                    onChange={(selectedOption) => setCountry(selectedOption.label)}
+                                    isSearchable
+                                    styles={customStyles}
                                 />
                             </div>
                         </div>
                         {/* COMMUNICATION */}
                         <div className="flex flex-row items-center mb-4 mt-6 gap-4">
                             <MdEmail size={30} color="#e6ac27" />
-                            <p className="font-bold text-xl text-[#e6ac27]">Communication</p>
+                            <p className="font-bold text-xl text-[#e6ac27]">Contacts</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <div className="flex flex-row justify-between">
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Email</p>
                                 <input
                                     type="text"
@@ -325,7 +374,7 @@ export default function GuestProfile() {
                                     className="text-right focus:outline-none w-120"
                                 />
                             </div>
-                            <div className="flex flex-row justify-between">
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Phone</p>
                                 <input
                                     type="text"
@@ -334,7 +383,7 @@ export default function GuestProfile() {
                                     className="text-right focus:outline-none"
                                 />
                             </div>
-                            <div className="flex flex-row justify-between">
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Mobile</p>
                                 <input
                                     type="text"
@@ -347,11 +396,27 @@ export default function GuestProfile() {
                         {/* PASSPORT */}
                         <div className="flex flex-row items-center mb-4 mt-6 gap-4">
                             <MdEmail size={30} color="#e6ac27" />
-                            <p className="font-bold text-xl text-[#e6ac27]">Passport</p>
+                            <p className="font-bold text-xl text-[#e6ac27]">Personal ID</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <div className="flex flex-row justify-between">
-                                <p>Passport no.</p>
+                        <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                                <p>Document type</p>
+                                {/* <input
+                                    type="text"
+                                    value={renderGuestData("identificationDocument")}
+                                    onChange={(e) => setIdentificationDocument(e.target.value)}
+                                    className="text-right focus:outline-none"
+                                /> */}
+                                <Select
+                                    options={docTypeOptions}
+                                    value={docTypeOptions.find(option => option.label === renderGuestData("identificationDocument")) || null}
+                                    onChange={(selectedOption) => setIdentificationDocument(selectedOption.label)}
+                                    isSearchable
+                                    styles={customStyles}
+                                />
+                            </div>
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                                <p>Document no.</p>
                                 <input
                                     type="text"
                                     value={renderGuestData("docNo")}
@@ -359,16 +424,7 @@ export default function GuestProfile() {
                                     className="text-right focus:outline-none"
                                 />
                             </div>
-                            <div className="flex flex-row justify-between">
-                                <p>Document type</p>
-                                <input
-                                    type="text"
-                                    value={renderGuestData("identificationDocument")}
-                                    onChange={(e) => setIdentificationDocument(e.target.value)}
-                                    className="text-right focus:outline-none"
-                                />
-                            </div>
-                            <div className="flex flex-row justify-between">
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Expiry date</p>
                                 <input
                                     type="text"
@@ -377,7 +433,7 @@ export default function GuestProfile() {
                                     className="text-right focus:outline-none"
                                 />
                             </div>
-                            <div className="flex flex-row justify-between">
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Country of birth</p>
                                 <input
                                     type="text"
