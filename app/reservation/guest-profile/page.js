@@ -15,6 +15,8 @@ import { jwtDecode } from "jwt-decode";
 
 import Select from "react-select";
 
+import "./style.css";
+
 // Função para formatar a data
 const formatDate = (dateStr) => {
     if (!dateStr) return "";
@@ -254,7 +256,7 @@ export default function GuestProfile() {
                 <p className="text-red-500">{error}</p>
             ) : data ? (
                 <>
-                    <div className="bg-[#8F857D] flex flex-row items-center h-12 pl-64 pr-64">
+                    <div className="bg-[#8F857D] flex flex-row items-center h-12 pl-64 pr-64 header">
                         <IoChevronBackOutline
                             size={20}
                             color="white"
@@ -263,7 +265,7 @@ export default function GuestProfile() {
                         />
                         <p className="font-bold text-white flex-grow text-center">Guest Profile</p>
                     </div>
-                    <div className="flex flex-col pl-110 pr-110 mt-8">
+                    <div className="flex flex-col pl-110 pr-110 mt-8 main-page">
                         {/* PERSONAL DATA */}
                         <div className="flex flex-row items-center mb-4 gap-4">
                             <FaClipboardUser size={30} color="#e6ac27" />

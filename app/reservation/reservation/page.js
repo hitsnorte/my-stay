@@ -11,6 +11,8 @@ import { IoMdRefresh } from "react-icons/io";
 import { FaCalendarAlt, FaRegCalendarCheck } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 
+import "./style.css";
+
 function ReservationContent() {
     const router = useRouter();
     const [token, setToken] = useState(null);
@@ -78,12 +80,12 @@ function ReservationContent() {
     const checkOut = formatDate(checkOutDate);
 
     return (
-        <main className="bg-[#F7F0F5] h-screen">
+        <main className="bg-[#F7F0F5] min-h-screen w-full">
             {error ? (
                 <p className="text-red-500">{error}</p>
             ) : data ? (
                 <>
-                    <div className="bg-[#8F857D] flex flex-row justify-between items-center h-12 pl-64 pr-64">
+                    <div className="bg-[#8F857D] flex flex-row justify-between items-center h-12 pl-64 pr-64 header">
                         <IoChevronBackOutline size={20} color="white" onClick={() => router.push("/")} />
                         <p className="font-bold text-white">Reservation {data.protelBookingID}</p>
                         <IoMdRefresh size={20} color="white" onClick={() => window.location.reload()} />
@@ -109,25 +111,25 @@ function ReservationContent() {
                         </div>
                         <div className="flex flex-row gap-2 items-center text-[#8F857D] mt-4">
                             <MdEmail />
-                            <a href={`./contact-us?email=${encodeURIComponent(data?.protelGuestEmail)}`} className="font-bold">Contact us</a>
+                            <a href={`./contact-us?email=${encodeURIComponent(data?.email)}`} className="font-bold">Contact us</a>
                             <MdEmail />
                         </div>
                         <div className="flex justify-center mt-4">
-                            <div className="flex flex-row gap-6">
+                            <div className="flex flex-row gap-6 cards-display">
                                 <div 
-                                className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#DECBB7] w-48 h-48 text-center text-sm cursor-pointer"
+                                className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#DECBB7] w-48 h-48 text-center text-sm cursor-pointer cards"
                                 onClick={() => router.push("./details")}
                                 >
                                     <FaCalendarAlt size={35} />
                                     <p className="uppercase">Reservation</p>
                                 </div>
-                                <div className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#DECBB7] w-48 h-48 text-center text-sm cursor-pointer"
+                                <div className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#DECBB7] w-48 h-48 text-center text-sm cursor-pointer cards"
                                 onClick={() => router.push("./prepare-check-in")}
                                 >
                                     <FaRegCalendarCheck size={35} />
                                     <p className="uppercase">Prepare check-in</p>
                                 </div>
-                                <div className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#8F857D] w-48 h-48 text-center font-bold text-sm text-white">
+                                <div className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#8F857D] w-48 h-48 text-center font-bold text-sm text-white cards">
                                     <p className="uppercase">Check-in and discover all features</p>
                                 </div>
                             </div>

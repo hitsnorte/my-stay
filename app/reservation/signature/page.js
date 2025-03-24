@@ -7,6 +7,8 @@ import SignatureCanvas from "react-signature-canvas";
 import { IoChevronBackOutline } from "react-icons/io5";
 import { IoIosCloseCircle } from "react-icons/io";
 
+import "./style.css";
+
 export default function Signature() {
     const router = useRouter();
     const sigCanvas = useRef(null);
@@ -30,7 +32,7 @@ export default function Signature() {
 
     return (
         <main>
-            <div className="bg-[#8F857D] flex flex-row items-center h-12 pl-64 pr-64">
+            <div className="bg-[#8F857D] flex flex-row items-center h-12 pl-64 pr-64 header">
                 <IoChevronBackOutline
                     size={20}
                     color="white"
@@ -39,7 +41,7 @@ export default function Signature() {
                 />
                 <p className="font-bold text-white flex-grow text-center">Signature</p>
             </div>
-            <div className="flex flex-col pl-92 pr-92 mt-4">
+            <div className="flex flex-col pl-92 pr-92 mt-4 main-page">
                 <h2 className="text-xl font-bold mb-4">Sign Below</h2>
                 <div className="border-2 border-gray-300 h-48">
                     <SignatureCanvas

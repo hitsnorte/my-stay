@@ -8,6 +8,8 @@ import { MdArrowForwardIos } from "react-icons/md";
 import { FaUsers, FaRegCreditCard } from "react-icons/fa";
 import { FaFileSignature } from "react-icons/fa6";
 
+import "./style.css";
+
 export default function PrepareCheckIn() {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
@@ -48,7 +50,7 @@ export default function PrepareCheckIn() {
                 <p className="text-red-500">{error}</p>
             ) : data ? (
                 <>
-                    <div className="bg-[#8F857D] flex flex-row items-center h-12 pl-64 pr-64">
+                    <div className="bg-[#8F857D] flex flex-row items-center h-12 pl-64 pr-64 header">
                         <IoChevronBackOutline
                             size={20}
                             color="white"
@@ -57,7 +59,7 @@ export default function PrepareCheckIn() {
                         />
                         <p className="font-bold text-white flex-grow text-center">Prepare check-in</p>
                     </div>
-                    <div className="flex flex-col pl-92 pr-92 mt-4">
+                    <div className="flex flex-col pl-92 pr-92 mt-4 main-page">
                         <p className="font-bold text-xl text-[#e6ac27]">Your check-in</p>
                         <div className="flex flex-row items-center gap-2 mt-10 mb-2">
                             <FaUsers size={30} color="#e6ac27" />

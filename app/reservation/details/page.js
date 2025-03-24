@@ -13,6 +13,8 @@ import { MdQrCode2 } from "react-icons/md";
 
 import { QRCodeCanvas } from "qrcode.react";
 
+import "./style.css";
+
 export default function ReservationInfo() {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
@@ -87,7 +89,7 @@ export default function ReservationInfo() {
                 <p className="text-red-500">{error}</p>
             ) : data ? (
                 <>
-                    <div className="bg-[#8F857D] flex flex-row justify-between items-center h-12 pl-64 pr-64">
+                    <div className="bg-[#8F857D] flex flex-row justify-between items-center h-12 pl-64 pr-64 header">
                         <IoChevronBackOutline
                             size={20}
                             color="white"
@@ -97,7 +99,7 @@ export default function ReservationInfo() {
                         <p className="font-bold text-white">Reservation {data.protelBookingID}</p>
                         <IoMdRefresh size={20} color="white" onClick={() => window.location.reload()} />
                     </div>
-                    <div className="flex flex-col pl-92 pr-92">
+                    <div className="flex flex-col pl-92 pr-92 main-page">
                         <div className="flex flex-col justify-center items-center">
                             <h1 className="text-2xl font-bold flex justify-center mt-4">{data.protelGuestName}</h1>
                             <div className="flex flex-row gap-4 items-center mt-4">
