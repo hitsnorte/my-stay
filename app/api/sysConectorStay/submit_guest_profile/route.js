@@ -4,8 +4,45 @@ import prisma from "@/lib/db"; // Remova esta linha se não precisar do banco de
 
 export async function POST(request) {
   try {
-    const { token, guestProfileData } = await request.json();
-    console.log("Dados recebidos:", { token, guestProfileData });
+    const headers = request.headers;
+    const token = headers.get("Reservation-Token");
+
+    if (!token) {
+      return new NextResponse(
+        JSON.stringify({ error: "Token de reserva não encontrado" }),
+        { status: 400, headers: { "Content-Type": "application/json; charset=utf-8" } }
+      );
+    }
+
+    // Coleta os dados do hóspede a partir dos headers
+    const guestProfileData = {
+      propertyID: headers.get("Guest-propertyID"),
+      Salutation_string40: headers.get("Guest-salutation"),
+      LastName_string80: headers.get("Guest-lastName"),
+      FirstName_string50: headers.get("Guest-firstName"),
+      birthday_date: headers.get("Guest-birthDate"),
+      nationality_integer: headers.get("Guest-nationality"),
+      country: headers.get("Guest-country"),
+      emailaddress_string75: headers.get("Guest-email"),
+      guestPhone_string50: headers.get("Guest-phone"),
+      mobilePhone_string50: headers.get("Guest-mobile"),
+      idDocument_string30: headers.get("Guest-docNo"),
+      doctype_integer: headers.get("Guest-identificationDocument"),
+      expDate_date: headers.get("Guest-documentExpirationDate"),
+      issueDate_date: headers.get("Guest-documentIssueDate"),
+      birthCountry: headers.get("Guest-birthCountry"),
+      marketingOptIn: headers.get("Guest-marketingOptIn") === "true",
+      dataProcessingOptIn: headers.get("Guest-dataProcessingOptIn") === "true",
+    };
+
+    console.log("Dados recebidos via headers:", { token, guestProfileData });
+
+    if (!guestProfileData.propertyID) {
+      return new NextResponse(
+        JSON.stringify({ error: "Faltam parâmetros obrigatórios: propertyID" }),
+        { status: 400, headers: { "Content-Type": "application/json; charset=utf-8" } }
+      );
+    }
     if (!token || !guestProfileData || !guestProfileData.propertyID) {
       return new NextResponse(
         JSON.stringify({ error: "Faltam parâmetros obrigatórios: token ou propertyID" }),
@@ -37,20 +74,20 @@ export async function POST(request) {
     const { propertyServer, propertyPortStay } = property;
 
     // Construir a URL para envio dos dados
-    const url = `http://${propertyServer}:${propertyPortStay}/pp_xml_ckit_submitguestprofile`;
+    const url = `http://${propertyServer}:${propertyPortStay}/insertcompanion`;
     console.log("Enviando dados para:", url);
 
     // Enviar os dados para o servidor do hotel
     const response = await axios.post(url, {
-        ...guestProfileData,  // Dados do hóspede
-        token,  // Token de reserva
-      }, {
-        headers: {
-          Authorization: "q4vf9p8n4907895f7m8d24m75c2q947m2398c574q9586c490q756c98q4m705imtugcfecvrhym04capwz3e2ewqaefwegfiuoamv4ros2nuyp0sjc3iutow924bn5ry943utrjmi", // Token de autorização
-          "Content-Type": "application/json",
-        },
-      });      
-      console.log("response: ", response);
+      ...guestProfileData,  // Dados do hóspede
+      token,  // Token de reserva
+    }, {
+      headers: {
+        Authorization: "q4vf9p8n4907895f7m8d24m75c2q947m2398c574q9586c490q756c98q4m705imtugcfecvrhym04capwz3e2ewqaefwegfiuoamv4ros2nuyp0sjc3iutow924bn5ry943utrjmi", // Token de autorização
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("response: ", response);
     return new NextResponse(JSON.stringify(response.data), {
       status: response.status,
       headers: { "Content-Type": "application/json; charset=utf-8" },

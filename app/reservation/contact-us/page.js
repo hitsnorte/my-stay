@@ -11,13 +11,14 @@ export default function ContactUs() {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
             const urlParams = new URLSearchParams(window.location.search);
             const emailParam = urlParams.get("email");
             if (emailParam) {
-                setEmail(decodeURIComponent(emailParam)); // ✅ Agora seguro
+                setEmail(decodeURIComponent(emailParam));
             }
         }
     }, []);
@@ -25,6 +26,41 @@ export default function ContactUs() {
     const clearFields = () => {
         setMessage("");
     };
+
+    const handleSubmit = async () => {
+        if (!email || !message) {
+            alert("Please fill in all fields.");
+            return;
+        }
+    
+        setLoading(true);
+    
+        try {
+            const token = sessionStorage.getItem("reservationToken"); // Agora buscando no sessionStorage
+            if (!token) {
+                alert("User not authenticated.");
+                return;
+            }
+    
+            const response = await fetch("/api/send_info_by_email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, message, token }),
+            });
+    
+            if (response.ok) {
+                alert("Email sent successfully!");
+                setEmail("");
+                setMessage("");
+            } else {
+                alert("Failed to send email.");
+            }
+        } catch (error) {
+            alert("An error occurred. Please try again.");
+        }
+    
+        setLoading(false);
+    };    
 
     return (
         <main>
@@ -35,7 +71,6 @@ export default function ContactUs() {
             </div>
 
             <div className="flex flex-col pl-110 pr-110 mt-8 main-page">
-                {/* HOTEL INFO */}
                 <div className="flex justify-center">
                     <p>Hotel Name</p>
                 </div>
@@ -71,9 +106,11 @@ export default function ContactUs() {
                     </div>
                 </div>
                 <button
+                    onClick={handleSubmit}
                     className="bg-[#e6ac27] text-white mt-4 mb-4 p-3"
+                    disabled={loading}
                 >
-                    SEND
+                    {loading ? "Sending..." : "SEND"}
                 </button>
             </div>
         </main>

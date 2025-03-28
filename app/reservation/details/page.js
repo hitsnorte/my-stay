@@ -15,6 +15,21 @@ import { QRCodeCanvas } from "qrcode.react";
 
 import "./style.css";
 
+import AES from "crypto-js/aes";
+import Utf8 from "crypto-js/enc-utf8";
+
+
+// Função para criptografar os dados
+const encryptData = (data) => {
+    const secretKey = process.env.NEXT_PUBLIC_SECRET_KEY;
+    if (!secretKey) {
+        console.error("Erro: Chave secreta não definida.");
+        return null;
+    }
+    return AES.encrypt(JSON.stringify(data), secretKey).toString();
+};
+
+
 export default function ReservationInfo() {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
@@ -83,6 +98,19 @@ export default function ReservationInfo() {
         setShowQRCode(true);
     };
 
+    // Dados a serem criptografados
+    const reservationData = {
+        email: "teste@gmail.com",
+        password: "123",
+        resNo: data?.protelReservationID,
+        profileID: data?.protelGuestID,
+        propertyID: 1,
+        requestID: 49
+    };
+
+    // Dados criptografados
+    const encryptedData = encryptData(reservationData);
+
     return (
         <main>
             {error ? (
@@ -121,7 +149,7 @@ export default function ReservationInfo() {
                             </div>
                         </div>
                         <div className="flex flex-col">
-                            {/* GUESTS */}
+                            {/* GUESTS */} 
                             <div className="flex flex-row items-center gap-2">
                                 <FaUsers size={30} color="#e6ac27" />
                                 <p className="font-bold text-xl text-[#e6ac27]">Guests</p>
@@ -149,7 +177,7 @@ export default function ReservationInfo() {
                                     ))}
                                 </div>
                             )}
-                            {/* EXTRAS */}
+                            {/* EXTRAS */} 
                             <div className="flex flex-row items-center gap-2 mt-6">
                                 <TiDocumentAdd size={30} color="#e6ac27" />
                                 <p className="font-bold text-xl text-[#e6ac27]">Extras</p>
@@ -162,7 +190,7 @@ export default function ReservationInfo() {
                                     <MdArrowForwardIos />
                                 </div>
                             </div>
-                            {/* ROOM */}
+                            {/* ROOM */} 
                             <div className="flex flex-row items-center gap-2 mt-6">
                                 <FaBed size={26} color="#e6ac27" />
                                 <p className="font-bold text-xl text-[#e6ac27]">My room</p>
@@ -170,7 +198,7 @@ export default function ReservationInfo() {
                             <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4">
                                 <p>Not yet assigned.</p>
                             </div>
-                            {/* QR CODE */}
+                            {/* QR CODE */} 
                             <div className="flex flex-row items-center gap-2 mt-6">
                                 <MdQrCode2 size={26} color="#e6ac27" />
                                 <p className="font-bold text-xl text-[#e6ac27]">QR code</p>
@@ -184,19 +212,14 @@ export default function ReservationInfo() {
                         </div>
 
                         {/* Exibe o QR Code se showQRCode for true */}
-                        {showQRCode && (
+                        {showQRCode && encryptedData && (
                             <div className="flex justify-center mt-4">
                                 <QRCodeCanvas
-                                    value={JSON.stringify({
-                                        reservationId: data.protelReservationID,
-                                        confirmationId: data.protelBookingID,
-                                        guestId: data.protelGuestID,
-                                    })}
-                                    size={128} // Tamanho do QR Code
+                                    value={encryptedData} // Passa os dados criptografados
+                                    size={128}
                                 />
                             </div>
                         )}
-
                     </div>
                 </>
             ) : (

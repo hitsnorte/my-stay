@@ -56,6 +56,7 @@ export default function GuestProfile() {
     const [docNo, setDocNo] = useState("");
     const [identificationDocument, setIdentificationDocument] = useState("");
     const [documentExpirationDate, setDocumentExpirationDate] = useState("");
+    const [documentIssueDate, setDocumentIssueDate] = useState("");
     const [birthCountry, setBirthCountry] = useState("");
 
     const [propertyID, setPropertyID] = useState(null);
@@ -112,6 +113,7 @@ export default function GuestProfile() {
                 setDocNo(fetchedData.docNo || "");
                 setIdentificationDocument(fetchedData.identificationDocument || "");
                 setDocumentExpirationDate(fetchedData.documentExpirationDate || "");
+                setDocumentIssueDate(fetchedData.documentIssueDate || "");
                 setBirthCountry(fetchedData.birthCountry || "");
 
                 // Se o nome do hóspede não for "Unknown guest", divide o nome completo
@@ -140,25 +142,32 @@ export default function GuestProfile() {
     };
 
     const renderGuestData = (field, formatDateFlag = false) => {
-        if (guestName === "Unknown guest") {
-            return ""; // Deixa os campos vazios para "Unknown guest"
+        if (guestName === "Unknown guest") return "";
+    
+        if (!data) return "";
+    
+        // Se o campo for "firstName" ou "lastName", precisamos processar protelGuestName
+        if (field === "firstName" || field === "lastName") {
+            if (!data.protelGuestName) return "";
+    
+            const { firstName, lastName } = splitFullName(data.protelGuestName);
+            return field === "firstName" ? firstName : lastName;
         }
-
-        const value = data ? data[field] || "" : ""; // Retorna os dados se houver
-        if (formatDateFlag && value) {
-            return formatDate(value); // Se precisar formatar como data
-        }
-        return value;
+    
+        // Caso contrário, retorna normalmente
+        const value = data[field] || "";
+        return formatDateFlag && value ? formatDate(value) : value;
     };
+    
 
     const handleSave = async () => {
         const token = sessionStorage.getItem("reservationToken");
-
+    
         if (!token) {
             setError("Token de reserva não encontrado.");
             return;
         }
-
+    
         const guestProfileData = {
             propertyID,
             salutation,
@@ -173,17 +182,26 @@ export default function GuestProfile() {
             docNo,
             identificationDocument,
             documentExpirationDate,
+            documentIssueDate,
             birthCountry,
             marketingOptIn: enabledMarketing,
             dataProcessingOptIn: enabledDataP,
         };
-
+    
         try {
-            const response = await axios.post("/api/sysConectorStay/submit_guest_profile", {
-                token,
-                guestProfileData,
+            const headers = {
+                Authorization: "q4vf9p8n4907895f7m8d24m75c2q947m2398c574q9586c490q756c98q4m705imtugcfecvrhym04capwz3e2ewqaefwegfiuoamv4ros2nuyp0sjc3iutow924bn5ry943utrjmi",
+                "Content-Type": "application/json",
+                "Reservation-Token": token,
+            };
+    
+            // Adiciona cada campo do guestProfileData no header
+            Object.entries(guestProfileData).forEach(([key, value]) => {
+                headers[`Guest-${key}`] = value !== undefined ? String(value) : "";
             });
-
+    
+            const response = await axios.post("/api/sysConectorStay/submit_guest_profile", {}, { headers });
+    
             if (response.status === 200) {
                 alert("Dados salvos com sucesso!");
             } else {
@@ -192,7 +210,7 @@ export default function GuestProfile() {
         } catch (err) {
             setError("Erro ao enviar os dados. Tente novamente.");
         }
-    };
+    };    
 
     const fetchNationalities = async () => {
         const response = await axios.get(`/api/sysConectorStay/get_countries?propertyID=${propertyID}`);
@@ -250,6 +268,36 @@ export default function GuestProfile() {
         }
     }, [propertyID]);    
 
+
+    useEffect(() => {
+        if (!data) return;
+    
+        setSalutation(renderGuestData("salutation"));
+        setBirthDate(renderGuestData("birthDate"));
+        setNationality(renderGuestData("nationality"));
+        setCountry(renderGuestData("country"));
+        setEmail(renderGuestData("email"));
+        setPhone(renderGuestData("phone"));
+        setMobile(renderGuestData("mobile"));
+        setDocNo(renderGuestData("docNo"));
+        setIdentificationDocument(renderGuestData("identificationDocument"));
+        setDocumentExpirationDate(renderGuestData("documentExpirationDate"));
+        setDocumentIssueDate(renderGuestData("documentIssueDate"));
+        setBirthCountry(renderGuestData("birthCountry"));
+    
+        // Se for o hóspede principal, define o nome corretamente
+        if (guestName !== "Unknown guest" && data.protelGuestName) {
+            const { firstName, lastName } = splitFullName(data.protelGuestName);
+            setFirstName(firstName);
+            setLastName(lastName);
+        } else {
+            setFirstName(""); // Mantém os campos vazios se for um hóspede desconhecido
+            setLastName("");
+        }
+    }, [data, guestName]); 
+    
+    
+
     return (
         <main>
             {error ? (
@@ -289,8 +337,6 @@ export default function GuestProfile() {
                                 />
                             </div>
 
-                            {guestName !== "Unknown guest" && (
-                                <>
                                     <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                         <p>Last Name</p>
                                         <input
@@ -305,18 +351,16 @@ export default function GuestProfile() {
                                         <p>First Name</p>
                                         <input
                                             type="text"
-                                            value={firstName}  // Usa diretamente o estado firstName
+                                            value={firstName}
                                             onChange={(e) => setFirstName(e.target.value)}  // Atualiza o estado firstName
                                             className="text-right focus:outline-none" // Alinha o texto à direita
                                         />
                                     </div>
-                                </>
-                            )}
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Date of birth</p>
                                 <input
                                     type="date" // Isso garante que apenas a data será exibida (sem horas)
-                                    value={renderGuestData("birthDate")}
+                                    value={birthDate}
                                     onChange={(e) => setBirthDate(e.target.value)}
                                     className="text-right focus:outline-none" // Alinha o texto à direita
                                 />
@@ -331,7 +375,7 @@ export default function GuestProfile() {
                                 /> */}
                                 <Select
                                     options={countryOptions}
-                                    value={countryOptions.find(option => option.label === renderGuestData("nationality")) || null}
+                                    value={countryOptions.find(option => option.label === nationality) || null}
                                     onChange={(selectedOption) => setNationality(selectedOption.label)}
                                     isSearchable
                                     styles={customStyles}
@@ -354,7 +398,7 @@ export default function GuestProfile() {
                                 /> */}
                                 <Select
                                     options={countryOptions}
-                                    value={countryOptions.find(option => option.label === renderGuestData("country")) || null}
+                                    value={countryOptions.find(option => option.label === country) || null}
                                     onChange={(selectedOption) => setCountry(selectedOption.label)}
                                     isSearchable
                                     styles={customStyles}
@@ -371,7 +415,7 @@ export default function GuestProfile() {
                                 <p>Email</p>
                                 <input
                                     type="text"
-                                    value={renderGuestData("email")}
+                                    value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="text-right focus:outline-none w-120"
                                 />
@@ -380,7 +424,7 @@ export default function GuestProfile() {
                                 <p>Phone</p>
                                 <input
                                     type="text"
-                                    value={renderGuestData("phone")}
+                                    value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                     className="text-right focus:outline-none"
                                 />
@@ -389,7 +433,7 @@ export default function GuestProfile() {
                                 <p>Mobile</p>
                                 <input
                                     type="text"
-                                    value={renderGuestData("mobile")}
+                                    value={mobile}
                                     onChange={(e) => setMobile(e.target.value)}
                                     className="text-right focus:outline-none"
                                 />
@@ -411,7 +455,7 @@ export default function GuestProfile() {
                                 /> */}
                                 <Select
                                     options={docTypeOptions}
-                                    value={docTypeOptions.find(option => option.label === renderGuestData("identificationDocument")) || null}
+                                    value={docTypeOptions.find(option => option.label === identificationDocument) || null}
                                     onChange={(selectedOption) => setIdentificationDocument(selectedOption.label)}
                                     isSearchable
                                     styles={customStyles}
@@ -421,8 +465,17 @@ export default function GuestProfile() {
                                 <p>Document no.</p>
                                 <input
                                     type="text"
-                                    value={renderGuestData("docNo")}
+                                    value={docNo}
                                     onChange={(e) => setDocNo(e.target.value)}
+                                    className="text-right focus:outline-none"
+                                />
+                            </div>
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                                <p>Issue date</p>
+                                <input
+                                    type="text"
+                                    value={documentIssueDate}
+                                    onChange={(e) => setDocumentIssueDate(e.target.value)}
                                     className="text-right focus:outline-none"
                                 />
                             </div>
@@ -430,7 +483,7 @@ export default function GuestProfile() {
                                 <p>Expiry date</p>
                                 <input
                                     type="text"
-                                    value={renderGuestData("documentExpirationDate")}
+                                    value={documentExpirationDate}
                                     onChange={(e) => setDocumentExpirationDate(e.target.value)}
                                     className="text-right focus:outline-none"
                                 />
@@ -439,7 +492,7 @@ export default function GuestProfile() {
                                 <p>Country of birth</p>
                                 <input
                                     type="text"
-                                    value={renderGuestData("birthCountry")}
+                                    value={birthCountry}
                                     onChange={(e) => setBirthCountry(e.target.value)}
                                     className="text-right focus:outline-none"
                                 />
