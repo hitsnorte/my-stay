@@ -39,9 +39,9 @@ export async function GET(request) {
 
     // Construir a URL da API externa
     const { propertyServer, propertyPortStay } = property;
-    const url = `http://${propertyServer}:${propertyPortStay}/nationalities`;
+    const url = `http://${propertyServer}:${propertyPortStay}/doctype`;
 
-    // Fazer a requisição para buscar as nacionalidades
+    // Fazer a requisição para buscar os tipos de documentos
     const response = await axios.get(url, {
       headers: {
         Authorization: 'q4vf9p8n4907895f7m8d24m75c2q947m2398c574q9586c490q756c98q4m705imtugcfecvrhym04capwz3e2ewqaefwegfiuoamv4ros2nuyp0sjc3iutow924bn5ry943utrjmi',
@@ -49,30 +49,23 @@ export async function GET(request) {
       },
     });
 
-    const nationalitiesData = response.data; // Os dados retornados da API externa
+    const doctypes = response.data;
 
-    if (!nationalitiesData || !Array.isArray(nationalitiesData)) {
-      return new NextResponse(
-        JSON.stringify({ error: "Dados de nacionalidades não encontrados." }),
-        { status: 404, headers: { "Content-Type": "application/json; charset=utf-8" } }
-      );
-    }
-
-    // Opcional: Se precisar filtrar ou transformar os dados
-    const nationalities = nationalitiesData.map(item => ({
-      code: item.codenr,   // Renomeando o campo 'codenr' para 'code'
-      country: item.land,  // Renomeando o campo 'land' para 'country'
+    // Opcional: Filtrar ou transformar os dados se necessário
+    const formattedDocTypes = doctypes.map((doctype) => ({
+      value: doctype.ref,       // ID do tipo de documento
+      label: doctype.text       // Nome do tipo de documento
     }));
 
     // Retornar os dados como JSON
     return new NextResponse(
-      JSON.stringify(nationalities),
+      JSON.stringify(formattedDocTypes),
       { status: 200, headers: { "Content-Type": "application/json; charset=utf-8" } }
     );
   } catch (error) {
-    console.error("Erro ao buscar nacionalidades:", error.message);
+    console.error("Erro ao buscar tipos de documentos:", error.message);
     return new NextResponse(
-      JSON.stringify({ error: "Erro ao buscar nacionalidades." }),
+      JSON.stringify({ error: "Erro ao buscar tipos de documentos." }),
       { status: 500, headers: { "Content-Type": "application/json; charset=utf-8" } }
     );
   }

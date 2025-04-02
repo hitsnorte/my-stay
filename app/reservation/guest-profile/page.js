@@ -143,31 +143,31 @@ export default function GuestProfile() {
 
     const renderGuestData = (field, formatDateFlag = false) => {
         if (guestName === "Unknown guest") return "";
-    
+
         if (!data) return "";
-    
+
         // Se o campo for "firstName" ou "lastName", precisamos processar protelGuestName
         if (field === "firstName" || field === "lastName") {
             if (!data.protelGuestName) return "";
-    
+
             const { firstName, lastName } = splitFullName(data.protelGuestName);
             return field === "firstName" ? firstName : lastName;
         }
-    
+
         // Caso contrário, retorna normalmente
         const value = data[field] || "";
         return formatDateFlag && value ? formatDate(value) : value;
     };
-    
+
 
     const handleSave = async () => {
         const token = sessionStorage.getItem("reservationToken");
-    
+
         if (!token) {
             setError("Token de reserva não encontrado.");
             return;
         }
-    
+
         const guestProfileData = {
             propertyID,
             salutation,
@@ -187,21 +187,21 @@ export default function GuestProfile() {
             marketingOptIn: enabledMarketing,
             dataProcessingOptIn: enabledDataP,
         };
-    
+
         try {
             const headers = {
                 Authorization: "q4vf9p8n4907895f7m8d24m75c2q947m2398c574q9586c490q756c98q4m705imtugcfecvrhym04capwz3e2ewqaefwegfiuoamv4ros2nuyp0sjc3iutow924bn5ry943utrjmi",
                 "Content-Type": "application/json",
                 "Reservation-Token": token,
             };
-    
+
             // Adiciona cada campo do guestProfileData no header
             Object.entries(guestProfileData).forEach(([key, value]) => {
                 headers[`Guest-${key}`] = value !== undefined ? String(value) : "";
             });
-    
+
             const response = await axios.post("/api/sysConectorStay/submit_guest_profile", {}, { headers });
-    
+
             if (response.status === 200) {
                 alert("Dados salvos com sucesso!");
             } else {
@@ -210,23 +210,23 @@ export default function GuestProfile() {
         } catch (err) {
             setError("Erro ao enviar os dados. Tente novamente.");
         }
-    };    
+    };
 
     const fetchNationalities = async () => {
         const response = await axios.get(`/api/sysConectorStay/get_countries?propertyID=${propertyID}`);
         return response.data;
     };
-    
+
     const fetchSalutation = async () => {
         const response = await axios.get(`/api/sysConectorStay/get_salutation?propertyID=${propertyID}`);
         return response.data;
     };
-    
+
     const fetchDocType = async () => {
         const response = await axios.get(`/api/sysConectorStay/get_doc_type?propertyID=${propertyID}`);
         return response.data;
     };
-    
+
     useEffect(() => {
         if (propertyID) {
             // Usando Promise.all para fazer as três requisições ao mesmo tempo
@@ -235,43 +235,44 @@ export default function GuestProfile() {
                     // Processando nacionalidades
                     const formattedCountryOptions = nationalities
                         .map((country) => ({
-                            value: country.codenr, // ID do país
-                            label: country.land    // Nome do país
+                            value: country.code,   // Usando 'code' que foi renomeado no backend
+                            label: country.country // Usando 'country' que foi renomeado no backend
                         }))
                         .sort((a, b) => a.label.localeCompare(b.label)); // Ordena alfabeticamente
-    
+
                     setCountryOptions(formattedCountryOptions);
-    
+
                     // Processando saudações
                     const formattedSalutationOptions = salutations
                         .map((salutation) => ({
-                            value: salutation.codenr, // ID da saudação
-                            label: salutation.land    // Nome da saudação
+                            value: salutation.code,        // ID da saudação
+                            label: salutation.salutation   // Nome da saudação (correto)
                         }))
                         .sort((a, b) => a.label.localeCompare(b.label)); // Ordena alfabeticamente
-    
+
                     setSalutationOptions(formattedSalutationOptions);
-    
+
                     // Processando tipos de documentos
                     const formattedDocTypeOptions = docTypes
                         .map((docType) => ({
-                            value: docType.codenr,  // ID do tipo de documento
-                            label: docType.land     // Nome do tipo de documento
+                            value: docType.ref,  // 'ref' é o campo de ID do tipo de documento
+                            label: docType.text  // 'text' é o campo de nome do tipo de documento
                         }))
                         .sort((a, b) => a.label.localeCompare(b.label)); // Ordena alfabeticamente
-    
+
                     setDocTypeOptions(formattedDocTypeOptions);
+
                 })
                 .catch((error) => {
                     console.log("Erro ao buscar nacionalidades, saudações ou tipos de documentos:", error);
                 });
         }
-    }, [propertyID]);    
+    }, [propertyID]);
 
 
     useEffect(() => {
         if (!data) return;
-    
+
         setSalutation(renderGuestData("salutation"));
         setBirthDate(renderGuestData("birthDate"));
         setNationality(renderGuestData("nationality"));
@@ -284,7 +285,7 @@ export default function GuestProfile() {
         setDocumentExpirationDate(renderGuestData("documentExpirationDate"));
         setDocumentIssueDate(renderGuestData("documentIssueDate"));
         setBirthCountry(renderGuestData("birthCountry"));
-    
+
         // Se for o hóspede principal, define o nome corretamente
         if (guestName !== "Unknown guest" && data.protelGuestName) {
             const { firstName, lastName } = splitFullName(data.protelGuestName);
@@ -294,9 +295,9 @@ export default function GuestProfile() {
             setFirstName(""); // Mantém os campos vazios se for um hóspede desconhecido
             setLastName("");
         }
-    }, [data, guestName]); 
-    
-    
+    }, [data, guestName]);
+
+
 
     return (
         <main>
@@ -330,32 +331,33 @@ export default function GuestProfile() {
                                 /> */}
                                 <Select
                                     options={salutationOptions}
-                                    value={salutationOptions.find(option => option.label === renderGuestData("salutation")) || null}
-                                    onChange={(selectedOption) => setSalutation(selectedOption.label)}
+                                    value={salutationOptions.find(option => option.value === salutation) || null} // Garantir que está usando 'value'
+                                    onChange={(selectedOption) => setSalutation(selectedOption.value)} // Usar 'value' ao invés de 'label'
                                     isSearchable
                                     styles={customStyles}
                                 />
+
                             </div>
 
-                                    <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                        <p>Last Name</p>
-                                        <input
-                                            type="text"
-                                            value={lastName}  // Usa diretamente o estado lastName
-                                            onChange={(e) => setLastName(e.target.value)}  // Atualiza o estado lastName
-                                            className="text-right focus:outline-none" // Alinha o texto à direita
-                                        />
-                                    </div>
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                                <p>Last Name</p>
+                                <input
+                                    type="text"
+                                    value={lastName}  // Usa diretamente o estado lastName
+                                    onChange={(e) => setLastName(e.target.value)}  // Atualiza o estado lastName
+                                    className="text-right focus:outline-none" // Alinha o texto à direita
+                                />
+                            </div>
 
-                                    <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                        <p>First Name</p>
-                                        <input
-                                            type="text"
-                                            value={firstName}
-                                            onChange={(e) => setFirstName(e.target.value)}  // Atualiza o estado firstName
-                                            className="text-right focus:outline-none" // Alinha o texto à direita
-                                        />
-                                    </div>
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                                <p>First Name</p>
+                                <input
+                                    type="text"
+                                    value={firstName}
+                                    onChange={(e) => setFirstName(e.target.value)}  // Atualiza o estado firstName
+                                    className="text-right focus:outline-none" // Alinha o texto à direita
+                                />
+                            </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Date of birth</p>
                                 <input
@@ -375,8 +377,8 @@ export default function GuestProfile() {
                                 /> */}
                                 <Select
                                     options={countryOptions}
-                                    value={countryOptions.find(option => option.label === nationality) || null}
-                                    onChange={(selectedOption) => setNationality(selectedOption.label)}
+                                    value={countryOptions.find(option => option.value === nationality) || null}
+                                    onChange={(selectedOption) => setCountry(selectedOption.value)}
                                     isSearchable
                                     styles={customStyles}
                                 />
@@ -398,8 +400,8 @@ export default function GuestProfile() {
                                 /> */}
                                 <Select
                                     options={countryOptions}
-                                    value={countryOptions.find(option => option.label === country) || null}
-                                    onChange={(selectedOption) => setCountry(selectedOption.label)}
+                                    value={countryOptions.find(option => option.value === country) || null}
+                                    onChange={(selectedOption) => setCountry(selectedOption.value)}
                                     isSearchable
                                     styles={customStyles}
                                 />
@@ -445,7 +447,7 @@ export default function GuestProfile() {
                             <p className="font-bold text-xl text-[#e6ac27]">Personal ID</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                        <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Document type</p>
                                 {/* <input
                                     type="text"
@@ -455,11 +457,12 @@ export default function GuestProfile() {
                                 /> */}
                                 <Select
                                     options={docTypeOptions}
-                                    value={docTypeOptions.find(option => option.label === identificationDocument) || null}
-                                    onChange={(selectedOption) => setIdentificationDocument(selectedOption.label)}
+                                    value={docTypeOptions.find(option => option.value === identificationDocument) || null} // Garantir que está usando 'value'
+                                    onChange={(selectedOption) => setIdentificationDocument(selectedOption.value)} // Usar 'value' ao invés de 'label'
                                     isSearchable
                                     styles={customStyles}
                                 />
+
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Document no.</p>

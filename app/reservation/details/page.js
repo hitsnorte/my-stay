@@ -16,16 +16,17 @@ import { QRCodeCanvas } from "qrcode.react";
 import "./style.css";
 
 import AES from "crypto-js/aes";
-import Utf8 from "crypto-js/enc-utf8";
-
 
 // Função para criptografar os dados
 const encryptData = (data) => {
+    if (typeof window === "undefined") return null;
+
     const secretKey = process.env.NEXT_PUBLIC_SECRET_KEY;
     if (!secretKey) {
-        console.error("Erro: Chave secreta não definida.");
+        console.error("Erro: A chave secreta não está definida.");
         return null;
     }
+
     return AES.encrypt(JSON.stringify(data), secretKey).toString();
 };
 
@@ -100,7 +101,7 @@ export default function ReservationInfo() {
 
     // Dados a serem criptografados
     const reservationData = {
-        email: "teste@gmail.com",
+        email: "internaluser@gmail.com",
         password: "123",
         resNo: data?.protelReservationID,
         profileID: data?.protelGuestID,
