@@ -171,6 +171,7 @@ export default function GuestProfile() {
 
         const guestProfileData = {
             propertyID,
+            reservationID,
             salutation,
             lastName,
             firstName,
@@ -333,12 +334,11 @@ export default function GuestProfile() {
                                 /> */}
                                 <Select
                                     options={salutationOptions}
-                                    value={salutationOptions.find(option => option.value === salutation) || null} // Garantir que está usando 'value'
+                                    value={salutationOptions.find(option => option.label === salutation) || null} // Garantir que está usando 'value'
                                     onChange={(selectedOption) => setSalutation(selectedOption.label)} // Usar 'value' ao invés de 'label'
                                     isSearchable
                                     styles={customStyles}
                                 />
-
                             </div>
 
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
@@ -498,12 +498,6 @@ export default function GuestProfile() {
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Country of birth</p>
-                                <input
-                                    type="text"
-                                    value={birthCountry}
-                                    onChange={(e) => setBirthCountry(e.target.value)}
-                                    className="text-right focus:outline-none"
-                                />
                                 <Select
                                     options={countryOptions}
                                     value={countryOptions.find(option => option.value === birthCountry) || null}
