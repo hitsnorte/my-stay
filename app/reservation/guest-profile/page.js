@@ -61,6 +61,7 @@ export default function GuestProfile() {
     const [birthCountry, setBirthCountry] = useState("");
 
     const [propertyID, setPropertyID] = useState(null);
+    const [reservationID, setReservationID] = useState(null);
     const [guestName, setGuestName] = useState("");
 
     const [countryOptions, setCountryOptions] = useState([]);
@@ -85,13 +86,12 @@ export default function GuestProfile() {
         }
 
         try {
-            // Decodifica o token para extrair o propertyID
             const decodedToken = jwtDecode(token);
-            if (decodedToken.propertyID) {
+            if (decodedToken?.propertyID && decodedToken?.resNo) {
                 setPropertyID(decodedToken.propertyID);
-                console.log("PropertyID extraído do token:", decodedToken.propertyID);
+                setReservationID(decodedToken.resNo);
             } else {
-                console.error("PropertyID não encontrado no token!");
+                console.error("PropertyID ou ReservationID não encontrados no token!");
             }
         } catch (error) {
             console.error("Erro ao decodificar o token:", error);

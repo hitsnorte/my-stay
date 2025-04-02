@@ -22,7 +22,8 @@ export async function POST(request) {
       FirstName_string50: headers.get("Guest-firstName"),
       birthday_date: headers.get("Guest-birthDate"),
       nationality_integer: headers.get("Guest-nationality"),
-      country: headers.get("Guest-country"),
+      CountryID_CodeNrColumnFromNatcode_integer: headers.get("Guest-country"),
+      CountryID_LandColumnFromNatcode_string80: headers.get("Guest-countryText"),
       emailaddress_string75: headers.get("Guest-email"),
       guestPhone_string50: headers.get("Guest-phone"),
       mobilePhone_string50: headers.get("Guest-mobile"),
@@ -30,9 +31,14 @@ export async function POST(request) {
       doctype_integer: headers.get("Guest-identificationDocument"),
       expDate_date: headers.get("Guest-documentExpirationDate"),
       issueDate_date: headers.get("Guest-documentIssueDate"),
-      birthCountry: headers.get("Guest-birthCountry"),
+      birthCountry_integer: headers.get("Guest-birthCountry"),
       marketingOptIn: headers.get("Guest-marketingOptIn") === "true",
       dataProcessingOptIn: headers.get("Guest-dataProcessingOptIn") === "true",
+      StreetAddress_string80: "teste",
+      ZipCode_string17: "teste",
+      City_string50: "teste",
+      vatNO_string30: "teste",
+      IDReserva_integer: headers.get("Guest-reservationID")
     };
 
     console.log("Dados recebidos via headers:", { token, guestProfileData });
