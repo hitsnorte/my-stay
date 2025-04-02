@@ -17,28 +17,28 @@ export async function POST(request) {
     // Coleta os dados do hóspede a partir dos headers
     const guestProfileData = {
       propertyID: headers.get("Guest-propertyID"),
-      Salutation_string40: headers.get("Guest-salutation"),
+      Salutation_string40: parseInt(headers.get("Guest-salutation")),
       LastName_string80: headers.get("Guest-lastName"),
       FirstName_string50: headers.get("Guest-firstName"),
       birthday_date: headers.get("Guest-birthDate"),
-      nationality_integer: headers.get("Guest-nationality"),
-      CountryID_CodeNrColumnFromNatcode_integer: headers.get("Guest-country"),
+      nationality_integer: parseInt(headers.get("Guest-nationality")),
+      CountryID_CodeNrColumnFromNatcode_integer: parseInt(headers.get("Guest-country")),
       CountryID_LandColumnFromNatcode_string80: headers.get("Guest-countryText"),
       emailaddress_string75: headers.get("Guest-email"),
       guestPhone_string50: headers.get("Guest-phone"),
       mobilePhone_string50: headers.get("Guest-mobile"),
       idDocument_string30: headers.get("Guest-docNo"),
-      doctype_integer: headers.get("Guest-identificationDocument"),
+      doctype_integer: parseInt(headers.get("Guest-identificationDocument")),
       expDate_date: headers.get("Guest-documentExpirationDate"),
       issueDate_date: headers.get("Guest-documentIssueDate"),
-      birthCountry_integer: headers.get("Guest-birthCountry"),
+      birthCountry_integer: parseInt(headers.get("Guest-birthCountry")),
       marketingOptIn: headers.get("Guest-marketingOptIn") === "true",
       dataProcessingOptIn: headers.get("Guest-dataProcessingOptIn") === "true",
       StreetAddress_string80: "teste",
       ZipCode_string17: "teste",
       City_string50: "teste",
       vatNO_string30: "teste",
-      IDReserva_integer: headers.get("Guest-reservationID")
+      IDReserva_integer: parseInt(headers.get("Guest-reservationID"))
     };
 
     console.log("Dados recebidos via headers:", { token, guestProfileData });
