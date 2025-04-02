@@ -17,7 +17,7 @@ export async function POST(request) {
     // Coleta os dados do hóspede a partir dos headers
     const guestProfileData = {
       propertyID: headers.get("Guest-propertyID"),
-      Salutation_string40: parseInt(headers.get("Guest-salutation")),
+      Salutation_string40: headers.get("Guest-salutation"),
       LastName_string80: headers.get("Guest-lastName"),
       FirstName_string50: headers.get("Guest-firstName"),
       birthday_date: headers.get("Guest-birthDate"),
