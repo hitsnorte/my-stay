@@ -50,6 +50,7 @@ export default function GuestProfile() {
     const [birthDate, setBirthDate] = useState("");
     const [nationality, setNationality] = useState("");
     const [country, setCountry] = useState("");
+    const [countryText, setCountryText] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
     const [mobile, setMobile] = useState("");
@@ -176,6 +177,7 @@ export default function GuestProfile() {
             birthDate,
             nationality,
             country,
+            countryText,
             email,
             phone,
             mobile,
@@ -255,8 +257,8 @@ export default function GuestProfile() {
                     // Processando tipos de documentos
                     const formattedDocTypeOptions = docTypes
                         .map((docType) => ({
-                            value: docType.ref,  // 'ref' é o campo de ID do tipo de documento
-                            label: docType.text  // 'text' é o campo de nome do tipo de documento
+                            value: docType.value,  // 'ref' é o campo de ID do tipo de documento
+                            label: docType.label  // 'text' é o campo de nome do tipo de documento
                         }))
                         .sort((a, b) => a.label.localeCompare(b.label)); // Ordena alfabeticamente
 
@@ -332,7 +334,7 @@ export default function GuestProfile() {
                                 <Select
                                     options={salutationOptions}
                                     value={salutationOptions.find(option => option.value === salutation) || null} // Garantir que está usando 'value'
-                                    onChange={(selectedOption) => setSalutation(selectedOption.value)} // Usar 'value' ao invés de 'label'
+                                    onChange={(selectedOption) => setSalutation(selectedOption.label)} // Usar 'value' ao invés de 'label'
                                     isSearchable
                                     styles={customStyles}
                                 />
@@ -378,7 +380,7 @@ export default function GuestProfile() {
                                 <Select
                                     options={countryOptions}
                                     value={countryOptions.find(option => option.value === nationality) || null}
-                                    onChange={(selectedOption) => setCountry(selectedOption.value)}
+                                    onChange={(selectedOption) => setNationality(selectedOption.value)}
                                     isSearchable
                                     styles={customStyles}
                                 />
@@ -401,7 +403,10 @@ export default function GuestProfile() {
                                 <Select
                                     options={countryOptions}
                                     value={countryOptions.find(option => option.value === country) || null}
-                                    onChange={(selectedOption) => setCountry(selectedOption.value)}
+                                    onChange={(selectedOption) => {
+                                        setCountry(selectedOption.value);
+                                        setCountryText(selectedOption.label);
+                                    }}
                                     isSearchable
                                     styles={customStyles}
                                 />
@@ -498,6 +503,13 @@ export default function GuestProfile() {
                                     value={birthCountry}
                                     onChange={(e) => setBirthCountry(e.target.value)}
                                     className="text-right focus:outline-none"
+                                />
+                                <Select
+                                    options={countryOptions}
+                                    value={countryOptions.find(option => option.value === birthCountry) || null}
+                                    onChange={(selectedOption) => setBirthCountry(selectedOption.value)}
+                                    isSearchable
+                                    styles={customStyles}
                                 />
                             </div>
                         </div>
