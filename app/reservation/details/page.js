@@ -184,7 +184,7 @@ export default function ReservationInfo() {
         }
     
         // Se for hóspede principal (ou unknown), não fazemos nada porque já estará no endpoint
-        window.location.href = "/guest-profile";
+        router.push("./guest-profile");
     };
     
 
