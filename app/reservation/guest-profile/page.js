@@ -105,7 +105,7 @@ export default function GuestProfile() {
             try {
                 const response = await axios.get(`/api/get_reservation?token=${token}`);
                 const fetchedData = JSON.parse(response.data.requestBody);
-
+    
                 // Armazena os dados da reserva no estado
                 setData(fetchedData);
                 setSalutation(fetchedData.salutation || "");
@@ -124,7 +124,7 @@ export default function GuestProfile() {
                 setStreetAddress(fetchedData.streetAddress || "");
                 setPostalCode(fetchedData.postalCode || "");
                 setCity(fetchedData.city || "");
-
+    
                 // Se o nome do hóspede não for "Unknown guest", define os nomes
                 if (
                     (fetchedData.protelGuestFirstName && fetchedData.protelGuestFirstName !== "Unknown guest") ||
@@ -133,8 +133,9 @@ export default function GuestProfile() {
                     setFirstName(fetchedData.protelGuestFirstName || "");
                     setLastName(fetchedData.protelGuestLastName || "");
                 }
-
+    
             } catch (err) {
+                console.error(err); // boa prática: log no console pro dev
                 setError("Erro ao buscar os dados da reserva");
             }
         };

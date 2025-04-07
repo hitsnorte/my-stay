@@ -155,11 +155,38 @@ export default function ReservationInfo() {
     const checkOut = formatDate(checkOutDate);
 
     // Função para verificar se é o "Unknown guest" ou o nome real
-    const handleGuestClick = (guestName) => {
-        // Armazena o nome do hóspede ou "Unknown guest" no sessionStorage
-        sessionStorage.setItem("selectedGuestName", guestName);
-        router.push("./guest-profile");
+    // const handleGuestClick = (guestName) => {
+    //     // Armazena o nome do hóspede ou "Unknown guest" no sessionStorage
+    //     sessionStorage.setItem("selectedGuestName", guestName);
+    //     router.push("./guest-profile");
+    // };
+    const handleGuestClick = (guestFullName) => {
+        sessionStorage.setItem("selectedGuestName", guestFullName);
+    
+        // Procurar o hóspede no sessionStorage (caso não seja o principal)
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key !== "reservationToken" && key !== "selectedGuestName") {
+                try {
+                    const guestArray = JSON.parse(sessionStorage.getItem(key));
+                    if (Array.isArray(guestArray)) {
+                        const guest = guestArray[0];
+                        const fullName = `${guest.protelGuestFirstName} ${guest.protelGuestLastName}`;
+                        if (fullName === guestFullName) {
+                            sessionStorage.setItem("selectedGuestID", key); // salvando ID
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Erro ao ler hóspede do sessionStorage", e);
+                }
+            }
+        }
+    
+        // Se for hóspede principal (ou unknown), não fazemos nada porque já estará no endpoint
+        window.location.href = "/guest-profile";
     };
+    
 
     // const handleGuestClick = async (guestName) => {
     //     try {
