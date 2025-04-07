@@ -21,8 +21,9 @@ import "./style.css";
 const formatDate = (dateStr) => {
     if (!dateStr) return "";
     const [day, month, year] = dateStr.split(" ")[0].split("/");
-    return `${day}/${month}/${year}`;
+    return `${year}-${month}-${day}`;
 };
+
 
 const customStyles = {
     control: (provided) => ({
@@ -51,6 +52,9 @@ export default function GuestProfile() {
     const [nationality, setNationality] = useState("");
     const [country, setCountry] = useState("");
     const [countryText, setCountryText] = useState("");
+    const [streetAddress, setStreetAddress] = useState("");
+    const [postalCode, setPostalCode] = useState("");
+    const [city, setCity] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
     const [mobile, setMobile] = useState("");
@@ -59,7 +63,7 @@ export default function GuestProfile() {
     const [documentExpirationDate, setDocumentExpirationDate] = useState("");
     const [documentIssueDate, setDocumentIssueDate] = useState("");
     const [birthCountry, setBirthCountry] = useState("");
-
+    const [vatNo, setVatNo] = useState("");
     const [propertyID, setPropertyID] = useState(null);
     const [reservationID, setReservationID] = useState(null);
     const [guestName, setGuestName] = useState("");
@@ -116,13 +120,18 @@ export default function GuestProfile() {
                 setDocumentExpirationDate(fetchedData.documentExpirationDate || "");
                 setDocumentIssueDate(fetchedData.documentIssueDate || "");
                 setBirthCountry(fetchedData.birthCountry || "");
+                setVatNo(fetchedData.vatNo || "");
+                setStreetAddress(fetchedData.streetAddress || "");
+                setPostalCode(fetchedData.postalCode || "");
+                setCity(fetchedData.city || "");
 
-                // Se o nome do hóspede não for "Unknown guest", divide o nome completo
-                if (fetchedData.protelGuestName && fetchedData.protelGuestName !== "Unknown guest") {
-                    const { firstName, lastName } = splitFullName(fetchedData.protelGuestName);
-                    console.log("Primeiro nome:", firstName);
-                    setFirstName(firstName);
-                    setLastName(lastName);
+                // Se o nome do hóspede não for "Unknown guest", define os nomes
+                if (
+                    (fetchedData.protelGuestFirstName && fetchedData.protelGuestFirstName !== "Unknown guest") ||
+                    (fetchedData.protelGuestLastName && fetchedData.protelGuestLastName !== "Unknown guest")
+                ) {
+                    setFirstName(fetchedData.protelGuestFirstName || "");
+                    setLastName(fetchedData.protelGuestLastName || "");
                 }
 
             } catch (err) {
@@ -133,33 +142,15 @@ export default function GuestProfile() {
         fetchData();
     }, [router]);
 
-    // Função para separar o nome completo em primeiro nome e sobrenome
-    const splitFullName = (fullName) => {
-        if (!fullName) return { firstName: "", lastName: "" };
-        const nameParts = fullName.split(" ");
-        const firstName = nameParts[0] || ""; // Primeiro nome
-        const lastName = nameParts.slice(1).join(" ") || ""; // Sobrenome (caso tenha mais de um nome)
-        return { firstName, lastName };
-    };
-
     const renderGuestData = (field, formatDateFlag = false) => {
         if (guestName === "Unknown guest") return "";
 
         if (!data) return "";
 
-        // Se o campo for "firstName" ou "lastName", precisamos processar protelGuestName
-        if (field === "firstName" || field === "lastName") {
-            if (!data.protelGuestName) return "";
-
-            const { firstName, lastName } = splitFullName(data.protelGuestName);
-            return field === "firstName" ? firstName : lastName;
-        }
-
         // Caso contrário, retorna normalmente
         const value = data[field] || "";
         return formatDateFlag && value ? formatDate(value) : value;
     };
-
 
     const handleSave = async () => {
         const token = sessionStorage.getItem("reservationToken");
@@ -179,6 +170,9 @@ export default function GuestProfile() {
             nationality,
             country,
             countryText,
+            streetAddress,
+            postalCode,
+            city,
             email,
             phone,
             mobile,
@@ -187,6 +181,7 @@ export default function GuestProfile() {
             documentExpirationDate,
             documentIssueDate,
             birthCountry,
+            vatNo,
             marketingOptIn: enabledMarketing,
             dataProcessingOptIn: enabledDataP,
         };
@@ -280,6 +275,9 @@ export default function GuestProfile() {
         setBirthDate(renderGuestData("birthDate"));
         setNationality(renderGuestData("nationality"));
         setCountry(renderGuestData("country"));
+        setStreetAddress(renderGuestData("streetAddress"));
+        setPostalCode(renderGuestData("postalCode"));
+        setCity(renderGuestData("city"));
         setEmail(renderGuestData("email"));
         setPhone(renderGuestData("phone"));
         setMobile(renderGuestData("mobile"));
@@ -288,19 +286,20 @@ export default function GuestProfile() {
         setDocumentExpirationDate(renderGuestData("documentExpirationDate"));
         setDocumentIssueDate(renderGuestData("documentIssueDate"));
         setBirthCountry(renderGuestData("birthCountry"));
+        setVatNo(renderGuestData("vatNo"));
 
         // Se for o hóspede principal, define o nome corretamente
-        if (guestName !== "Unknown guest" && data.protelGuestName) {
-            const { firstName, lastName } = splitFullName(data.protelGuestName);
-            setFirstName(firstName);
-            setLastName(lastName);
+        if (
+            guestName !== "Unknown guest" &&
+            (data.protelGuestFirstName || data.protelGuestLastName)
+        ) {
+            setFirstName(data.protelGuestFirstName || "");
+            setLastName(data.protelGuestLastName || "");
         } else {
-            setFirstName(""); // Mantém os campos vazios se for um hóspede desconhecido
+            setFirstName(""); // Campos vazios para hóspede desconhecido
             setLastName("");
         }
     }, [data, guestName]);
-
-
 
     return (
         <main>
@@ -318,20 +317,14 @@ export default function GuestProfile() {
                         <p className="font-bold text-white flex-grow text-center">Guest Profile</p>
                     </div>
                     <div className="flex flex-col pl-110 pr-110 mt-8 main-page">
-                        {/* PERSONAL DATA */}
+                        {/* GUEST DETAILS */}
                         <div className="flex flex-row items-center mb-4 gap-4">
                             <FaClipboardUser size={30} color="#e6ac27" />
                             <p className="font-bold text-xl text-[#e6ac27]">Guest Details</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                            <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Salutation</p>
-                                {/* <input
-                                    type="text"
-                                    value={renderGuestData("salutation")}
-                                    onChange={(e) => setSalutation(e.target.value)}
-                                    className="text-right focus:outline-none"
-                                /> */}
                                 <Select
                                     options={salutationOptions}
                                     value={salutationOptions.find(option => option.label === salutation) || null} // Garantir que está usando 'value'
@@ -364,19 +357,13 @@ export default function GuestProfile() {
                                 <p>Date of birth</p>
                                 <input
                                     type="date" // Isso garante que apenas a data será exibida (sem horas)
-                                    value={birthDate}
+                                    value={formatDate(birthDate)}
                                     onChange={(e) => setBirthDate(e.target.value)}
                                     className="text-right focus:outline-none" // Alinha o texto à direita
                                 />
                             </div>
-                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                            <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Nationality</p>
-                                {/* <input
-                                    type="text"
-                                    value={renderGuestData("nationality")}
-                                    onChange={(e) => setNationality(e.target.value)}
-                                    className="text-right focus:outline-none" // Alinha o texto à direita
-                                /> */}
                                 <Select
                                     options={countryOptions}
                                     value={countryOptions.find(option => option.value === nationality) || null}
@@ -393,13 +380,34 @@ export default function GuestProfile() {
                         </div>
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Country</p>
-                                {/* <input
+                                <p>Street Address</p>
+                                <input
                                     type="text"
-                                    value={renderGuestData("country")}
-                                    onChange={(e) => setCountry(e.target.value)}
-                                    className="text-right focus:outline-none" // Alinha o texto à direita
-                                /> */}
+                                    value={streetAddress}
+                                    onChange={(e) => setStreetAddress(e.target.value)}
+                                    className="text-right focus:outline-none w-120"
+                                />
+                            </div>
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                                <p>Zip Code</p>
+                                <input
+                                    type="text"
+                                    value={postalCode}
+                                    onChange={(e) => setPostalCode(e.target.value)}
+                                    className="text-right focus:outline-none w-120"
+                                />
+                            </div>
+                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                                <p>City</p>
+                                <input
+                                    type="text"
+                                    value={city}
+                                    onChange={(e) => setCity(e.target.value)}
+                                    className="text-right focus:outline-none w-120"
+                                />
+                            </div>
+                            <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                                <p>Country</p>
                                 <Select
                                     options={countryOptions}
                                     value={countryOptions.find(option => option.value === country) || null}
@@ -446,20 +454,14 @@ export default function GuestProfile() {
                                 />
                             </div>
                         </div>
-                        {/* PASSPORT */}
+                        {/* PERSONAL ID */}
                         <div className="flex flex-row items-center mb-4 mt-6 gap-4">
                             <MdEmail size={30} color="#e6ac27" />
                             <p className="font-bold text-xl text-[#e6ac27]">Personal ID</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                            <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Document type</p>
-                                {/* <input
-                                    type="text"
-                                    value={renderGuestData("identificationDocument")}
-                                    onChange={(e) => setIdentificationDocument(e.target.value)}
-                                    className="text-right focus:outline-none"
-                                /> */}
                                 <Select
                                     options={docTypeOptions}
                                     value={docTypeOptions.find(option => option.value === identificationDocument) || null} // Garantir que está usando 'value'
@@ -481,8 +483,8 @@ export default function GuestProfile() {
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Issue date</p>
                                 <input
-                                    type="text"
-                                    value={documentIssueDate}
+                                    type="date"
+                                    value={formatDate(documentIssueDate)}
                                     onChange={(e) => setDocumentIssueDate(e.target.value)}
                                     className="text-right focus:outline-none"
                                 />
@@ -490,13 +492,13 @@ export default function GuestProfile() {
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Expiry date</p>
                                 <input
-                                    type="text"
-                                    value={documentExpirationDate}
+                                    type="date"
+                                    value={formatDate(documentExpirationDate)}
                                     onChange={(e) => setDocumentExpirationDate(e.target.value)}
                                     className="text-right focus:outline-none"
                                 />
                             </div>
-                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                            <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Country of birth</p>
                                 <Select
                                     options={countryOptions}
@@ -507,6 +509,21 @@ export default function GuestProfile() {
                                 />
                             </div>
                         </div>
+                        {/* INVOICE DATA */}
+                        <div className="flex flex-row items-center mb-4 mt-6 gap-4">
+                            <MdEmail size={30} color="#e6ac27" />
+                            <p className="font-bold text-xl text-[#e6ac27]">Invoice Data</p>
+                        </div>
+                        <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                            <p>Vat No</p>
+                            <input
+                                type="text"
+                                value={vatNo}
+                                onChange={(e) => setVatNo(e.target.value)}
+                                className="text-right focus:outline-none"
+                            />
+                        </div>
+
                         {/* PRIVACY */}
                         <div className="flex flex-row items-center mb-4 mt-6 gap-4">
                             <BsShieldLockFill size={30} color="#e6ac27" />

@@ -88,17 +88,19 @@ model requestRecordsInHouses {
 }
 
 model users {
-  userID          Int               @id @default(autoincrement())
-  firstName       String            @db.VarChar(50)
-  secondName      String            @db.VarChar(50)
-  email           String            @unique(map: "email") @db.VarChar(100)
-  password        String            @db.VarChar(255)
-  createdAt       DateTime?         @default(now()) @db.Timestamp(0)
-  propertyID      Int?
-  pin             String?           @db.VarChar(255)
-  permissions     Int               @default(0)
-  expirationDate  DateTime?         @default(dbgenerated("'2222-01-01'")) @db.Date
-  usersProperties usersProperties[]
+  userID           Int               @id @default(autoincrement())
+  firstName        String            @db.VarChar(50)
+  secondName       String            @db.VarChar(50)
+  email            String            @unique(map: "email") @db.VarChar(100)
+  password         String            @db.VarChar(255)
+  createdAt        DateTime?         @default(now()) @db.Timestamp(0)
+  propertyID       Int?
+  pin              String?           @db.VarChar(255)
+  permissions      Int               @default(0)
+  expirationDate   DateTime?         @default(dbgenerated("'2222-01-01'")) @db.Date
+  internalUser     String?           @db.VarChar(100)
+  internalPassword String?           @db.VarChar(255)
+  usersProperties  usersProperties[]
 }
 
 model usersProperties {
@@ -121,4 +123,5 @@ model stayRecords {
   responseBody    String?  @db.Text
   propertyID      Int
   token           String?  @db.VarChar(512)
+  companionsIDS   String?  @db.VarChar(255)
 }

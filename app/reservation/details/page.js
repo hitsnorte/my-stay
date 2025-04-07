@@ -58,6 +58,37 @@ export default function ReservationInfo() {
 
         fetchData();
     }, [router]);
+    
+    useEffect(() => {
+        const fetchGuestData = async () => {
+          try {
+            const token = sessionStorage.getItem("reservationToken");
+    
+            if (!token || !data?.protelGuestID) {
+              console.warn("Token ou protelGuestID ausente.");
+              return;
+            }
+    
+            const response = await axios.get(
+              `/api/sysConectorStay/get_guests?reservationToken=${token}&protelGuestID=${data.protelGuestID}`
+            );
+    
+            const guestData = response.data;
+    
+            // Salva cada hóspede retornado no sessionStorage com a key do profileID
+            Object.keys(guestData).forEach((guestID) => {
+              sessionStorage.setItem(guestID, JSON.stringify(guestData[guestID]));
+            });
+    
+            console.log("Hóspedes armazenados no sessionStorage:", guestData);
+    
+          } catch (error) {
+            console.error("Erro ao buscar dados dos hóspedes:", error);
+          }
+        };
+    
+        fetchGuestData();
+      }, [data?.protelGuestID]); // dispara sempre que esse ID mudar
 
     // Função para converter a string de data para um formato correto
     const parseDate = (dateStr) => {
@@ -95,6 +126,22 @@ export default function ReservationInfo() {
         router.push("./guest-profile");
     };
 
+    // const handleGuestClick = async (guestName) => {
+    //     try {
+    //         const response = await axios.get(`/api/sysConectorStay/get_guests?id=${data.protelGuestID}`);
+    
+    //         // Armazena os dados retornados no sessionStorage (ou state/context dependendo do seu fluxo)
+    //         sessionStorage.setItem("selectedGuestData", JSON.stringify(response.data));
+    //         sessionStorage.setItem("selectedGuestName", guestName);
+    
+    //         // Redireciona após o sucesso da requisição
+    //         router.push("./guest-profile");
+    //     } catch (err) {
+    //         console.error("Erro ao buscar dados do hóspede:", err);
+    //         alert("Erro ao buscar informações do hóspede.");
+    //     }
+    // };  
+
     const handleQRCodeClick = () => {
         setShowQRCode(true);
     };
@@ -130,7 +177,7 @@ export default function ReservationInfo() {
                     </div>
                     <div className="flex flex-col pl-92 pr-92 main-page">
                         <div className="flex flex-col justify-center items-center">
-                            <h1 className="text-2xl font-bold flex justify-center mt-4">{data.protelGuestName}</h1>
+                            <h1 className="text-2xl font-bold flex justify-center mt-4">{data.protelGuestFirstName} {data.protelGuestLastName}</h1>
                             <div className="flex flex-row gap-4 items-center mt-4">
                                 <div className="flex flex-row items-center font-bold">
                                     <p className="text-5xl">{checkIn.day}</p>
@@ -150,7 +197,7 @@ export default function ReservationInfo() {
                             </div>
                         </div>
                         <div className="flex flex-col">
-                            {/* GUESTS */} 
+                            {/* GUESTS */}
                             <div className="flex flex-row items-center gap-2">
                                 <FaUsers size={30} color="#e6ac27" />
                                 <p className="font-bold text-xl text-[#e6ac27]">Guests</p>
@@ -160,14 +207,14 @@ export default function ReservationInfo() {
                             {/* Verificação de quantos adultos e crianças existem */}
                             {(parseInt(data.adult) + parseInt(data.child)) === 1 ? (
                                 <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4">
-                                    <p>{data.protelGuestName}</p>
-                                    <MdArrowForwardIos onClick={() => handleGuestClick(data.protelGuestName)} />
+                                    <p>{data.protelGuestFirstName} {data.protelGuestLastName}</p>
+                                    <MdArrowForwardIos onClick={() => handleGuestClick(`${data.protelGuestFirstName} ${data.protelGuestLastName}`)} />
                                 </div>
                             ) : (
                                 <div>
                                     <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white">
-                                        <p>{data.protelGuestName}</p>
-                                        <MdArrowForwardIos onClick={() => handleGuestClick(data.protelGuestName)} />
+                                        <p>{data.protelGuestFirstName} {data.protelGuestLastName}</p>
+                                        <MdArrowForwardIos onClick={() => handleGuestClick(`${data.protelGuestFirstName} ${data.protelGuestLastName}`)} />
                                     </div>
 
                                     {[...Array(parseInt(data.adult) + parseInt(data.child) - 1)].map((_, index) => (
@@ -178,7 +225,7 @@ export default function ReservationInfo() {
                                     ))}
                                 </div>
                             )}
-                            {/* EXTRAS */} 
+                            {/* EXTRAS */}
                             <div className="flex flex-row items-center gap-2 mt-6">
                                 <TiDocumentAdd size={30} color="#e6ac27" />
                                 <p className="font-bold text-xl text-[#e6ac27]">Extras</p>
@@ -191,7 +238,7 @@ export default function ReservationInfo() {
                                     <MdArrowForwardIos />
                                 </div>
                             </div>
-                            {/* ROOM */} 
+                            {/* ROOM */}
                             <div className="flex flex-row items-center gap-2 mt-6">
                                 <FaBed size={26} color="#e6ac27" />
                                 <p className="font-bold text-xl text-[#e6ac27]">My room</p>
@@ -199,7 +246,7 @@ export default function ReservationInfo() {
                             <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4">
                                 <p>Not yet assigned.</p>
                             </div>
-                            {/* QR CODE */} 
+                            {/* QR CODE */}
                             <div className="flex flex-row items-center gap-2 mt-6">
                                 <MdQrCode2 size={26} color="#e6ac27" />
                                 <p className="font-bold text-xl text-[#e6ac27]">QR code</p>

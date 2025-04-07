@@ -91,7 +91,7 @@ function ReservationContent() {
                         <IoMdRefresh size={20} color="white" onClick={() => window.location.reload()} />
                     </div>
                     <div className="flex flex-col justify-center items-center">
-                        <h1 className="text-2xl font-bold flex justify-center mt-4">{data.protelGuestName}</h1>
+                        <h1 className="text-2xl font-bold flex justify-center mt-4">{data.protelGuestFirstName} {data.protelGuestLastName}</h1>
                         <div className="flex flex-row gap-4 items-center mt-4">
                             <div className="flex flex-row items-center font-bold">
                                 <p className="text-5xl">{checkIn.day}</p>

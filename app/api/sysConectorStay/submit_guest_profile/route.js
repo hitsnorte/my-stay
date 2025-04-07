@@ -34,10 +34,10 @@ export async function POST(request) {
       birthCountry_integer: parseInt(headers.get("Guest-birthCountry")),
       marketingOptIn: headers.get("Guest-marketingOptIn") === "true",
       dataProcessingOptIn: headers.get("Guest-dataProcessingOptIn") === "true",
-      StreetAddress_string80: "teste",
-      ZipCode_string17: "teste",
-      City_string50: "teste",
-      vatNO_string30: "teste",
+      StreetAddress_string80: headers.get("Guest-streetAddress"),
+      ZipCode_string17: headers.get("Guest-postalCode"),
+      City_string50: headers.get("Guest-city"),
+      vatNO_string30: headers.get("Guest-vatNo"),
       IDReserva_integer: parseInt(headers.get("Guest-reservationID"))
     };
 
@@ -93,11 +93,48 @@ export async function POST(request) {
       },
     });
     console.log("response: ", response);
-    return new NextResponse(JSON.stringify(response.data), {
-      status: response.status,
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-    });
 
+    // Verificar se a resposta foi bem-sucedida
+    if (response.data.message === "Success") {
+      const insertedID = response.data.InsertedID;
+
+      // Buscar o stayRecord existente com o propertyID e token
+      const stayRecord = await prisma.stayRecords.findFirst({
+        where: { token, propertyID: propertyIDInt },
+      });
+
+      if (stayRecord) {
+        // Se já existir algum valor no campo companionsIDS, adiciona o novo ID
+        const updatedCompanionsIDS = stayRecord.companionsIDS
+          ? `${stayRecord.companionsIDS},${insertedID}`
+          : `${insertedID}`;
+
+        // Atualizar o campo companionsIDS
+        await prisma.stayRecords.update({
+          where: { stayID: stayRecord.stayID },
+          data: { companionsIDS: updatedCompanionsIDS },
+        });
+      } else {
+        // Caso não exista o stayRecord, cria um novo
+        await prisma.stayRecords.create({
+          data: {
+            propertyID: propertyIDInt,
+            token,
+            companionsIDS: `${insertedID}`,
+          },
+        });
+      }
+
+      return new NextResponse(JSON.stringify({ message: "Success", InsertedID: insertedID }), {
+        status: 200,
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+      });
+    } else {
+      return new NextResponse(
+        JSON.stringify({ error: "Erro ao enviar os dados para o servidor do hotel" }),
+        { status: 500, headers: { "Content-Type": "application/json; charset=utf-8" } }
+      );
+    }
   } catch (error) {
     console.error("Erro ao processar a requisição:", error);
     return new NextResponse(
