@@ -72,23 +72,87 @@ export default function GuestProfile() {
     const [salutationOptions, setSalutationOptions] = useState([]);
     const [docTypeOptions, setDocTypeOptions] = useState([]);
 
+    // useEffect(() => {
+    //     // Acesso ao sessionStorage só no lado do cliente
+    //     const storedGuestName = sessionStorage.getItem("selectedGuestName");
+
+    //     if (storedGuestName) {
+    //         setGuestName(storedGuestName); // Armazena no estado
+    //     } else {
+    //         setGuestName("Unknown guest");
+    //     }
+
+    //     const token = sessionStorage.getItem("reservationToken");
+
+    //     if (!token) {
+    //         router.push("/"); // Redireciona para a página inicial se não houver token
+    //         return;
+    //     }
+
+    //     try {
+    //         const decodedToken = jwtDecode(token);
+    //         if (decodedToken?.propertyID && decodedToken?.resNo) {
+    //             setPropertyID(decodedToken.propertyID);
+    //             setReservationID(decodedToken.resNo);
+    //         } else {
+    //             console.error("PropertyID ou ReservationID não encontrados no token!");
+    //         }
+    //     } catch (error) {
+    //         console.error("Erro ao decodificar o token:", error);
+    //     }
+
+    //     const fetchData = async () => {
+    //         try {
+    //             const response = await axios.get(`/api/get_reservation?token=${token}`);
+    //             const fetchedData = JSON.parse(response.data.requestBody);
+    
+    //             // Armazena os dados da reserva no estado
+    //             setData(fetchedData);
+    //             setSalutation(fetchedData.salutation || "");
+    //             setBirthDate(fetchedData.birthDate || "");
+    //             setNationality(fetchedData.nationality || "");
+    //             setCountry(fetchedData.country || "");
+    //             setEmail(fetchedData.email || "");
+    //             setPhone(fetchedData.phone || "");
+    //             setMobile(fetchedData.mobile || "");
+    //             setDocNo(fetchedData.docNo || "");
+    //             setIdentificationDocument(fetchedData.identificationDocument || "");
+    //             setDocumentExpirationDate(fetchedData.documentExpirationDate || "");
+    //             setDocumentIssueDate(fetchedData.documentIssueDate || "");
+    //             setBirthCountry(fetchedData.birthCountry || "");
+    //             setVatNo(fetchedData.vatNo || "");
+    //             setStreetAddress(fetchedData.streetAddress || "");
+    //             setPostalCode(fetchedData.postalCode || "");
+    //             setCity(fetchedData.city || "");
+    
+    //             // Se o nome do hóspede não for "Unknown guest", define os nomes
+    //             if (
+    //                 (fetchedData.protelGuestFirstName && fetchedData.protelGuestFirstName !== "Unknown guest") ||
+    //                 (fetchedData.protelGuestLastName && fetchedData.protelGuestLastName !== "Unknown guest")
+    //             ) {
+    //                 setFirstName(fetchedData.protelGuestFirstName || "");
+    //                 setLastName(fetchedData.protelGuestLastName || "");
+    //             }
+    
+    //         } catch (err) {
+    //             console.error(err); // boa prática: log no console pro dev
+    //             setError("Erro ao buscar os dados da reserva");
+    //         }
+    //     };
+
+    //     fetchData();
+    // }, [router]);
+
     useEffect(() => {
-        // Acesso ao sessionStorage só no lado do cliente
-        const storedGuestName = sessionStorage.getItem("selectedGuestName");
+        const token = sessionStorage.getItem("reservationToken"); // Obtendo o token do sessionStorage
 
-        if (storedGuestName) {
-            setGuestName(storedGuestName); // Armazena no estado
-        } else {
-            setGuestName("Unknown guest");
-        }
-
-        const token = sessionStorage.getItem("reservationToken");
-
+        // Se não houver token, redireciona para a página inicial
         if (!token) {
             router.push("/"); // Redireciona para a página inicial se não houver token
             return;
         }
 
+        // Decodificando o token para obter o propertyID e reservationID
         try {
             const decodedToken = jwtDecode(token);
             if (decodedToken?.propertyID && decodedToken?.resNo) {
@@ -101,47 +165,93 @@ export default function GuestProfile() {
             console.error("Erro ao decodificar o token:", error);
         }
 
-        const fetchData = async () => {
-            try {
-                const response = await axios.get(`/api/get_reservation?token=${token}`);
-                const fetchedData = JSON.parse(response.data.requestBody);
-    
-                // Armazena os dados da reserva no estado
-                setData(fetchedData);
-                setSalutation(fetchedData.salutation || "");
-                setBirthDate(fetchedData.birthDate || "");
-                setNationality(fetchedData.nationality || "");
-                setCountry(fetchedData.country || "");
-                setEmail(fetchedData.email || "");
-                setPhone(fetchedData.phone || "");
-                setMobile(fetchedData.mobile || "");
-                setDocNo(fetchedData.docNo || "");
-                setIdentificationDocument(fetchedData.identificationDocument || "");
-                setDocumentExpirationDate(fetchedData.documentExpirationDate || "");
-                setDocumentIssueDate(fetchedData.documentIssueDate || "");
-                setBirthCountry(fetchedData.birthCountry || "");
-                setVatNo(fetchedData.vatNo || "");
-                setStreetAddress(fetchedData.streetAddress || "");
-                setPostalCode(fetchedData.postalCode || "");
-                setCity(fetchedData.city || "");
-    
-                // Se o nome do hóspede não for "Unknown guest", define os nomes
-                if (
-                    (fetchedData.protelGuestFirstName && fetchedData.protelGuestFirstName !== "Unknown guest") ||
-                    (fetchedData.protelGuestLastName && fetchedData.protelGuestLastName !== "Unknown guest")
-                ) {
-                    setFirstName(fetchedData.protelGuestFirstName || "");
-                    setLastName(fetchedData.protelGuestLastName || "");
-                }
-    
-            } catch (err) {
-                console.error(err); // boa prática: log no console pro dev
-                setError("Erro ao buscar os dados da reserva");
-            }
-        };
+        const selectedGuestID = sessionStorage.getItem("selectedGuestID"); // Obtendo o ID do hóspede
+        const selectedGuestName = sessionStorage.getItem("selectedGuestName");
 
-        fetchData();
+        if (!selectedGuestID || !selectedGuestName) {
+            // Caso não tenha selecionado um hóspede (sem selectedGuestID), você vai buscar o hóspede principal
+            fetchMainGuestData(token); // Passa o token para a função de busca
+        } else {
+            // Se tiver o selectedGuestID, carrega os dados do sessionStorage
+            loadGuestDataFromSessionStorage(selectedGuestID);
+        }
     }, [router]);
+
+    // Função para carregar os dados do hóspede principal (caso não exista selectedGuestID no sessionStorage)
+    const fetchMainGuestData = async (token) => {
+        try {
+            if (!propertyID || !reservationID) {
+                console.error("propertyID ou reservationID não definidos.");
+                return;
+            }
+
+            // Aqui usamos axios para fazer a requisição, passando propertyID e reservationID
+            const response = await axios.get(`/api/get_reservation?token=${token}&propertyID=${propertyID}&reservationID=${reservationID}`);
+
+            if (response.data.success) {
+                const guestInfo = response.data.data;
+
+                // Preenchendo os estados com os dados do hóspede principal
+                setData(guestInfo);
+                setFirstName(guestInfo.protelGuestFirstName);
+                setLastName(guestInfo.protelGuestLastName);
+                setSalutation(guestInfo.protelSalution);
+                setBirthDate(formatDate(guestInfo.birthDate));
+                setNationality(guestInfo.nationality);
+                setCountry(guestInfo.country);
+                setStreetAddress(guestInfo.protelAddress);
+                setPostalCode(guestInfo.postalCode);
+                setCity(guestInfo.city);
+                setEmail(guestInfo.email);
+                setPhone(guestInfo.protelGuestPhone);
+                setMobile(guestInfo.protelGuestMobilePhone);
+                setDocNo(guestInfo.identificationDocument);
+                setIdentificationDocument(guestInfo.identificationDocument);
+                setDocumentExpirationDate(formatDate(guestInfo.documentExpirationDate));
+                setDocumentIssueDate(formatDate(guestInfo.documentIssueDate));
+                setBirthCountry(guestInfo.birthCountry);
+                setVatNo(guestInfo.vatNo);
+            } else {
+                setError("Erro ao carregar os dados do hóspede principal.");
+            }
+        } catch (err) {
+            setError("Erro ao buscar os dados do hóspede principal.");
+            console.error("Erro ao fazer a requisição:", err);
+        }
+    };
+
+    // Função para carregar os dados do hóspede do sessionStorage
+    const loadGuestDataFromSessionStorage = (selectedGuestID) => {
+        const guestData = JSON.parse(sessionStorage.getItem(selectedGuestID)); // Pegando os dados do hóspede pelo ID
+
+        if (!guestData) {
+            setError("Dados do hóspede não encontrados.");
+            return;
+        }
+
+        const guestInfo = guestData[0]; // Assumindo que a chave seja um array com os dados
+
+        // Preenchendo os estados com os dados do hóspede
+        setData(guestInfo);
+        setFirstName(guestInfo.protelGuestFirstName);
+        setLastName(guestInfo.protelGuestLastName);
+        setSalutation(guestInfo.protelSalution);
+        setBirthDate(formatDate(guestInfo.birthDate));
+        setNationality(guestInfo.nationality);
+        setCountry(guestInfo.country);
+        setStreetAddress(guestInfo.protelAddress);
+        setPostalCode(guestInfo.postalCode);
+        setCity(guestInfo.city);
+        setEmail(guestInfo.email);
+        setPhone(guestInfo.protelGuestPhone);
+        setMobile(guestInfo.protelGuestMobilePhone);
+        setDocNo(guestInfo.identificationDocument);
+        setIdentificationDocument(guestInfo.identificationDocument);
+        setDocumentExpirationDate(formatDate(guestInfo.documentExpirationDate));
+        setDocumentIssueDate(formatDate(guestInfo.documentIssueDate));
+        setBirthCountry(guestInfo.birthCountry);
+        setVatNo(guestInfo.vatNo);
+    };
 
     const renderGuestData = (field, formatDateFlag = false) => {
         if (guestName === "Unknown guest") return "";
