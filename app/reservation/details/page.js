@@ -163,17 +163,34 @@ export default function ReservationInfo() {
     const handleGuestClick = (guestFullName) => {
         sessionStorage.setItem("selectedGuestName", guestFullName);
     
-        // Procurar o hóspede no sessionStorage (caso não seja o principal)
+        const mainGuestFullName = `${data.protelGuestFirstName} ${data.protelGuestLastName}`;
+    
+        if (guestFullName === "Unknown guest") {
+            sessionStorage.removeItem("selectedGuestID");
+            sessionStorage.setItem("selectedGuestType", "unknown");
+            router.push("./guest-profile");
+            return;
+        }
+    
+        if (guestFullName === mainGuestFullName) {
+            sessionStorage.removeItem("selectedGuestID");
+            sessionStorage.setItem("selectedGuestType", "main");
+            router.push("./guest-profile");
+            return;
+        }
+    
+        // Caso seja um hóspede adicional
         for (let i = 0; i < sessionStorage.length; i++) {
             const key = sessionStorage.key(i);
-            if (key !== "reservationToken" && key !== "selectedGuestName") {
+            if (key !== "reservationToken" && key !== "selectedGuestName" && key !== "selectedGuestType") {
                 try {
                     const guestArray = JSON.parse(sessionStorage.getItem(key));
                     if (Array.isArray(guestArray)) {
                         const guest = guestArray[0];
                         const fullName = `${guest.protelGuestFirstName} ${guest.protelGuestLastName}`;
                         if (fullName === guestFullName) {
-                            sessionStorage.setItem("selectedGuestID", key); // salvando ID
+                            sessionStorage.setItem("selectedGuestID", key);
+                            sessionStorage.setItem("selectedGuestType", "additional");
                             break;
                         }
                     }
@@ -183,9 +200,8 @@ export default function ReservationInfo() {
             }
         }
     
-        // Se for hóspede principal (ou unknown), não fazemos nada porque já estará no endpoint
         router.push("./guest-profile");
-    };
+    };    
     
 
     // const handleGuestClick = async (guestName) => {

@@ -144,15 +144,13 @@ export default function GuestProfile() {
     // }, [router]);
 
     useEffect(() => {
-        const token = sessionStorage.getItem("reservationToken"); // Obtendo o token do sessionStorage
-
-        // Se não houver token, redireciona para a página inicial
+        const token = sessionStorage.getItem("reservationToken");
+    
         if (!token) {
-            router.push("/"); // Redireciona para a página inicial se não houver token
+            router.push("/");
             return;
         }
-
-        // Decodificando o token para obter o propertyID e reservationID
+    
         try {
             const decodedToken = jwtDecode(token);
             if (decodedToken?.propertyID && decodedToken?.resNo) {
@@ -164,18 +162,31 @@ export default function GuestProfile() {
         } catch (error) {
             console.error("Erro ao decodificar o token:", error);
         }
-
-        const selectedGuestID = sessionStorage.getItem("selectedGuestID"); // Obtendo o ID do hóspede
-        const selectedGuestName = sessionStorage.getItem("selectedGuestName");
-
-        if (!selectedGuestID || !selectedGuestName) {
-            // Caso não tenha selecionado um hóspede (sem selectedGuestID), você vai buscar o hóspede principal
-            fetchMainGuestData(token); // Passa o token para a função de busca
-        } else {
-            // Se tiver o selectedGuestID, carrega os dados do sessionStorage
-            loadGuestDataFromSessionStorage(selectedGuestID);
+    
+        const selectedGuestID = sessionStorage.getItem("selectedGuestID");
+        const selectedGuestType = sessionStorage.getItem("selectedGuestType");
+    
+        switch (selectedGuestType) {
+            case "main":
+                fetchMainGuestData(token);
+                break;
+            case "additional":
+                if (selectedGuestID) {
+                    loadGuestDataFromSessionStorage(selectedGuestID);
+                } else {
+                    setError("ID do hóspede adicional não encontrado.");
+                }
+                break;
+            case "unknown":
+                // Se for "Unknown", apenas não carrega dados (podes inicializar estados vazios se quiseres)
+                setData(null); // Ou algo mais elaborado
+                break;
+            default:
+                // Se não há info clara, assume hóspede principal por padrão
+                fetchMainGuestData(token);
         }
     }, [router]);
+    
 
     // Função para carregar os dados do hóspede principal (caso não exista selectedGuestID no sessionStorage)
     const fetchMainGuestData = async (token) => {
