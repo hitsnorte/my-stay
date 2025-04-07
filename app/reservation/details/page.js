@@ -36,6 +36,7 @@ export default function ReservationInfo() {
     const [error, setError] = useState(null);
     const router = useRouter();
     const [showQRCode, setShowQRCode] = useState(false);
+    const [additionalGuests, setAdditionalGuests] = useState([]);
 
     useEffect(() => {
         // Recupera o token do sessionStorage
@@ -58,37 +59,71 @@ export default function ReservationInfo() {
 
         fetchData();
     }, [router]);
-    
+
     useEffect(() => {
         const fetchGuestData = async () => {
-          try {
-            const token = sessionStorage.getItem("reservationToken");
-    
-            if (!token || !data?.protelGuestID) {
-              console.warn("Token ou protelGuestID ausente.");
-              return;
+            try {
+                const token = sessionStorage.getItem("reservationToken");
+
+                if (!token || !data?.protelGuestID) {
+                    console.warn("Token ou protelGuestID ausente.");
+                    return;
+                }
+
+                const response = await axios.get(
+                    `/api/sysConectorStay/get_guests?reservationToken=${token}&protelGuestID=${data.protelGuestID}`
+                );
+
+                const guestData = response.data;
+
+                // Salva cada hóspede retornado no sessionStorage com a key do profileID
+                Object.keys(guestData).forEach((guestID) => {
+                    sessionStorage.setItem(guestID, JSON.stringify(guestData[guestID]));
+                });
+
+                console.log("Hóspedes armazenados no sessionStorage:", guestData);
+
+            } catch (error) {
+                console.error("Erro ao buscar dados dos hóspedes:", error);
             }
-    
-            const response = await axios.get(
-              `/api/sysConectorStay/get_guests?reservationToken=${token}&protelGuestID=${data.protelGuestID}`
-            );
-    
-            const guestData = response.data;
-    
-            // Salva cada hóspede retornado no sessionStorage com a key do profileID
-            Object.keys(guestData).forEach((guestID) => {
-              sessionStorage.setItem(guestID, JSON.stringify(guestData[guestID]));
-            });
-    
-            console.log("Hóspedes armazenados no sessionStorage:", guestData);
-    
-          } catch (error) {
-            console.error("Erro ao buscar dados dos hóspedes:", error);
-          }
         };
-    
+
         fetchGuestData();
-      }, [data?.protelGuestID]); // dispara sempre que esse ID mudar
+    }, [data?.protelGuestID]); // dispara sempre que esse ID mudar
+
+    useEffect(() => {
+        if (!data || !data.protelGuestID) return;
+    
+        const mainGuestID = data.protelGuestID.toString();
+        const storedGuests = [];
+    
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+    
+          // Ignorar o token, guest selecionado e o hóspede principal
+          if (
+            key !== "reservationToken" &&
+            key !== "selectedGuestName" &&
+            key !== mainGuestID
+          ) {
+            try {
+              const guestArray = JSON.parse(sessionStorage.getItem(key));
+              if (Array.isArray(guestArray) && guestArray.length > 0) {
+                storedGuests.push(guestArray[0]); // só o primeiro item do array
+              }
+            } catch (err) {
+              console.warn("Erro ao parsear guest no sessionStorage:", err);
+            }
+          }
+        }
+    
+        setAdditionalGuests(storedGuests);
+      }, [data]);
+    
+      if (!data) return null;
+    
+      const totalGuests = parseInt(data.adult) + parseInt(data.child);
+      const remainingUnknowns = totalGuests - 1 - additionalGuests.length;
 
     // Função para converter a string de data para um formato correto
     const parseDate = (dateStr) => {
@@ -129,11 +164,11 @@ export default function ReservationInfo() {
     // const handleGuestClick = async (guestName) => {
     //     try {
     //         const response = await axios.get(`/api/sysConectorStay/get_guests?id=${data.protelGuestID}`);
-    
+
     //         // Armazena os dados retornados no sessionStorage (ou state/context dependendo do seu fluxo)
     //         sessionStorage.setItem("selectedGuestData", JSON.stringify(response.data));
     //         sessionStorage.setItem("selectedGuestName", guestName);
-    
+
     //         // Redireciona após o sucesso da requisição
     //         router.push("./guest-profile");
     //     } catch (err) {
@@ -204,27 +239,42 @@ export default function ReservationInfo() {
                             </div>
                             <p>Select a guest name to view guest information.</p>
 
-                            {/* Verificação de quantos adultos e crianças existem */}
-                            {(parseInt(data.adult) + parseInt(data.child)) === 1 ? (
-                                <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4">
-                                    <p>{data.protelGuestFirstName} {data.protelGuestLastName}</p>
-                                    <MdArrowForwardIos onClick={() => handleGuestClick(`${data.protelGuestFirstName} ${data.protelGuestLastName}`)} />
-                                </div>
-                            ) : (
-                                <div>
-                                    <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white">
-                                        <p>{data.protelGuestFirstName} {data.protelGuestLastName}</p>
-                                        <MdArrowForwardIos onClick={() => handleGuestClick(`${data.protelGuestFirstName} ${data.protelGuestLastName}`)} />
-                                    </div>
+                            {/* Hóspede principal */}
+                            <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4 border-b-2 border-white">
+                                <p>{data.protelGuestFirstName} {data.protelGuestLastName}</p>
+                                <MdArrowForwardIos
+                                    onClick={() =>
+                                        handleGuestClick(`${data.protelGuestFirstName} ${data.protelGuestLastName}`)
+                                    }
+                                />
+                            </div>
 
-                                    {[...Array(parseInt(data.adult) + parseInt(data.child) - 1)].map((_, index) => (
-                                        <div key={index} className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white">
-                                            <p>Unknown guest</p>
-                                            <MdArrowForwardIos onClick={() => handleGuestClick("Unknown guest")} />
-                                        </div>
-                                    ))}
+                            {/* Hóspedes com dados do sessionStorage */}
+                            {additionalGuests.map((guest, index) => (
+                                <div
+                                    key={guest.protelGuestID || index}
+                                    className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white"
+                                >
+                                    <p>{guest.protelGuestFirstName} {guest.protelGuestLastName}</p>
+                                    <MdArrowForwardIos
+                                        onClick={() =>
+                                            handleGuestClick(`${guest.protelGuestFirstName} ${guest.protelGuestLastName}`)
+                                        }
+                                    />
                                 </div>
-                            )}
+                            ))}
+
+                            {/* Unknown guests restantes */}
+                            {remainingUnknowns > 0 &&
+                                [...Array(remainingUnknowns)].map((_, index) => (
+                                    <div
+                                        key={`unknown-${index}`}
+                                        className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white"
+                                    >
+                                        <p>Unknown guest</p>
+                                        <MdArrowForwardIos onClick={() => handleGuestClick("Unknown guest")} />
+                                    </div>
+                                ))}
                             {/* EXTRAS */}
                             <div className="flex flex-row items-center gap-2 mt-6">
                                 <TiDocumentAdd size={30} color="#e6ac27" />
