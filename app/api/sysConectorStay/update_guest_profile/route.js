@@ -38,7 +38,7 @@ export async function POST(request) {
             City_string50: headers.get("Guest-city"),
             vatNO_string30: headers.get("Guest-vatNo"),
             IDReserva_integer: parseInt(headers.get("Guest-reservationID")),
-            ProfileID: parseInt(headers.get("Guest-profileID")), // Este é o campo chave
+            ProfileID: parseInt(headers.get("profileID")), // Este é o campo chave
         };
 
         console.log("Dados recebidos via headers:", { token, guestProfileData });

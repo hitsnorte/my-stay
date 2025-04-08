@@ -72,78 +72,7 @@ export default function GuestProfile() {
     const [salutationOptions, setSalutationOptions] = useState([]);
     const [docTypeOptions, setDocTypeOptions] = useState([]);
 
-    const [mainGuestID, setMainGuestID] = useState(""); // ID do hóspede selecionado
-
-    // useEffect(() => {
-    //     // Acesso ao sessionStorage só no lado do cliente
-    //     const storedGuestName = sessionStorage.getItem("selectedGuestName");
-
-    //     if (storedGuestName) {
-    //         setGuestName(storedGuestName); // Armazena no estado
-    //     } else {
-    //         setGuestName("Unknown guest");
-    //     }
-
-    //     const token = sessionStorage.getItem("reservationToken");
-
-    //     if (!token) {
-    //         router.push("/"); // Redireciona para a página inicial se não houver token
-    //         return;
-    //     }
-
-    //     try {
-    //         const decodedToken = jwtDecode(token);
-    //         if (decodedToken?.propertyID && decodedToken?.resNo) {
-    //             setPropertyID(decodedToken.propertyID);
-    //             setReservationID(decodedToken.resNo);
-    //         } else {
-    //             console.error("PropertyID ou ReservationID não encontrados no token!");
-    //         }
-    //     } catch (error) {
-    //         console.error("Erro ao decodificar o token:", error);
-    //     }
-
-    //     const fetchData = async () => {
-    //         try {
-    //             const response = await axios.get(`/api/get_reservation?token=${token}`);
-    //             const fetchedData = JSON.parse(response.data.requestBody);
-    
-    //             // Armazena os dados da reserva no estado
-    //             setData(fetchedData);
-    //             setSalutation(fetchedData.salutation || "");
-    //             setBirthDate(fetchedData.birthDate || "");
-    //             setNationality(fetchedData.nationality || "");
-    //             setCountry(fetchedData.country || "");
-    //             setEmail(fetchedData.email || "");
-    //             setPhone(fetchedData.phone || "");
-    //             setMobile(fetchedData.mobile || "");
-    //             setDocNo(fetchedData.docNo || "");
-    //             setIdentificationDocument(fetchedData.identificationDocument || "");
-    //             setDocumentExpirationDate(fetchedData.documentExpirationDate || "");
-    //             setDocumentIssueDate(fetchedData.documentIssueDate || "");
-    //             setBirthCountry(fetchedData.birthCountry || "");
-    //             setVatNo(fetchedData.vatNo || "");
-    //             setStreetAddress(fetchedData.streetAddress || "");
-    //             setPostalCode(fetchedData.postalCode || "");
-    //             setCity(fetchedData.city || "");
-    
-    //             // Se o nome do hóspede não for "Unknown guest", define os nomes
-    //             if (
-    //                 (fetchedData.protelGuestFirstName && fetchedData.protelGuestFirstName !== "Unknown guest") ||
-    //                 (fetchedData.protelGuestLastName && fetchedData.protelGuestLastName !== "Unknown guest")
-    //             ) {
-    //                 setFirstName(fetchedData.protelGuestFirstName || "");
-    //                 setLastName(fetchedData.protelGuestLastName || "");
-    //             }
-    
-    //         } catch (err) {
-    //             console.error(err); // boa prática: log no console pro dev
-    //             setError("Erro ao buscar os dados da reserva");
-    //         }
-    //     };
-
-    //     fetchData();
-    // }, [router]);
+    const [mainGuestID, setMainGuestID] = useState("");
 
     useEffect(() => {
         const storedGuestName = sessionStorage.getItem("selectedGuestName");
@@ -465,7 +394,7 @@ export default function GuestProfile() {
                                 <Select
                                     options={salutationOptions}
                                     value={salutationOptions.find(option => option.value === salutation) || null} // Garantir que está usando 'value'
-                                    onChange={(selectedOption) => setSalutation(selectedOption.label)} // Usar 'value' ao invés de 'label'
+                                    onChange={(selectedOption) => setSalutation(selectedOption.value)} // Usar 'value' ao invés de 'label'
                                     isSearchable
                                     styles={customStyles}
                                 />
