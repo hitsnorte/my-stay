@@ -190,7 +190,7 @@ export default function GuestProfile() {
                 setPhone(guestInfo.protelGuestPhone || "");
                 setMobile(guestInfo.protelGuestMobilePhone || "");
                 setDocNo(guestInfo.identificationDocument || "");
-                setIdentificationDocument(guestInfo.identificationDocument || "");
+                setIdentificationDocument(guestInfo.protelDocType || "");
                 setDocumentExpirationDate(guestInfo.documentExpirationDate || "");
                 setDocumentIssueDate(guestInfo.documentIssueDate || "");
                 setBirthCountry(guestInfo.birthCountry || "");
@@ -213,18 +213,18 @@ export default function GuestProfile() {
                 const fetchedData = JSON.parse(response.data.requestBody);
     
                 setData(fetchedData);
-                setSalutation(fetchedData.salutation || "");
+                setSalutation(fetchedData.protelSalutation || "");
                 setBirthDate(fetchedData.birthDate || "");
                 setNationality(fetchedData.nationality || "");
                 setCountry(fetchedData.country || "");
                 setEmail(fetchedData.email || "");
-                setPhone(fetchedData.phone || "");
-                setMobile(fetchedData.mobile || "");
-                setDocNo(fetchedData.docNo || "");
-                setIdentificationDocument(fetchedData.identificationDocument || "");
+                setPhone(fetchedData.protelGuestPhone || "");
+                setMobile(fetchedData.protelGuestMobilePhone || "");
+                setDocNo(fetchedData.identificationDocument || "");
+                setIdentificationDocument(fetchedData.protelDocType || "");
                 setDocumentExpirationDate(fetchedData.documentExpirationDate || "");
                 setDocumentIssueDate(fetchedData.documentIssueDate || "");
-                setBirthCountry(fetchedData.birthCountry || "");
+                setBirthCountry(fetchedData.protelAddress || "");
                 setVatNo(fetchedData.vatNo || "");
                 setStreetAddress(fetchedData.streetAddress || "");
                 setPostalCode(fetchedData.postalCode || "");
@@ -370,18 +370,18 @@ export default function GuestProfile() {
     useEffect(() => {
         if (!data) return;
 
-        setSalutation(renderGuestData("salutation"));
+        setSalutation(renderGuestData("protelSalutation"));
         setBirthDate(renderGuestData("birthDate"));
         setNationality(renderGuestData("nationality"));
         setCountry(renderGuestData("country"));
-        setStreetAddress(renderGuestData("streetAddress"));
+        setStreetAddress(renderGuestData("protelAddress"));
         setPostalCode(renderGuestData("postalCode"));
         setCity(renderGuestData("city"));
         setEmail(renderGuestData("email"));
-        setPhone(renderGuestData("phone"));
-        setMobile(renderGuestData("mobile"));
-        setDocNo(renderGuestData("docNo"));
-        setIdentificationDocument(renderGuestData("identificationDocument"));
+        setPhone(renderGuestData("protelGuestPhone"));
+        setMobile(renderGuestData("protelGuestMobilePhone"));
+        setDocNo(renderGuestData("identificationDocument"));
+        setIdentificationDocument(renderGuestData("protelDocType"));
         setDocumentExpirationDate(renderGuestData("documentExpirationDate"));
         setDocumentIssueDate(renderGuestData("documentIssueDate"));
         setBirthCountry(renderGuestData("birthCountry"));
@@ -426,7 +426,7 @@ export default function GuestProfile() {
                                 <p>Salutation</p>
                                 <Select
                                     options={salutationOptions}
-                                    value={salutationOptions.find(option => option.label === salutation) || null} // Garantir que está usando 'value'
+                                    value={salutationOptions.find(option => option.value === salutation) || null} // Garantir que está usando 'value'
                                     onChange={(selectedOption) => setSalutation(selectedOption.label)} // Usar 'value' ao invés de 'label'
                                     isSearchable
                                     styles={customStyles}
@@ -465,7 +465,7 @@ export default function GuestProfile() {
                                 <p>Nationality</p>
                                 <Select
                                     options={countryOptions}
-                                    value={countryOptions.find(option => option.value === nationality) || null}
+                                    value={countryOptions.find(option => option.label === nationality) || null}
                                     onChange={(selectedOption) => setNationality(selectedOption.value)}
                                     isSearchable
                                     styles={customStyles}
