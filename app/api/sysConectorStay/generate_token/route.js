@@ -67,8 +67,8 @@ export async function POST(request) {
     };
     
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
-    // const link = `https://stay.mypms.pt/reservation/reservation?token=${token}`;
-    const link = `http://localhost:3000/reservation/reservation?token=${token}`;
+    const link = `https://stay.mypms.pt/reservation/reservation?token=${token}`;
+    // const link = `http://localhost:3000/reservation/reservation?token=${token}`;
 
     // Inserir no banco de dados
     const stayRecord = await prisma.stayRecords.create({
