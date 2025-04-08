@@ -144,15 +144,24 @@ export default function GuestProfile() {
     // }, [router]);
 
     useEffect(() => {
+        const storedGuestName = sessionStorage.getItem("selectedGuestName");
+        const selectedGuestID = sessionStorage.getItem("selectedGuestID");
         const token = sessionStorage.getItem("reservationToken");
+    
+        if (storedGuestName) {
+            setGuestName(storedGuestName);
+        } else {
+            setGuestName("Unknown guest");
+        }
     
         if (!token) {
             router.push("/");
             return;
         }
     
+        let decodedToken = null;
         try {
-            const decodedToken = jwtDecode(token);
+            decodedToken = jwtDecode(token);
             if (decodedToken?.propertyID && decodedToken?.resNo) {
                 setPropertyID(decodedToken.propertyID);
                 setReservationID(decodedToken.resNo);
@@ -163,106 +172,74 @@ export default function GuestProfile() {
             console.error("Erro ao decodificar o token:", error);
         }
     
-        const selectedGuestID = sessionStorage.getItem("selectedGuestID");
-        const selectedGuestType = sessionStorage.getItem("selectedGuestType");
+        // Verifica se deve buscar do sessionStorage (hóspede adicional)
+        const isUnknownGuest = storedGuestName === "Unknown guest";
+        const isMainGuest = !selectedGuestID; // Se não tem ID, assumimos hóspede principal
     
-        switch (selectedGuestType) {
-            case "main":
-                fetchMainGuestData(token);
-                break;
-            case "additional":
-                if (selectedGuestID) {
-                    loadGuestDataFromSessionStorage(selectedGuestID);
-                } else {
-                    setError("ID do hóspede adicional não encontrado.");
-                }
-                break;
-            case "unknown":
-                // Se for "Unknown", apenas não carrega dados (podes inicializar estados vazios se quiseres)
-                setData(null); // Ou algo mais elaborado
-                break;
-            default:
-                // Se não há info clara, assume hóspede principal por padrão
-                fetchMainGuestData(token);
+        if (!isUnknownGuest && selectedGuestID) {
+            const guestData = JSON.parse(sessionStorage.getItem(selectedGuestID));
+            if (guestData) {
+                const guestInfo = guestData[0];
+    
+                setData(guestInfo);
+                setSalutation(guestInfo.protelSalution || "");
+                setBirthDate(guestInfo.birthDate || "");
+                setNationality(guestInfo.nationality || "");
+                setCountry(guestInfo.country || "");
+                setEmail(guestInfo.email || "");
+                setPhone(guestInfo.protelGuestPhone || "");
+                setMobile(guestInfo.protelGuestMobilePhone || "");
+                setDocNo(guestInfo.identificationDocument || "");
+                setIdentificationDocument(guestInfo.identificationDocument || "");
+                setDocumentExpirationDate(guestInfo.documentExpirationDate || "");
+                setDocumentIssueDate(guestInfo.documentIssueDate || "");
+                setBirthCountry(guestInfo.birthCountry || "");
+                setVatNo(guestInfo.vatNo || "");
+                setStreetAddress(guestInfo.protelAddress || "");
+                setPostalCode(guestInfo.postalCode || "");
+                setCity(guestInfo.city || "");
+                setFirstName(guestInfo.protelGuestFirstName || "");
+                setLastName(guestInfo.protelGuestLastName || "");
+                return; // Evita chamada à API
+            } else {
+                console.warn("selectedGuestID definido, mas dados não encontrados no sessionStorage.");
+            }
         }
+    
+        // Se for hóspede principal ou nome desconhecido, busca da API
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(`/api/get_reservation?token=${token}`);
+                const fetchedData = JSON.parse(response.data.requestBody);
+    
+                setData(fetchedData);
+                setSalutation(fetchedData.salutation || "");
+                setBirthDate(fetchedData.birthDate || "");
+                setNationality(fetchedData.nationality || "");
+                setCountry(fetchedData.country || "");
+                setEmail(fetchedData.email || "");
+                setPhone(fetchedData.phone || "");
+                setMobile(fetchedData.mobile || "");
+                setDocNo(fetchedData.docNo || "");
+                setIdentificationDocument(fetchedData.identificationDocument || "");
+                setDocumentExpirationDate(fetchedData.documentExpirationDate || "");
+                setDocumentIssueDate(fetchedData.documentIssueDate || "");
+                setBirthCountry(fetchedData.birthCountry || "");
+                setVatNo(fetchedData.vatNo || "");
+                setStreetAddress(fetchedData.streetAddress || "");
+                setPostalCode(fetchedData.postalCode || "");
+                setCity(fetchedData.city || "");
+                setFirstName(fetchedData.protelGuestFirstName || "");
+                setLastName(fetchedData.protelGuestLastName || "");
+            } catch (err) {
+                console.error(err);
+                setError("Erro ao buscar os dados da reserva");
+            }
+        };
+    
+        fetchData();
     }, [router]);
     
-
-    // Função para carregar os dados do hóspede principal (caso não exista selectedGuestID no sessionStorage)
-    const fetchMainGuestData = async (token) => {
-        try {
-            if (!propertyID || !reservationID) {
-                console.error("propertyID ou reservationID não definidos.");
-                return;
-            }
-
-            // Aqui usamos axios para fazer a requisição, passando propertyID e reservationID
-            const response = await axios.get(`/api/get_reservation?token=${token}&propertyID=${propertyID}&reservationID=${reservationID}`);
-
-            if (response.data.success) {
-                const guestInfo = response.data.data;
-
-                // Preenchendo os estados com os dados do hóspede principal
-                setData(guestInfo);
-                setFirstName(guestInfo.protelGuestFirstName);
-                setLastName(guestInfo.protelGuestLastName);
-                setSalutation(guestInfo.protelSalution);
-                setBirthDate(formatDate(guestInfo.birthDate));
-                setNationality(guestInfo.nationality);
-                setCountry(guestInfo.country);
-                setStreetAddress(guestInfo.protelAddress);
-                setPostalCode(guestInfo.postalCode);
-                setCity(guestInfo.city);
-                setEmail(guestInfo.email);
-                setPhone(guestInfo.protelGuestPhone);
-                setMobile(guestInfo.protelGuestMobilePhone);
-                setDocNo(guestInfo.identificationDocument);
-                setIdentificationDocument(guestInfo.identificationDocument);
-                setDocumentExpirationDate(formatDate(guestInfo.documentExpirationDate));
-                setDocumentIssueDate(formatDate(guestInfo.documentIssueDate));
-                setBirthCountry(guestInfo.birthCountry);
-                setVatNo(guestInfo.vatNo);
-            } else {
-                setError("Erro ao carregar os dados do hóspede principal.");
-            }
-        } catch (err) {
-            setError("Erro ao buscar os dados do hóspede principal.");
-            console.error("Erro ao fazer a requisição:", err);
-        }
-    };
-
-    // Função para carregar os dados do hóspede do sessionStorage
-    const loadGuestDataFromSessionStorage = (selectedGuestID) => {
-        const guestData = JSON.parse(sessionStorage.getItem(selectedGuestID)); // Pegando os dados do hóspede pelo ID
-
-        if (!guestData) {
-            setError("Dados do hóspede não encontrados.");
-            return;
-        }
-
-        const guestInfo = guestData[0]; // Assumindo que a chave seja um array com os dados
-
-        // Preenchendo os estados com os dados do hóspede
-        setData(guestInfo);
-        setFirstName(guestInfo.protelGuestFirstName);
-        setLastName(guestInfo.protelGuestLastName);
-        setSalutation(guestInfo.protelSalution);
-        setBirthDate(formatDate(guestInfo.birthDate));
-        setNationality(guestInfo.nationality);
-        setCountry(guestInfo.country);
-        setStreetAddress(guestInfo.protelAddress);
-        setPostalCode(guestInfo.postalCode);
-        setCity(guestInfo.city);
-        setEmail(guestInfo.email);
-        setPhone(guestInfo.protelGuestPhone);
-        setMobile(guestInfo.protelGuestMobilePhone);
-        setDocNo(guestInfo.identificationDocument);
-        setIdentificationDocument(guestInfo.identificationDocument);
-        setDocumentExpirationDate(formatDate(guestInfo.documentExpirationDate));
-        setDocumentIssueDate(formatDate(guestInfo.documentIssueDate));
-        setBirthCountry(guestInfo.birthCountry);
-        setVatNo(guestInfo.vatNo);
-    };
 
     const renderGuestData = (field, formatDateFlag = false) => {
         if (guestName === "Unknown guest") return "";
