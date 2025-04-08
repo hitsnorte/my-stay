@@ -290,7 +290,7 @@ export default function GuestProfile() {
     
         // Verifica se o hóspede é principal, desconhecido ou adicional
         const isUnknownGuest = guestName === "Unknown guest";
-        const isMainGuest = !selectedGuestID; // Se não tem ID, é o hóspede principal
+        const isMainGuest = !selectedGuestID && mainGuestID; // Se não tem ID no sessionStorage, usa mainGuestID da API
         const isAdditionalGuest = selectedGuestID && sessionStorage.getItem(selectedGuestID); // Se tem ID no sessionStorage, é hóspede adicional
     
         // Determina o endpoint a ser chamado com base no tipo de hóspede
@@ -312,8 +312,8 @@ export default function GuestProfile() {
             });
     
             // Se for o hóspede principal ou adicional, adiciona o guestID como profileID
+            let guestID = isMainGuest ? mainGuestID : selectedGuestID; // Usa mainGuestID para hóspede principal, ou selectedGuestID para hóspede adicional
             if (isMainGuest || isAdditionalGuest) {
-                const guestID = selectedGuestID || mainGuestID; // Caso não haja selectedGuestID, você pode definir um valor padrão
                 headers["profileID"] = guestID;
             }
     
@@ -328,7 +328,7 @@ export default function GuestProfile() {
         } catch (err) {
             setError("Erro ao enviar os dados. Tente novamente.");
         }
-    };      
+    };    
 
     const fetchNationalities = async () => {
         const response = await axios.get(`/api/sysConectorStay/get_countries?propertyID=${propertyID}`);
@@ -353,7 +353,7 @@ export default function GuestProfile() {
                     // Processando nacionalidades
                     const formattedCountryOptions = nationalities
                         .map((country) => ({
-                            value: country.code,   // Usando 'code' que foi renomeado no backend
+                            value: String(country.code),   // Usando 'code' que foi renomeado no backend
                             label: country.country // Usando 'country' que foi renomeado no backend
                         }))
                         .sort((a, b) => a.label.localeCompare(b.label)); // Ordena alfabeticamente
@@ -363,7 +363,7 @@ export default function GuestProfile() {
                     // Processando saudações
                     const formattedSalutationOptions = salutations
                         .map((salutation) => ({
-                            value: salutation.code,        // ID da saudação
+                            value: String(salutation.code),        // ID da saudação
                             label: salutation.salutation   // Nome da saudação (correto)
                         }))
                         .sort((a, b) => a.label.localeCompare(b.label)); // Ordena alfabeticamente
@@ -373,7 +373,7 @@ export default function GuestProfile() {
                     // Processando tipos de documentos
                     const formattedDocTypeOptions = docTypes
                         .map((docType) => ({
-                            value: docType.value,  // 'ref' é o campo de ID do tipo de documento
+                            value: String(docType.value),  // 'ref' é o campo de ID do tipo de documento
                             label: docType.label  // 'text' é o campo de nome do tipo de documento
                         }))
                         .sort((a, b) => a.label.localeCompare(b.label)); // Ordena alfabeticamente
@@ -448,7 +448,7 @@ export default function GuestProfile() {
                                 <p>Salutation</p>
                                 <Select
                                     options={salutationOptions}
-                                    value={salutationOptions.find(option => String(option.value) === String(salutation)) || null} // Garantir que está usando 'value'
+                                    value={salutationOptions.find(option => option.value === salutation) || null} // Garantir que está usando 'value'
                                     onChange={(selectedOption) => setSalutation(selectedOption.label)} // Usar 'value' ao invés de 'label'
                                     isSearchable
                                     styles={customStyles}
