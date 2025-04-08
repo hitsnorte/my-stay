@@ -72,6 +72,8 @@ export default function GuestProfile() {
     const [salutationOptions, setSalutationOptions] = useState([]);
     const [docTypeOptions, setDocTypeOptions] = useState([]);
 
+    const [mainGuestID, setMainGuestID] = useState(""); // ID do hóspede selecionado
+
     // useEffect(() => {
     //     // Acesso ao sessionStorage só no lado do cliente
     //     const storedGuestName = sessionStorage.getItem("selectedGuestName");
@@ -231,6 +233,7 @@ export default function GuestProfile() {
                 setCity(fetchedData.city || "");
                 setFirstName(fetchedData.protelGuestFirstName || "");
                 setLastName(fetchedData.protelGuestLastName || "");
+                setMainGuestID(fetchData.protelGuestID || "");
             } catch (err) {
                 console.error(err);
                 setError("Erro ao buscar os dados da reserva");
@@ -253,12 +256,12 @@ export default function GuestProfile() {
 
     const handleSave = async () => {
         const token = sessionStorage.getItem("reservationToken");
-
+    
         if (!token) {
             setError("Token de reserva não encontrado.");
             return;
         }
-
+    
         const guestProfileData = {
             propertyID,
             reservationID,
@@ -284,21 +287,39 @@ export default function GuestProfile() {
             marketingOptIn: enabledMarketing,
             dataProcessingOptIn: enabledDataP,
         };
-
+    
+        // Verifica se o hóspede é principal, desconhecido ou adicional
+        const isUnknownGuest = guestName === "Unknown guest";
+        const isMainGuest = !selectedGuestID; // Se não tem ID, é o hóspede principal
+        const isAdditionalGuest = selectedGuestID && sessionStorage.getItem(selectedGuestID); // Se tem ID no sessionStorage, é hóspede adicional
+    
+        // Determina o endpoint a ser chamado com base no tipo de hóspede
+        let url = "/api/sysConectorStay/submit_guest_profile";  // Default para Unknown Guest
+        if (isMainGuest || isAdditionalGuest) {
+            url = "/api/sysConectorStay/update_guest_profile";  // Para hóspede principal ou adicional
+        }
+    
         try {
             const headers = {
                 Authorization: "q4vf9p8n4907895f7m8d24m75c2q947m2398c574q9586c490q756c98q4m705imtugcfecvrhym04capwz3e2ewqaefwegfiuoamv4ros2nuyp0sjc3iutow924bn5ry943utrjmi",
                 "Content-Type": "application/json",
                 "Reservation-Token": token,
             };
-
+    
             // Adiciona cada campo do guestProfileData no header
             Object.entries(guestProfileData).forEach(([key, value]) => {
                 headers[`Guest-${key}`] = value !== undefined ? String(value) : "";
             });
-
-            const response = await axios.post("/api/sysConectorStay/submit_guest_profile", {}, { headers });
-
+    
+            // Se for o hóspede principal ou adicional, adiciona o guestID como profileID
+            if (isMainGuest || isAdditionalGuest) {
+                const guestID = selectedGuestID || mainGuestID; // Caso não haja selectedGuestID, você pode definir um valor padrão
+                headers["profileID"] = guestID;
+            }
+    
+            // Envia os dados para o endpoint determinado
+            const response = await axios.post(url, {}, { headers });
+    
             if (response.status === 200) {
                 alert("Dados salvos com sucesso!");
             } else {
@@ -307,7 +328,7 @@ export default function GuestProfile() {
         } catch (err) {
             setError("Erro ao enviar os dados. Tente novamente.");
         }
-    };
+    };      
 
     const fetchNationalities = async () => {
         const response = await axios.get(`/api/sysConectorStay/get_countries?propertyID=${propertyID}`);
@@ -386,6 +407,7 @@ export default function GuestProfile() {
         setDocumentIssueDate(renderGuestData("documentIssueDate"));
         setBirthCountry(renderGuestData("birthCountry"));
         setVatNo(renderGuestData("vatNo"));
+        setMainGuestID(renderGuestData("protelGuestID"));
 
         // Se for o hóspede principal, define o nome corretamente
         if (
@@ -426,8 +448,8 @@ export default function GuestProfile() {
                                 <p>Salutation</p>
                                 <Select
                                     options={salutationOptions}
-                                    value={salutationOptions.find(option => option.value === salutation) || null} // Garantir que está usando 'value'
-                                    onChange={(selectedOption) => setSalutation(selectedOption.value)} // Usar 'value' ao invés de 'label'
+                                    value={salutationOptions.find(option => String(option.value) === String(salutation)) || null} // Garantir que está usando 'value'
+                                    onChange={(selectedOption) => setSalutation(selectedOption.label)} // Usar 'value' ao invés de 'label'
                                     isSearchable
                                     styles={customStyles}
                                 />
