@@ -427,7 +427,7 @@ export default function GuestProfile() {
                                 <Select
                                     options={salutationOptions}
                                     value={salutationOptions.find(option => option.value === salutation) || null} // Garantir que está usando 'value'
-                                    onChange={(selectedOption) => setSalutation(selectedOption.label)} // Usar 'value' ao invés de 'label'
+                                    onChange={(selectedOption) => setSalutation(selectedOption.value)} // Usar 'value' ao invés de 'label'
                                     isSearchable
                                     styles={customStyles}
                                 />
