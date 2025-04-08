@@ -256,6 +256,7 @@ export default function GuestProfile() {
 
     const handleSave = async () => {
         const token = sessionStorage.getItem("reservationToken");
+        console.log("ID", mainGuestID);
     
         if (!token) {
             setError("Token de reserva não encontrado.");
@@ -328,6 +329,10 @@ export default function GuestProfile() {
             if (guestID) {
                 headers["profileID"] = guestID;
             }
+    
+            // Aqui estamos logando os dados que serão enviados
+            console.log("Enviando dados para o servidor com os seguintes headers:");
+            console.log(headers);
     
             // Envia os dados para o endpoint determinado
             const response = await axios.post(url, {}, { headers });
