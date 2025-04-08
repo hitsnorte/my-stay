@@ -288,10 +288,14 @@ export default function GuestProfile() {
             dataProcessingOptIn: enabledDataP,
         };
     
-        // Verifica se o hóspede é principal, desconhecido ou adicional
-        const isUnknownGuest = guestName === "Unknown guest";
-        const isMainGuest = !selectedGuestID && mainGuestID; // Se não tem ID no sessionStorage, usa mainGuestID da API
-        const isAdditionalGuest = selectedGuestID && sessionStorage.getItem(selectedGuestID); // Se tem ID no sessionStorage, é hóspede adicional
+        // Verifica o tipo de hóspede (main, adicional ou desconhecido)
+        const guestType = sessionStorage.getItem("selectedGuestType"); // Pode ser "main", "acompanhante" ou "unknown"
+        const selectedGuestID = sessionStorage.getItem("selectedGuestID"); // ID do hóspede, se existir
+    
+        // Verifica se o hóspede é desconhecido, principal ou adicional
+        const isUnknownGuest = guestType === "unknown"; // Hóspede desconhecido
+        const isMainGuest = guestType === "main"; // Hóspede principal
+        const isAdditionalGuest = guestType === "acompanhante" && selectedGuestID; // Hóspede adicional (tem selectedGuestID)
     
         // Determina o endpoint a ser chamado com base no tipo de hóspede
         let url = "/api/sysConectorStay/submit_guest_profile";  // Default para Unknown Guest
@@ -312,8 +316,16 @@ export default function GuestProfile() {
             });
     
             // Se for o hóspede principal ou adicional, adiciona o guestID como profileID
-            let guestID = isMainGuest ? mainGuestID : selectedGuestID; // Usa mainGuestID para hóspede principal, ou selectedGuestID para hóspede adicional
-            if (isMainGuest || isAdditionalGuest) {
+            let guestID = "";
+    
+            if (isMainGuest) {
+                guestID = mainGuestID; // Para o hóspede principal, usa o mainGuestID
+            } else if (isAdditionalGuest) {
+                guestID = selectedGuestID; // Para o hóspede adicional, usa o selectedGuestID
+            }
+    
+            // Se houver guestID (para principal ou adicional), inclui no header
+            if (guestID) {
                 headers["profileID"] = guestID;
             }
     
@@ -531,7 +543,7 @@ export default function GuestProfile() {
                                 <p>Country</p>
                                 <Select
                                     options={countryOptions}
-                                    value={countryOptions.find(option => option.value === country) || null}
+                                    value={countryOptions.find(option => option.label === country) || null}
                                     onChange={(selectedOption) => {
                                         setCountry(selectedOption.value);
                                         setCountryText(selectedOption.label);
@@ -623,7 +635,7 @@ export default function GuestProfile() {
                                 <p>Country of birth</p>
                                 <Select
                                     options={countryOptions}
-                                    value={countryOptions.find(option => option.value === birthCountry) || null}
+                                    value={countryOptions.find(option => option.label === birthCountry) || null}
                                     onChange={(selectedOption) => setBirthCountry(selectedOption.value)}
                                     isSearchable
                                     styles={customStyles}
