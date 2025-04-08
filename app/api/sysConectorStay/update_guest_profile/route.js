@@ -39,7 +39,7 @@ export async function POST(request) {
       City_string50: headers.get("Guest-city"),
       vatNO_string30: headers.get("Guest-vatNo"),
       IDReserva_integer: parseInt(headers.get("Guest-reservationID")),
-      ProfileID: headers.get("Guest-profileID")
+      ProfileID: parseInt(headers.get("Guest-profileID"))
     };
 
     console.log("Dados recebidos via headers:", { token, guestProfileData });
