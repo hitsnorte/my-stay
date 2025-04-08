@@ -295,7 +295,7 @@ export default function GuestProfile() {
         // Verifica se o hóspede é desconhecido, principal ou adicional
         const isUnknownGuest = guestType === "unknown"; // Hóspede desconhecido
         const isMainGuest = guestType === "main"; // Hóspede principal
-        const isAdditionalGuest = guestType === "acompanhante" && selectedGuestID; // Hóspede adicional (tem selectedGuestID)
+        const isAdditionalGuest = guestType === "additional" && selectedGuestID; // Hóspede adicional (tem selectedGuestID)
     
         // Determina o endpoint a ser chamado com base no tipo de hóspede
         let url = "/api/sysConectorStay/submit_guest_profile";  // Default para Unknown Guest
@@ -402,7 +402,7 @@ export default function GuestProfile() {
 
     useEffect(() => {
         if (!data) return;
-
+    
         setSalutation(renderGuestData("protelSalutation"));
         setBirthDate(renderGuestData("birthDate"));
         setNationality(renderGuestData("nationality"));
@@ -419,20 +419,19 @@ export default function GuestProfile() {
         setDocumentIssueDate(renderGuestData("documentIssueDate"));
         setBirthCountry(renderGuestData("birthCountry"));
         setVatNo(renderGuestData("vatNo"));
-        setMainGuestID(renderGuestData("protelGuestID"));
-
-        // Se for o hóspede principal, define o nome corretamente
-        if (
-            guestName !== "Unknown guest" &&
-            (data.protelGuestFirstName || data.protelGuestLastName)
-        ) {
+    
+        // Verificar se o guestName é diferente de "Unknown guest"
+        if (guestName !== "Unknown guest") {
             setFirstName(data.protelGuestFirstName || "");
             setLastName(data.protelGuestLastName || "");
+            setMainGuestID(data.protelGuestID || ""); // Definir o mainGuestID corretamente
         } else {
-            setFirstName(""); // Campos vazios para hóspede desconhecido
-            setLastName("");
+            setFirstName(""); // Para o hóspede desconhecido
+            setLastName("");  // Para o hóspede desconhecido
+            setMainGuestID(null);  // Caso seja um hóspede desconhecido
         }
     }, [data, guestName]);
+    
 
     return (
         <main>
