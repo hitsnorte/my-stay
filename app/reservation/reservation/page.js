@@ -11,6 +11,8 @@ import { IoMdRefresh } from "react-icons/io";
 import { FaCalendarAlt, FaRegCalendarCheck } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 
+import { jwtDecode } from "jwt-decode";
+
 import "./style.css";
 
 function ReservationContent() {
@@ -19,6 +21,8 @@ function ReservationContent() {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
     const [stayRecord, setStayRecord] = useState("");
+    const [profileID, setProfileID] = useState(null);
+    const [mainGuestData, setMainGuestData] = useState(null);
 
     useEffect(() => {
         // Recupera o token da URL
@@ -33,8 +37,24 @@ function ReservationContent() {
 
         // Armazenar o token no sessionStorage
         sessionStorage.setItem("reservationToken", urlToken);
-
         setToken(urlToken);
+
+        // Decodificar o token e extrair o profileID
+        try {
+            const decoded = jwtDecode(urlToken);
+
+            if (decoded?.profileID) {
+                setProfileID(decoded.profileID); // salva no estado
+                sessionStorage.setItem("mainGuestID", decoded.profileID); // opcional
+                console.log("ProfileID extraído:", decoded.profileID);
+            } else {
+                console.warn("profileID não encontrado no token.");
+            }
+        } catch (err) {
+            console.error("Erro ao decodificar token:", err);
+            router.push("/");
+            return;
+        }
 
         // Faz a requisição para buscar os dados da reserva usando o token
         const fetchData = async () => {
@@ -49,6 +69,37 @@ function ReservationContent() {
 
         fetchData();
     }, [router]);
+
+    useEffect(() => {
+        const fetchGuestData = async () => {
+            try {
+                const token = sessionStorage.getItem("reservationToken");
+
+                if (!token || !data?.protelGuestID) {
+                    console.warn("Token ou protelGuestID ausente.");
+                    return;
+                }
+
+                const response = await axios.get(
+                    `/api/sysConectorStay/get_guests?reservationToken=${token}&protelGuestID=${data.protelGuestID}`
+                );
+
+                const guestData = response.data;
+
+                // Salva cada hóspede retornado no sessionStorage com a key do profileID
+                Object.keys(guestData).forEach((guestID) => {
+                    sessionStorage.setItem(guestID, JSON.stringify(guestData[guestID]));
+                });
+
+                console.log("Hóspedes armazenados no sessionStorage:", guestData);
+
+            } catch (error) {
+                console.error("Erro ao buscar dados dos hóspedes:", error);
+            }
+        };
+
+        fetchGuestData();
+    }, [data?.protelGuestID]); // dispara sempre que esse ID mudar
 
     // Função para converter a string de data para um formato correto
     const parseDate = (dateStr) => {
@@ -79,6 +130,24 @@ function ReservationContent() {
     const checkIn = formatDate(checkInDate);
     const checkOut = formatDate(checkOutDate);
 
+    useEffect(() => {
+        if (profileID) {
+            const storedGuest = sessionStorage.getItem(profileID);
+            if (storedGuest) {
+                try {
+                    const guestArray = JSON.parse(storedGuest);
+                    if (Array.isArray(guestArray) && guestArray.length > 0) {
+                        setMainGuestData(guestArray[0]); // pega o primeiro (único)
+                    }
+                } catch (err) {
+                    console.error("Erro ao processar dados do hóspede principal:", err);
+                }
+            } else {
+                console.warn("Nenhum hóspede encontrado no sessionStorage para o profileID:", profileID);
+            }
+        }
+    }, [profileID]);
+
     return (
         <main className="bg-[#F7F0F5] min-h-screen w-full">
             {error ? (
@@ -91,7 +160,9 @@ function ReservationContent() {
                         <IoMdRefresh size={20} color="white" onClick={() => window.location.reload()} />
                     </div>
                     <div className="flex flex-col justify-center items-center">
-                        <h1 className="text-2xl font-bold flex justify-center mt-4">{data.protelGuestFirstName} {data.protelGuestLastName}</h1>
+                        <h1 className="text-2xl font-bold flex justify-center mt-4">
+                            {mainGuestData ? `${mainGuestData.protelGuestFirstName} ${mainGuestData.protelGuestLastName}` : "Carregando..."}
+                        </h1>
                         <div className="flex flex-row gap-4 items-center mt-4">
                             <div className="flex flex-row items-center font-bold">
                                 <p className="text-5xl">{checkIn.day}</p>
@@ -116,15 +187,15 @@ function ReservationContent() {
                         </div>
                         <div className="flex justify-center mt-4">
                             <div className="flex flex-row gap-6 cards-display">
-                                <div 
-                                className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#DECBB7] w-48 h-48 text-center text-sm cursor-pointer cards"
-                                onClick={() => router.push("./details")}
+                                <div
+                                    className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#DECBB7] w-48 h-48 text-center text-sm cursor-pointer cards"
+                                    onClick={() => router.push("./details")}
                                 >
                                     <FaCalendarAlt size={35} />
                                     <p className="uppercase">Reservation</p>
                                 </div>
                                 <div className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#DECBB7] w-48 h-48 text-center text-sm cursor-pointer cards"
-                                onClick={() => router.push("./prepare-check-in")}
+                                    onClick={() => router.push("./prepare-check-in")}
                                 >
                                     <FaRegCalendarCheck size={35} />
                                     <p className="uppercase">Prepare check-in</p>
