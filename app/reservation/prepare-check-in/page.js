@@ -59,8 +59,15 @@ export default function PrepareCheckIn() {
     }, []);
 
     const handleSave = async () => {
+        if (!signatureExists) {
+            alert("Você precisa adicionar a assinatura antes de continuar.");
+            return;
+        }
+    
         if (!data || !propertyID) return;
+    
         console.log("Dados a serem enviados:", propertyID, data.protelReservationID, data.protelMpeHotel);
+    
         try {
             await axios.post("/api/sysConectorStay/precheckin", {
                 protelReservationID: data.protelReservationID,
@@ -72,7 +79,7 @@ export default function PrepareCheckIn() {
             console.error("Erro ao enviar dados para o precheckin:", err);
             alert("Ocorreu um erro ao salvar.");
         }
-    };
+    };    
 
     return (
         <main>

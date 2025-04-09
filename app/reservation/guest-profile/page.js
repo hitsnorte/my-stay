@@ -20,9 +20,23 @@ import "./style.css";
 // Função para formatar a data
 const formatDate = (dateStr) => {
     if (!dateStr) return "";
-    const [day, month, year] = dateStr.split(" ")[0].split("/");
-    return `${year}-${month}-${day}`;
+
+    // Se já está no formato correto, retorna direto
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+
+    try {
+        const [datePart] = dateStr.split(" ");
+        const [day, month, year] = datePart.split("/");
+
+        if (!day || !month || !year) return "";
+
+        return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    } catch (err) {
+        console.error("Erro ao formatar a data:", err);
+        return "";
+    }
 };
+
 
 
 const customStyles = {
@@ -78,18 +92,18 @@ export default function GuestProfile() {
         const storedGuestName = sessionStorage.getItem("selectedGuestName");
         const selectedGuestID = sessionStorage.getItem("selectedGuestID");
         const token = sessionStorage.getItem("reservationToken");
-    
+
         if (storedGuestName) {
             setGuestName(storedGuestName);
         } else {
             setGuestName("Unknown guest");
         }
-    
+
         if (!token) {
             router.push("/");
             return;
         }
-    
+
         let decodedToken = null;
         try {
             decodedToken = jwtDecode(token);
@@ -102,16 +116,16 @@ export default function GuestProfile() {
         } catch (error) {
             console.error("Erro ao decodificar o token:", error);
         }
-    
+
         // Verifica se deve buscar do sessionStorage (hóspede adicional)
         const isUnknownGuest = storedGuestName === "Unknown guest";
         const isMainGuest = !selectedGuestID; // Se não tem ID, assumimos hóspede principal
-    
+
         if (!isUnknownGuest && selectedGuestID) {
             const guestData = JSON.parse(sessionStorage.getItem(selectedGuestID));
             if (guestData) {
                 const guestInfo = guestData[0];
-    
+
                 setData(guestInfo);
                 setSalutation(guestInfo.protelSalution || "");
                 setBirthDate(guestInfo.birthDate || "");
@@ -136,13 +150,13 @@ export default function GuestProfile() {
                 console.warn("selectedGuestID definido, mas dados não encontrados no sessionStorage.");
             }
         }
-    
+
         // Se for hóspede principal ou nome desconhecido, busca da API
         const fetchData = async () => {
             try {
                 const response = await axios.get(`/api/get_reservation?token=${token}`);
                 const fetchedData = JSON.parse(response.data.requestBody);
-    
+
                 setData(fetchedData);
                 setSalutation(fetchedData.protelSalutation || "");
                 setBirthDate(fetchedData.birthDate || "");
@@ -168,10 +182,10 @@ export default function GuestProfile() {
                 setError("Erro ao buscar os dados da reserva");
             }
         };
-    
+
         fetchData();
     }, [router]);
-    
+
 
     const renderGuestData = (field, formatDateFlag = false) => {
         if (guestName === "Unknown guest") return "";
@@ -186,12 +200,12 @@ export default function GuestProfile() {
     const handleSave = async () => {
         const token = sessionStorage.getItem("reservationToken");
         console.log("ID", mainGuestID);
-    
+
         if (!token) {
             setError("Token de reserva não encontrado.");
             return;
         }
-    
+
         const guestProfileData = {
             propertyID,
             reservationID,
@@ -217,55 +231,55 @@ export default function GuestProfile() {
             marketingOptIn: enabledMarketing,
             dataProcessingOptIn: enabledDataP,
         };
-    
+
         // Verifica o tipo de hóspede (main, adicional ou desconhecido)
         const guestType = sessionStorage.getItem("selectedGuestType"); // Pode ser "main", "acompanhante" ou "unknown"
         const selectedGuestID = sessionStorage.getItem("selectedGuestID"); // ID do hóspede, se existir
-    
+
         // Verifica se o hóspede é desconhecido, principal ou adicional
         const isUnknownGuest = guestType === "unknown"; // Hóspede desconhecido
         const isMainGuest = guestType === "main"; // Hóspede principal
         const isAdditionalGuest = guestType === "additional" && selectedGuestID; // Hóspede adicional (tem selectedGuestID)
-    
+
         // Determina o endpoint a ser chamado com base no tipo de hóspede
         let url = "/api/sysConectorStay/submit_guest_profile";  // Default para Unknown Guest
         if (isMainGuest || isAdditionalGuest) {
             url = "/api/sysConectorStay/update_guest_profile";  // Para hóspede principal ou adicional
         }
-    
+
         try {
             const headers = {
                 Authorization: "q4vf9p8n4907895f7m8d24m75c2q947m2398c574q9586c490q756c98q4m705imtugcfecvrhym04capwz3e2ewqaefwegfiuoamv4ros2nuyp0sjc3iutow924bn5ry943utrjmi",
                 "Content-Type": "application/json",
                 "Reservation-Token": token,
             };
-    
+
             // Adiciona cada campo do guestProfileData no header
             Object.entries(guestProfileData).forEach(([key, value]) => {
                 headers[`Guest-${key}`] = value !== undefined ? String(value) : "";
             });
-    
+
             // Se for o hóspede principal ou adicional, adiciona o guestID como profileID
             let guestID = "";
-    
+
             if (isMainGuest) {
                 guestID = mainGuestID; // Para o hóspede principal, usa o mainGuestID
             } else if (isAdditionalGuest) {
                 guestID = selectedGuestID; // Para o hóspede adicional, usa o selectedGuestID
             }
-    
+
             // Se houver guestID (para principal ou adicional), inclui no header
             if (guestID) {
                 headers["profileID"] = guestID;
             }
-    
+
             // Aqui estamos logando os dados que serão enviados
             console.log("Enviando dados para o servidor com os seguintes headers:");
             console.log(headers);
-    
+
             // Envia os dados para o endpoint determinado
             const response = await axios.post(url, {}, { headers });
-    
+
             if (response.status === 200) {
                 alert("Dados salvos com sucesso!");
             } else {
@@ -274,7 +288,7 @@ export default function GuestProfile() {
         } catch (err) {
             setError("Erro ao enviar os dados. Tente novamente.");
         }
-    };    
+    };
 
     const fetchNationalities = async () => {
         const response = await axios.get(`/api/sysConectorStay/get_countries?propertyID=${propertyID}`);
@@ -336,7 +350,7 @@ export default function GuestProfile() {
 
     useEffect(() => {
         if (!data) return;
-    
+
         setSalutation(renderGuestData("protelSalutation"));
         setBirthDate(renderGuestData("birthDate"));
         setNationality(renderGuestData("nationality"));
@@ -353,7 +367,7 @@ export default function GuestProfile() {
         setDocumentIssueDate(renderGuestData("documentIssueDate"));
         setBirthCountry(renderGuestData("birthCountry"));
         setVatNo(renderGuestData("vatNo"));
-    
+
         // Verificar se o guestName é diferente de "Unknown guest"
         if (guestName !== "Unknown guest") {
             setFirstName(data.protelGuestFirstName || "");
@@ -365,7 +379,7 @@ export default function GuestProfile() {
             setMainGuestID(null);  // Caso seja um hóspede desconhecido
         }
     }, [data, guestName]);
-    
+
 
     return (
         <main>
@@ -393,8 +407,12 @@ export default function GuestProfile() {
                                 <p>Salutation</p>
                                 <Select
                                     options={salutationOptions}
-                                    value={salutationOptions.find(option => option.value === salutation) || null} // Garantir que está usando 'value'
-                                    onChange={(selectedOption) => setSalutation(selectedOption.value)} // Usar 'value' ao invés de 'label'
+                                    value={
+                                        salutationOptions.find(
+                                            option => option.value === salutation || option.label === salutation
+                                        ) || null
+                                    }
+                                    onChange={(selectedOption) => setSalutation(selectedOption.label)}
                                     isSearchable
                                     styles={customStyles}
                                 />
@@ -422,17 +440,22 @@ export default function GuestProfile() {
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Date of birth</p>
                                 <input
-                                    type="date" // Isso garante que apenas a data será exibida (sem horas)
+                                    type="date"
                                     value={formatDate(birthDate)}
-                                    onChange={(e) => setBirthDate(e.target.value)}
-                                    className="text-right focus:outline-none" // Alinha o texto à direita
+                                    onChange={(e) => { setBirthDate(e.target.value); }}
+                                    className="text-right focus:outline-none"
                                 />
                             </div>
+
                             <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>Nationality</p>
                                 <Select
                                     options={countryOptions}
-                                    value={countryOptions.find(option => option.label === nationality) || null}
+                                    value={
+                                        countryOptions.find(
+                                            option => option.value === nationality || option.label === nationality
+                                        ) || null
+                                    }
                                     onChange={(selectedOption) => setNationality(selectedOption.value)}
                                     isSearchable
                                     styles={customStyles}
@@ -476,7 +499,11 @@ export default function GuestProfile() {
                                 <p>Country</p>
                                 <Select
                                     options={countryOptions}
-                                    value={countryOptions.find(option => option.label === country) || null}
+                                    value={
+                                        countryOptions.find(
+                                          option => option.value === country || option.label === country
+                                        ) || null
+                                      }
                                     onChange={(selectedOption) => {
                                         setCountry(selectedOption.value);
                                         setCountryText(selectedOption.label);
@@ -568,7 +595,11 @@ export default function GuestProfile() {
                                 <p>Country of birth</p>
                                 <Select
                                     options={countryOptions}
-                                    value={countryOptions.find(option => option.label === birthCountry) || null}
+                                    value={
+                                        countryOptions.find(
+                                          option => option.value === birthCountry || option.label === birthCountry
+                                        ) || null
+                                      }
                                     onChange={(selectedOption) => setBirthCountry(selectedOption.value)}
                                     isSearchable
                                     styles={customStyles}
