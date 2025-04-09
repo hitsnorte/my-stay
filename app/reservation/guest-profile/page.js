@@ -249,7 +249,7 @@ export default function GuestProfile() {
 
         try {
             const headers = {
-                Authorization: "q4vf9p8n4907895f7m8d24m75c2q947m2398c574q9586c490q756c98q4m705imtugcfecvrhym04capwz3e2ewqaefwegfiuoamv4ros2nuyp0sjc3iutow924bn5ry943utrjmi",
+                // Authorization: "q4vf9p8n4907895f7m8d24m75c2q947m2398c574q9586c490q756c98q4m705imtugcfecvrhym04capwz3e2ewqaefwegfiuoamv4ros2nuyp0sjc3iutow924bn5ry943utrjmi",
                 "Content-Type": "application/json",
                 "Reservation-Token": token,
             };
@@ -281,10 +281,37 @@ export default function GuestProfile() {
             const response = await axios.post(url, {}, { headers });
 
             if (response.status === 200) {
+                // Atualiza sessionStorage se for hóspede adicional
+                if (isAdditionalGuest && selectedGuestID) {
+                    const updatedGuestData = {
+                        protelSalution: salutation,
+                        birthDate,
+                        nationality,
+                        country,
+                        email,
+                        protelGuestPhone: phone,
+                        protelGuestMobilePhone: mobile,
+                        identificationDocument: docNo,
+                        protelDocType: identificationDocument,
+                        documentExpirationDate,
+                        documentIssueDate,
+                        birthCountry,
+                        vatNo,
+                        protelAddress: streetAddress,
+                        postalCode,
+                        city,
+                        protelGuestFirstName: firstName,
+                        protelGuestLastName: lastName,
+                    };
+            
+                    // Armazena como array, seguindo o formato original
+                    sessionStorage.setItem(selectedGuestID, JSON.stringify([updatedGuestData]));
+                }
+            
                 alert("Dados salvos com sucesso!");
             } else {
                 setError("Erro ao salvar os dados.");
-            }
+            }            
         } catch (err) {
             setError("Erro ao enviar os dados. Tente novamente.");
         }
