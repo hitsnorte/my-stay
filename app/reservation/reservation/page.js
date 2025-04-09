@@ -131,7 +131,7 @@ function ReservationContent() {
     const checkOut = formatDate(checkOutDate);
 
     useEffect(() => {
-        if (profileID) {
+        if (profileID && data) {
             const storedGuest = sessionStorage.getItem(profileID);
             if (storedGuest) {
                 try {
@@ -146,7 +146,7 @@ function ReservationContent() {
                 console.warn("Nenhum hóspede encontrado no sessionStorage para o profileID:", profileID);
             }
         }
-    }, [profileID]);
+    }, [profileID, data]); 
 
     return (
         <main className="bg-[#F7F0F5] min-h-screen w-full">
