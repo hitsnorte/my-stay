@@ -10,10 +10,19 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const userEmail = body.email;
+    const profileID = body.protelGuestID; // <- Novo campo
 
+    // Validações
     if (!userEmail) {
       return new NextResponse(
         JSON.stringify({ error: "O campo 'email' é obrigatório!" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!profileID) {
+      return new NextResponse(
+        JSON.stringify({ error: "O campo 'protelGuestID' é obrigatório!" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
@@ -30,7 +39,7 @@ export async function POST(request) {
       );
     }
 
-    // Buscar dados da propriedade no banco
+    // Buscar dados da propriedade
     const property = await prisma.properties.findUnique({
       where: { propertyTag },
       select: {
@@ -54,23 +63,23 @@ export async function POST(request) {
     const { propertyServer, propertyPort, propertyID, replyEmail, replyPassword, sendingServer, sendingPort } = property;
     const uniqueId = uuidv4();
 
-    // Criar token com os novos parâmetros
+    // Payload do token com o novo parâmetro
     const payload = {
       propertyTag,
       propertyID,
       replyEmail,
       sendingServer,
       sendingPort,
-      resNo, // Adicionado ao token
-      mpeHotel, // Adicionado ao token
+      resNo,
+      mpeHotel,
+      profileID, // <- Adicionado ao token
       uniqueId,
     };
-    
+
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
     const link = `https://stay.mypms.pt/reservation/reservation?token=${token}`;
-    // const link = `http://localhost:3000/reservation/reservation?token=${token}`;
 
-    // Inserir no banco de dados
+    // Inserção no banco
     const stayRecord = await prisma.stayRecords.create({
       data: {
         requestBody: JSON.stringify(body),
@@ -83,7 +92,7 @@ export async function POST(request) {
       },
     });
 
-    // Configuração do transporte de e-mail
+    // Email setup
     const transporter = nodemailer.createTransport({
       host: sendingServer,
       port: sendingPort,
@@ -91,7 +100,6 @@ export async function POST(request) {
       auth: { user: replyEmail, pass: replyPassword },
     });
 
-    // Configuração do e-mail
     const mailOptions = {
       from: `Reserva Confirmada <${replyEmail}>`,
       to: userEmail,

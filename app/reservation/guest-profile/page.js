@@ -110,8 +110,9 @@ export default function GuestProfile() {
             if (decodedToken?.propertyID && decodedToken?.resNo) {
                 setPropertyID(decodedToken.propertyID);
                 setReservationID(decodedToken.resNo);
+                setMainGuestID(decodedToken.profileID);
             } else {
-                console.error("PropertyID ou ReservationID não encontrados no token!");
+                console.error("PropertyID, ReservationID ou ProfileID não encontrados no token!");
             }
         } catch (error) {
             console.error("Erro ao decodificar o token:", error);
@@ -151,39 +152,34 @@ export default function GuestProfile() {
             }
         }
 
-        // Se for hóspede principal ou nome desconhecido, busca da API
-        const fetchData = async () => {
-            try {
-                const response = await axios.get(`/api/get_reservation?token=${token}`);
-                const fetchedData = JSON.parse(response.data.requestBody);
+        // Se for hóspede principal e existir no sessionStorage, usa os dados de lá
+        if (isMainGuest && mainGuestID) {
+            const storedMainGuestData = sessionStorage.getItem(mainGuestID);
+            if (storedMainGuestData) {
+                const guestInfo = JSON.parse(storedMainGuestData)[0];
 
-                setData(fetchedData);
-                setSalutation(fetchedData.protelSalutation || "");
-                setBirthDate(fetchedData.birthDate || "");
-                setNationality(fetchedData.nationality || "");
-                setCountry(fetchedData.country || "");
-                setEmail(fetchedData.email || "");
-                setPhone(fetchedData.protelGuestPhone || "");
-                setMobile(fetchedData.protelGuestMobilePhone || "");
-                setDocNo(fetchedData.identificationDocument || "");
-                setIdentificationDocument(fetchedData.protelDocType || "");
-                setDocumentExpirationDate(fetchedData.documentExpirationDate || "");
-                setDocumentIssueDate(fetchedData.documentIssueDate || "");
-                setBirthCountry(fetchedData.protelAddress || "");
-                setVatNo(fetchedData.vatNo || "");
-                setStreetAddress(fetchedData.streetAddress || "");
-                setPostalCode(fetchedData.postalCode || "");
-                setCity(fetchedData.city || "");
-                setFirstName(fetchedData.protelGuestFirstName || "");
-                setLastName(fetchedData.protelGuestLastName || "");
-                setMainGuestID(fetchData.protelGuestID || "");
-            } catch (err) {
-                console.error(err);
-                setError("Erro ao buscar os dados da reserva");
+                setData(guestInfo);
+                setSalutation(guestInfo.protelSalution || "");
+                setBirthDate(guestInfo.birthDate || "");
+                setNationality(guestInfo.nationality || "");
+                setCountry(guestInfo.country || "");
+                setEmail(guestInfo.email || "");
+                setPhone(guestInfo.protelGuestPhone || "");
+                setMobile(guestInfo.protelGuestMobilePhone || "");
+                setDocNo(guestInfo.identificationDocument || "");
+                setIdentificationDocument(guestInfo.protelDocType || "");
+                setDocumentExpirationDate(guestInfo.documentExpirationDate || "");
+                setDocumentIssueDate(guestInfo.documentIssueDate || "");
+                setBirthCountry(guestInfo.birthCountry || "");
+                setVatNo(guestInfo.vatNo || "");
+                setStreetAddress(guestInfo.protelAddress || "");
+                setPostalCode(guestInfo.postalCode || "");
+                setCity(guestInfo.city || "");
+                setFirstName(guestInfo.protelGuestFirstName || "");
+                setLastName(guestInfo.protelGuestLastName || "");
+                return; // evita chamada à API
             }
-        };
-
-        fetchData();
+        }
     }, [router]);
 
 
@@ -281,30 +277,31 @@ export default function GuestProfile() {
             const response = await axios.post(url, {}, { headers });
 
             if (response.status === 200) {
-                // Atualiza sessionStorage se for hóspede adicional
-                if (isAdditionalGuest && selectedGuestID) {
-                    const updatedGuestData = {
-                        protelSalution: salutation,
-                        birthDate,
-                        nationality,
-                        country,
-                        email,
-                        protelGuestPhone: phone,
-                        protelGuestMobilePhone: mobile,
-                        identificationDocument: docNo,
-                        protelDocType: identificationDocument,
-                        documentExpirationDate,
-                        documentIssueDate,
-                        birthCountry,
-                        vatNo,
-                        protelAddress: streetAddress,
-                        postalCode,
-                        city,
-                        protelGuestFirstName: firstName,
-                        protelGuestLastName: lastName,
-                    };
+                const updatedGuestData = {
+                    protelSalution: salutation,
+                    birthDate,
+                    nationality,
+                    country,
+                    email,
+                    protelGuestPhone: phone,
+                    protelGuestMobilePhone: mobile,
+                    identificationDocument: docNo,
+                    protelDocType: identificationDocument,
+                    documentExpirationDate,
+                    documentIssueDate,
+                    birthCountry,
+                    vatNo,
+                    protelAddress: streetAddress,
+                    postalCode,
+                    city,
+                    protelGuestFirstName: firstName,
+                    protelGuestLastName: lastName,
+                };
             
-                    // Armazena como array, seguindo o formato original
+                // Atualiza sessionStorage conforme o tipo de hóspede
+                if (isMainGuest && mainGuestID) {
+                    sessionStorage.setItem(mainGuestID, JSON.stringify([updatedGuestData]));
+                } else if (isAdditionalGuest && selectedGuestID) {
                     sessionStorage.setItem(selectedGuestID, JSON.stringify([updatedGuestData]));
                 }
             
@@ -399,11 +396,9 @@ export default function GuestProfile() {
         if (guestName !== "Unknown guest") {
             setFirstName(data.protelGuestFirstName || "");
             setLastName(data.protelGuestLastName || "");
-            setMainGuestID(data.protelGuestID || ""); // Definir o mainGuestID corretamente
         } else {
             setFirstName(""); // Para o hóspede desconhecido
             setLastName("");  // Para o hóspede desconhecido
-            setMainGuestID(null);  // Caso seja um hóspede desconhecido
         }
     }, [data, guestName]);
 
@@ -528,9 +523,9 @@ export default function GuestProfile() {
                                     options={countryOptions}
                                     value={
                                         countryOptions.find(
-                                          option => option.value === country || option.label === country
+                                            option => option.value === country || option.label === country
                                         ) || null
-                                      }
+                                    }
                                     onChange={(selectedOption) => {
                                         setCountry(selectedOption.value);
                                         setCountryText(selectedOption.label);
@@ -624,9 +619,9 @@ export default function GuestProfile() {
                                     options={countryOptions}
                                     value={
                                         countryOptions.find(
-                                          option => option.value === birthCountry || option.label === birthCountry
+                                            option => option.value === birthCountry || option.label === birthCountry
                                         ) || null
-                                      }
+                                    }
                                     onChange={(selectedOption) => setBirthCountry(selectedOption.value)}
                                     isSearchable
                                     styles={customStyles}
