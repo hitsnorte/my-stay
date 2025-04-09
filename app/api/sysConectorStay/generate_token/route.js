@@ -10,7 +10,8 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const userEmail = body.email;
-    const profileID = body.protelGuestID; // <- Novo campo
+    const profileID = body.protelGuestID;
+    const expDate = body.protelValidUntil;
 
     // Validações
     if (!userEmail) {
@@ -23,6 +24,13 @@ export async function POST(request) {
     if (!profileID) {
       return new NextResponse(
         JSON.stringify({ error: "O campo 'protelGuestID' é obrigatório!" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!expDate) {
+      return new NextResponse(
+        JSON.stringify({ error: "O campo 'protelValidUntil' é obrigatório!" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
@@ -72,11 +80,26 @@ export async function POST(request) {
       sendingPort,
       resNo,
       mpeHotel,
-      profileID, // <- Adicionado ao token
+      profileID,
       uniqueId,
     };
 
-    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
+    // Converter expDate para objeto Date
+    const [datePart, timePart] = expDate.split(" ");
+    const [day, month, year] = datePart.split("/").map(Number);
+    const [hours, minutes, seconds] = timePart.split(":").map(Number);
+    const expirationDate = new Date(year, month - 1, day, hours, minutes, seconds);
+    const now = new Date();
+    const expiresInSeconds = Math.floor((expirationDate - now) / 1000);
+
+    if (expiresInSeconds <= 0) {
+      return new NextResponse(
+        JSON.stringify({ error: "Data de validade expirada ou inválida" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: expiresInSeconds });
     const link = `https://stay.mypms.pt/reservation/reservation?token=${token}`;
     // const link = `http://localhost:3000/reservation/reservation?token=${token}`;
 
