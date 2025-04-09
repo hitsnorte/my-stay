@@ -23,6 +23,7 @@ function ReservationContent() {
     const [stayRecord, setStayRecord] = useState("");
     const [profileID, setProfileID] = useState(null);
     const [mainGuestData, setMainGuestData] = useState(null);
+    const [guestsFetched, setGuestsFetched] = useState(false);
 
     useEffect(() => {
         // Recupera o token da URL
@@ -74,32 +75,32 @@ function ReservationContent() {
         const fetchGuestData = async () => {
             try {
                 const token = sessionStorage.getItem("reservationToken");
-
+    
                 if (!token || !data?.protelGuestID) {
                     console.warn("Token ou protelGuestID ausente.");
                     return;
                 }
-
+    
                 const response = await axios.get(
                     `/api/sysConectorStay/get_guests?reservationToken=${token}&protelGuestID=${data.protelGuestID}`
                 );
-
+    
                 const guestData = response.data;
-
-                // Salva cada hóspede retornado no sessionStorage com a key do profileID
+    
                 Object.keys(guestData).forEach((guestID) => {
                     sessionStorage.setItem(guestID, JSON.stringify(guestData[guestID]));
                 });
-
+    
                 console.log("Hóspedes armazenados no sessionStorage:", guestData);
-
+                setGuestsFetched(true); // <- novo aqui
+    
             } catch (error) {
                 console.error("Erro ao buscar dados dos hóspedes:", error);
             }
         };
-
+    
         fetchGuestData();
-    }, [data?.protelGuestID]); // dispara sempre que esse ID mudar
+    }, [data?.protelGuestID]);    
 
     // Função para converter a string de data para um formato correto
     const parseDate = (dateStr) => {
@@ -131,13 +132,13 @@ function ReservationContent() {
     const checkOut = formatDate(checkOutDate);
 
     useEffect(() => {
-        if (profileID && data) {
+        if (profileID && guestsFetched) {
             const storedGuest = sessionStorage.getItem(profileID);
             if (storedGuest) {
                 try {
                     const guestArray = JSON.parse(storedGuest);
                     if (Array.isArray(guestArray) && guestArray.length > 0) {
-                        setMainGuestData(guestArray[0]); // pega o primeiro (único)
+                        setMainGuestData(guestArray[0]);
                     }
                 } catch (err) {
                     console.error("Erro ao processar dados do hóspede principal:", err);
@@ -146,7 +147,7 @@ function ReservationContent() {
                 console.warn("Nenhum hóspede encontrado no sessionStorage para o profileID:", profileID);
             }
         }
-    }, [profileID, data]); 
+    }, [profileID, guestsFetched]);    
 
     return (
         <main className="bg-[#F7F0F5] min-h-screen w-full">
