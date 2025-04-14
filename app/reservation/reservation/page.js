@@ -75,32 +75,32 @@ function ReservationContent() {
         const fetchGuestData = async () => {
             try {
                 const token = sessionStorage.getItem("reservationToken");
-    
+
                 if (!token || !data?.protelGuestID) {
                     console.warn("Token ou protelGuestID ausente.");
                     return;
                 }
-    
+
                 const response = await axios.get(
                     `/api/sysConectorStay/get_guests?reservationToken=${token}&protelGuestID=${data.protelGuestID}`
                 );
-    
+
                 const guestData = response.data;
-    
+
                 Object.keys(guestData).forEach((guestID) => {
                     sessionStorage.setItem(guestID, JSON.stringify(guestData[guestID]));
                 });
-    
+
                 console.log("Hóspedes armazenados no sessionStorage:", guestData);
                 setGuestsFetched(true); // <- novo aqui
-    
+
             } catch (error) {
                 console.error("Erro ao buscar dados dos hóspedes:", error);
             }
         };
-    
+
         fetchGuestData();
-    }, [data?.protelGuestID]);    
+    }, [data?.protelGuestID]);
 
     // Função para converter a string de data para um formato correto
     const parseDate = (dateStr) => {
@@ -147,7 +147,7 @@ function ReservationContent() {
                 console.warn("Nenhum hóspede encontrado no sessionStorage para o profileID:", profileID);
             }
         }
-    }, [profileID, guestsFetched]);    
+    }, [profileID, guestsFetched]);
 
     return (
         <main className="bg-[#F7F0F5] min-h-screen w-full">
@@ -162,7 +162,9 @@ function ReservationContent() {
                     </div>
                     <div className="flex flex-col justify-center items-center">
                         <h1 className="text-2xl font-bold flex justify-center mt-4">
-                            {mainGuestData ? `${mainGuestData.protelGuestFirstName} ${mainGuestData.protelGuestLastName}` : "Carregando..."}
+                            {mainGuestData
+                                ? `${mainGuestData.protelGuestFirstName} ${mainGuestData.protelGuestLastName}`
+                                : `${data.protelGuestFirstName} ${data.protelGuestLastName}`}
                         </h1>
                         <div className="flex flex-row gap-4 items-center mt-4">
                             <div className="flex flex-row items-center font-bold">

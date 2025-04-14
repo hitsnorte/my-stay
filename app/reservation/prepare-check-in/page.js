@@ -19,6 +19,10 @@ export default function PrepareCheckIn() {
     const router = useRouter();
 
     const [propertyID, setPropertyID] = useState(null);
+    const [profileID, setProfileID] = useState(null);
+    const [guestsFetched, setGuestsFetched] = useState(false);
+    const [mainGuestData, setMainGuestData] = useState(null);
+    const [allGuestData, setAllGuestData] = useState([]);
 
     useEffect(() => {
         const token = sessionStorage.getItem("reservationToken");
@@ -34,8 +38,9 @@ export default function PrepareCheckIn() {
             decodedToken = jwtDecode(token);
             if (decodedToken?.propertyID && decodedToken?.resNo) {
                 setPropertyID(decodedToken.propertyID);
-            } else {
-                console.error("PropertyID ou ReservationID não encontrados no token!");
+            }
+            if (decodedToken?.profileID) {
+                setProfileID(decodedToken.profileID);
             }
         } catch (error) {
             console.error("Erro ao decodificar o token:", error);
@@ -63,23 +68,131 @@ export default function PrepareCheckIn() {
             alert("Você precisa adicionar a assinatura antes de continuar.");
             return;
         }
-    
+
         if (!data || !propertyID) return;
-    
+
         console.log("Dados a serem enviados:", propertyID, data.protelReservationID, data.protelMpeHotel);
-    
+
         try {
             await axios.post("/api/sysConectorStay/precheckin", {
                 protelReservationID: data.protelReservationID,
                 protelMpeHotel: data.protelMpeHotel,
-                propertyID: propertyID 
+                propertyID: propertyID
             });
             alert("Dados enviados com sucesso!");
         } catch (err) {
             console.error("Erro ao enviar dados para o precheckin:", err);
             alert("Ocorreu um erro ao salvar.");
         }
-    };    
+    };
+
+    useEffect(() => {
+        const fetchGuestData = async () => {
+            try {
+                const token = sessionStorage.getItem("reservationToken");
+
+                if (!token || !data?.protelGuestID) {
+                    console.warn("Token ou protelGuestID ausente.");
+                    return;
+                }
+
+                const response = await axios.get(
+                    `/api/sysConectorStay/get_guests?reservationToken=${token}&protelGuestID=${data.protelGuestID}`
+                );
+
+                const guestData = response.data;
+
+                Object.keys(guestData).forEach((guestID) => {
+                    sessionStorage.setItem(guestID, JSON.stringify(guestData[guestID]));
+                });
+
+                setGuestsFetched(true);
+            } catch (error) {
+                console.error("Erro ao buscar dados dos hóspedes:", error);
+            }
+        };
+
+        if (data?.protelGuestID) {
+            fetchGuestData();
+        }
+    }, [data?.protelGuestID]);
+
+    useEffect(() => {
+        if (profileID && guestsFetched) {
+            const guestList = [];
+            let mainGuestFound = false;
+
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                try {
+                    const guest = JSON.parse(sessionStorage.getItem(key));
+                    if (Array.isArray(guest) && guest.length > 0) {
+                        const g = guest[0];
+                        guestList.push({ id: key, ...g });
+
+                        if (key === profileID) {
+                            setMainGuestData(g);
+                            mainGuestFound = true;
+                        }
+                    }
+                } catch (err) {
+                    // Não fazer nada, pode ser outro valor
+                }
+            }
+
+            setAllGuestData(guestList);
+            if (!mainGuestFound) {
+                console.warn("Hóspede principal não encontrado no sessionStorage.");
+            }
+        }
+    }, [profileID, guestsFetched]);
+
+    const handleGuestClick = (guestFullName) => {
+        sessionStorage.setItem("selectedGuestName", guestFullName);
+
+        const mainGuestFullName = `${data.protelGuestFirstName} ${data.protelGuestLastName}`;
+
+        if (guestFullName === "Unknown guest") {
+            sessionStorage.removeItem("selectedGuestID");
+            sessionStorage.setItem("selectedGuestType", "unknown");
+            router.push("./guest-profile");
+            return;
+        }
+
+        if (guestFullName === mainGuestFullName) {
+            sessionStorage.removeItem("selectedGuestID");
+            sessionStorage.setItem("selectedGuestType", "main");
+            router.push("./guest-profile");
+            return;
+        }
+
+        // Caso seja um hóspede adicional
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key !== "reservationToken" && key !== "selectedGuestName" && key !== "selectedGuestType") {
+                try {
+                    const guestArray = JSON.parse(sessionStorage.getItem(key));
+                    if (Array.isArray(guestArray)) {
+                        const guest = guestArray[0];
+                        const fullName = `${guest.protelGuestFirstName} ${guest.protelGuestLastName}`;
+                        if (fullName === guestFullName) {
+                            sessionStorage.setItem("selectedGuestID", key);
+                            sessionStorage.setItem("selectedGuestType", "additional");
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Erro ao ler hóspede do sessionStorage", e);
+                }
+            }
+        }
+
+        router.push("./guest-profile");
+    };
+
+    const totalGuests = parseInt(data?.adult || 0) + parseInt(data?.child || 0);
+    const completedGuests = allGuestData.length;
+    const isComplete = completedGuests >= totalGuests;
 
     return (
         <main>
@@ -102,31 +215,34 @@ export default function PrepareCheckIn() {
                             <FaUsers size={30} color="#e6ac27" />
                             <div className="flex flex-row gap-2 items-center">
                                 <p className="font-bold text-xl text-[#e6ac27]">Guests</p>
-                                <p className={`text-xs`}>(Incomplete)</p>
+                                <p className="text-xs">({isComplete ? "Complete" : "Incomplete"})</p>
                             </div>
                         </div>
+
                         <p>By entering some of your personal and payment data in advance we will be able to check you in much faster and more comfortably on the day of your arrival.</p>
+
                         <div>
-                            {(parseInt(data.adult) + parseInt(data.child)) === 1 ? (
-                                <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4">
-                                    <p>{data.salutation} {data.protelGuestName}</p>
-                                    <MdArrowForwardIos />
-                                </div>
-                            ) : (
-                                <div>
-                                    <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white">
-                                        <p>{data.salutation} {data.protelGuestName}</p>
+                            {[...Array(totalGuests)].map((_, index) => {
+                                const guest = allGuestData[index];
+                                const guestFullName = guest
+                                    ? `${guest.protelGuestFirstName || ""} ${guest.protelGuestLastName || ""}`
+                                    : "Unknown guest";
+
+                                return (
+                                    <div
+                                        key={index}
+                                        className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white cursor-pointer"
+                                        onClick={() => handleGuestClick(guestFullName)}
+                                    >
+                                        <p>
+                                            {guest
+                                                ? `${guest.protelsalutation || ""} ${guest.protelGuestFirstName || ""} ${guest.protelGuestLastName || ""}`
+                                                : "Unknown guest"}
+                                        </p>
                                         <MdArrowForwardIos />
                                     </div>
-
-                                    {[...Array(parseInt(data.adult) + parseInt(data.child) - 1)].map((_, index) => (
-                                        <div key={index} className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white">
-                                            <p>Unknown guest</p>
-                                            <MdArrowForwardIos />
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                                );
+                            })}
                         </div>
                         <div className="flex flex-row items-center gap-2 mt-10">
                             <FaRegCreditCard size={30} color="#e6ac27" />

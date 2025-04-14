@@ -30,13 +30,16 @@ const encryptData = (data) => {
     return AES.encrypt(JSON.stringify(data), secretKey).toString();
 };
 
-
 export default function ReservationInfo() {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
     const router = useRouter();
     const [showQRCode, setShowQRCode] = useState(false);
     const [additionalGuests, setAdditionalGuests] = useState([]);
+    const [encryptedData, setEncryptedData] = useState(null); // Estado para armazenar dados criptografados
+    const [requestID, setRequestID] = useState(null);
+    const [propertyID, setPropertyID] = useState(null);
+    const [mainGuestData, setMainGuestData] = useState(null);
 
     useEffect(() => {
         // Recupera o token do sessionStorage
@@ -48,27 +51,45 @@ export default function ReservationInfo() {
             return;
         }
 
+        // Decodificando o token para obter requestID e propertyID
+        try {
+            const tokenData = JSON.parse(atob(token.split('.')[1])); // Decodificando um JWT (caso seja JWT)
+            setRequestID(tokenData.requestID);
+            setPropertyID(tokenData.propertyID);
+        } catch (err) {
+            console.error("Erro ao decodificar o token", err);
+        }
+
         const fetchData = async () => {
             try {
                 const response = await axios.get(`/api/get_reservation?token=${token}`);
-                setData(JSON.parse(response.data.requestBody));
+                const reservationData = JSON.parse(response.data.requestBody);
+                setData(reservationData);
+
+                // Gerar dados criptografados após os dados de reserva estarem carregados
+                const encrypted = encryptData({
+                    email: "internaluser@gmail.com",
+                    password: "123",
+                    resNo: reservationData?.protelReservationID,
+                    profileID: reservationData?.protelGuestID,
+                    propertyID: propertyID, // Agora usamos o propertyID extraído do token
+                    requestID: requestID, // Agora usamos o requestID extraído do token
+                });
+                setEncryptedData(encrypted); // Atualiza o estado com os dados criptografados
             } catch (err) {
                 setError("Erro ao buscar os dados da reserva");
             }
         };
 
         fetchData();
-    }, [router]);
+    }, [router, requestID, propertyID]); // As dependências agora incluem requestID e propertyID
 
     useEffect(() => {
         const fetchGuestData = async () => {
+            if (!data?.protelGuestID) return;
+
             try {
                 const token = sessionStorage.getItem("reservationToken");
-
-                if (!token || !data?.protelGuestID) {
-                    console.warn("Token ou protelGuestID ausente.");
-                    return;
-                }
 
                 const response = await axios.get(
                     `/api/sysConectorStay/get_guests?reservationToken=${token}&protelGuestID=${data.protelGuestID}`
@@ -82,7 +103,6 @@ export default function ReservationInfo() {
                 });
 
                 console.log("Hóspedes armazenados no sessionStorage:", guestData);
-
             } catch (error) {
                 console.error("Erro ao buscar dados dos hóspedes:", error);
             }
@@ -91,39 +111,59 @@ export default function ReservationInfo() {
         fetchGuestData();
     }, [data?.protelGuestID]); // dispara sempre que esse ID mudar
 
+
     useEffect(() => {
         if (!data || !data.protelGuestID) return;
-    
+
         const mainGuestID = data.protelGuestID.toString();
         const storedGuests = [];
-    
+
         for (let i = 0; i < sessionStorage.length; i++) {
-          const key = sessionStorage.key(i);
-    
-          // Ignorar o token, guest selecionado e o hóspede principal
-          if (
-            key !== "reservationToken" &&
-            key !== "selectedGuestName" &&
-            key !== mainGuestID
-          ) {
-            try {
-              const guestArray = JSON.parse(sessionStorage.getItem(key));
-              if (Array.isArray(guestArray) && guestArray.length > 0) {
-                storedGuests.push(guestArray[0]); // só o primeiro item do array
-              }
-            } catch (err) {
-              console.warn("Erro ao parsear guest no sessionStorage:", err);
+            const key = sessionStorage.key(i);
+
+            if (
+                key !== "reservationToken" &&
+                key !== "selectedGuestName" &&
+                key !== mainGuestID
+            ) {
+                try {
+                    const guestArray = JSON.parse(sessionStorage.getItem(key));
+                    if (Array.isArray(guestArray) && guestArray.length > 0) {
+                        storedGuests.push(guestArray[0]);
+                    }
+                } catch (err) {
+                    console.warn("Erro ao parsear guest no sessionStorage:", err);
+                }
             }
-          }
         }
-    
+
         setAdditionalGuests(storedGuests);
-      }, [data]);
-    
-      if (!data) return null;
-    
-      const totalGuests = parseInt(data.adult) + parseInt(data.child);
-      const remainingUnknowns = totalGuests - 1 - additionalGuests.length;
+    }, [data]);
+
+    useEffect(() => {
+        if (data?.protelGuestID) {
+            const mainGuestID = data.protelGuestID.toString();
+            const storedGuest = sessionStorage.getItem(mainGuestID);
+
+            if (storedGuest) {
+                try {
+                    const guestArray = JSON.parse(storedGuest);
+                    if (Array.isArray(guestArray) && guestArray.length > 0) {
+                        setMainGuestData(guestArray[0]);
+                    }
+                } catch (err) {
+                    console.error("Erro ao processar dados do hóspede principal:", err);
+                }
+            } else {
+                console.warn("Nenhum dado encontrado no sessionStorage para o mainGuestID:", mainGuestID);
+            }
+        }
+    }, [data?.protelGuestID]);
+
+    if (!data) return null;
+
+    const totalGuests = parseInt(data.adult) + parseInt(data.child);
+    const remainingUnknowns = totalGuests - 1 - additionalGuests.length;
 
     // Função para converter a string de data para um formato correto
     const parseDate = (dateStr) => {
@@ -154,31 +194,29 @@ export default function ReservationInfo() {
     const checkIn = formatDate(checkInDate);
     const checkOut = formatDate(checkOutDate);
 
-    // Função para verificar se é o "Unknown guest" ou o nome real
-    // const handleGuestClick = (guestName) => {
-    //     // Armazena o nome do hóspede ou "Unknown guest" no sessionStorage
-    //     sessionStorage.setItem("selectedGuestName", guestName);
-    //     router.push("./guest-profile");
-    // };
+    const handleQRCodeClick = () => {
+        setShowQRCode(true);
+    };
+
     const handleGuestClick = (guestFullName) => {
         sessionStorage.setItem("selectedGuestName", guestFullName);
-    
+
         const mainGuestFullName = `${data.protelGuestFirstName} ${data.protelGuestLastName}`;
-    
+
         if (guestFullName === "Unknown guest") {
             sessionStorage.removeItem("selectedGuestID");
             sessionStorage.setItem("selectedGuestType", "unknown");
             router.push("./guest-profile");
             return;
         }
-    
+
         if (guestFullName === mainGuestFullName) {
             sessionStorage.removeItem("selectedGuestID");
             sessionStorage.setItem("selectedGuestType", "main");
             router.push("./guest-profile");
             return;
         }
-    
+
         // Caso seja um hóspede adicional
         for (let i = 0; i < sessionStorage.length; i++) {
             const key = sessionStorage.key(i);
@@ -199,43 +237,9 @@ export default function ReservationInfo() {
                 }
             }
         }
-    
+
         router.push("./guest-profile");
-    };    
-    
-
-    // const handleGuestClick = async (guestName) => {
-    //     try {
-    //         const response = await axios.get(`/api/sysConectorStay/get_guests?id=${data.protelGuestID}`);
-
-    //         // Armazena os dados retornados no sessionStorage (ou state/context dependendo do seu fluxo)
-    //         sessionStorage.setItem("selectedGuestData", JSON.stringify(response.data));
-    //         sessionStorage.setItem("selectedGuestName", guestName);
-
-    //         // Redireciona após o sucesso da requisição
-    //         router.push("./guest-profile");
-    //     } catch (err) {
-    //         console.error("Erro ao buscar dados do hóspede:", err);
-    //         alert("Erro ao buscar informações do hóspede.");
-    //     }
-    // };  
-
-    const handleQRCodeClick = () => {
-        setShowQRCode(true);
     };
-
-    // Dados a serem criptografados
-    const reservationData = {
-        email: "internaluser@gmail.com",
-        password: "123",
-        resNo: data?.protelReservationID,
-        profileID: data?.protelGuestID,
-        propertyID: 1,
-        requestID: 49
-    };
-
-    // Dados criptografados
-    const encryptedData = encryptData(reservationData);
 
     return (
         <main>
@@ -255,7 +259,11 @@ export default function ReservationInfo() {
                     </div>
                     <div className="flex flex-col pl-92 pr-92 main-page">
                         <div className="flex flex-col justify-center items-center">
-                            <h1 className="text-2xl font-bold flex justify-center mt-4">{data.protelGuestFirstName} {data.protelGuestLastName}</h1>
+                            <h1 className="text-2xl font-bold flex justify-center mt-4">
+                                {mainGuestData
+                                    ? `${mainGuestData.protelGuestFirstName} ${mainGuestData.protelGuestLastName}`
+                                    : `${data.protelGuestFirstName} ${data.protelGuestLastName}`}
+                            </h1>
                             <div className="flex flex-row gap-4 items-center mt-4">
                                 <div className="flex flex-row items-center font-bold">
                                     <p className="text-5xl">{checkIn.day}</p>

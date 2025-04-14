@@ -71,6 +71,60 @@ export async function POST(request) {
     const { propertyServer, propertyPort, propertyID, replyEmail, replyPassword, sendingServer, sendingPort } = property;
     const uniqueId = uuidv4();
 
+    // Função para transformar os dados recebidos para o novo formato
+    function transformDataToNewFormat(data) {
+      return [
+        {
+          GuestInfo: [
+            {
+              Address: [
+                {
+                  City: data.city || "",
+                  Region: "", // Se precisar de algo mais, pode pegar do 'data'
+                  Street: data.protelAddress || "",
+                  Country: data.country || "Portugal", // Valor padrão "Portugal"
+                  PostalCode: data.postalCode || "",
+                },
+              ],
+              Contacts: [
+                {
+                  Email: data.email || "", // Usando o email que você recebeu
+                  VatNo: data.vatNo || "", // Valor recebido ou string vazia
+                  PhoneNumber: `+351 ${data.protelGuestPhone || ""}`, // Formato de telefone +351
+                },
+              ],
+              PersonalID: [
+                {
+                  Issue: "", // Preencher se necessário
+                  NrDoc: data.protelBookingID || "", // Pode substituir com o número de reserva
+                  ExpDate: data.documentExpirationDate || "", // Data de expiração do documento
+                  DateOfBirth: data.birthDate || "", // Data de nascimento
+                  Nationality: data.nationality || "Portugal", // Nacionalidade
+                  CountryOfBirth: data.birthCountry || "Portugal", // País de nascimento
+                },
+              ],
+            },
+          ],
+        },
+      ];
+    }
+
+    const transformedData = transformDataToNewFormat(body);
+
+    // Inserção na tabela requestRecordsArrivals com dados transformados
+    const requestRecord = await prisma.requestRecordsArrivals.create({
+      data: {
+        requestBody: transformedData, // Usando o novo formato transformado
+        requestType: request.method,
+        requestDateTime: new Date(),
+        responseStatus: "PENDING",
+        responseBody: JSON.stringify({ message: "E-mail será enviado", link: "" }),
+        propertyID: propertyID,
+      },
+    });
+
+    const requestID = requestRecord.requestID; // Pegando o requestID gerado
+
     // Payload do token com o novo parâmetro
     const payload = {
       propertyTag,
@@ -82,6 +136,7 @@ export async function POST(request) {
       mpeHotel,
       profileID,
       uniqueId,
+      requestID, // Adicionando requestID ao payload
     };
 
     // Converter expDate para objeto Date
@@ -100,10 +155,10 @@ export async function POST(request) {
     }
 
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: expiresInSeconds });
+    // const link = `http://localhost:3001/reservation/reservation?token=${token}`;
     const link = `https://stay.mypms.pt/reservation/reservation?token=${token}`;
-    // const link = `http://localhost:3000/reservation/reservation?token=${token}`;
 
-    // Inserção no banco
+    // Inserção no banco stayRecords
     const stayRecord = await prisma.stayRecords.create({
       data: {
         requestBody: JSON.stringify(body),
@@ -116,7 +171,7 @@ export async function POST(request) {
       },
     });
 
-    // Email setup
+    // Configuração do envio de e-mail
     const transporter = nodemailer.createTransport({
       host: sendingServer,
       port: sendingPort,
