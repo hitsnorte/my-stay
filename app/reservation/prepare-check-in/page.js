@@ -23,7 +23,7 @@ export default function PrepareCheckIn() {
     const [guestsFetched, setGuestsFetched] = useState(false);
     const [mainGuestData, setMainGuestData] = useState(null);
     const [allGuestData, setAllGuestData] = useState([]);
-
+    const [additionalGuests, setAdditionalGuests] = useState([]);
     useEffect(() => {
         const token = sessionStorage.getItem("reservationToken");
 
@@ -147,30 +147,103 @@ export default function PrepareCheckIn() {
         }
     }, [profileID, guestsFetched]);
 
-    const handleGuestClick = (protelGuestID) => {
-        const mainGuestID = sessionStorage.getItem("mainGuestID");
-    
-        if (protelGuestID === "unknown") {
+    useEffect(() => {
+        if (!data || !data.protelGuestID) return;
+
+        const mainGuestID = data.protelGuestID.toString();
+        const storedGuests = [];
+
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+
+            if (
+                key !== "reservationToken" &&
+                key !== "selectedGuestName" &&
+                key !== mainGuestID
+            ) {
+                try {
+                    const guestArray = JSON.parse(sessionStorage.getItem(key));
+                    if (Array.isArray(guestArray) && guestArray.length > 0) {
+                        storedGuests.push(guestArray[0]);
+                    }
+                } catch (err) {
+                    console.warn("Erro ao parsear guest no sessionStorage:", err);
+                }
+            }
+        }
+
+        setAdditionalGuests(storedGuests);
+    }, [data]);
+
+    useEffect(() => {
+        if (data?.protelGuestID) {
+            const mainGuestID = data.protelGuestID.toString();
+            const storedGuest = sessionStorage.getItem(mainGuestID);
+
+            if (storedGuest) {
+                try {
+                    const guestArray = JSON.parse(storedGuest);
+                    if (Array.isArray(guestArray) && guestArray.length > 0) {
+                        setMainGuestData(guestArray[0]);
+                    }
+                } catch (err) {
+                    console.error("Erro ao processar dados do hóspede principal:", err);
+                }
+            } else {
+                console.warn("Nenhum dado encontrado no sessionStorage para o mainGuestID:", mainGuestID);
+            }
+        }
+    }, [data?.protelGuestID]);
+
+    if (!data) return null;
+
+    const totalGuests = parseInt(data.adult) + parseInt(data.child);
+    const remainingUnknowns = totalGuests - 1 - additionalGuests.length;
+
+    const handleGuestClick = (guestFullName) => {
+        sessionStorage.setItem("selectedGuestName", guestFullName);
+
+        const mainGuestFullName = `${data.protelGuestFirstName} ${data.protelGuestLastName}`;
+
+        if (guestFullName === "Unknown guest") {
             sessionStorage.removeItem("selectedGuestID");
             sessionStorage.setItem("selectedGuestType", "unknown");
             router.push("./guest-profile");
             return;
         }
-    
-        sessionStorage.setItem("selectedGuestID", protelGuestID);
-    
-        if (protelGuestID.toString() === mainGuestID) {
-            sessionStorage.setItem("selectedGuestType", "main");
-        } else {
-            sessionStorage.setItem("selectedGuestType", "additional");
-        }
-    
-        router.push("./guest-profile");
-    };    
 
-    const totalGuests = parseInt(data?.adult || 0) + parseInt(data?.child || 0);
-    const completedGuests = allGuestData.length;
-    const isComplete = completedGuests >= totalGuests;
+        if (guestFullName === mainGuestFullName) {
+            sessionStorage.removeItem("selectedGuestID");
+            sessionStorage.setItem("selectedGuestType", "main");
+            router.push("./guest-profile");
+            return;
+        }
+
+        // Caso seja um hóspede adicional
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key !== "reservationToken" && key !== "selectedGuestName" && key !== "selectedGuestType") {
+                try {
+                    const guestArray = JSON.parse(sessionStorage.getItem(key));
+                    if (Array.isArray(guestArray)) {
+                        const guest = guestArray[0];
+                        const fullName = `${guest.protelGuestFirstName} ${guest.protelGuestLastName}`;
+                        if (fullName === guestFullName) {
+                            sessionStorage.setItem("selectedGuestID", key);
+                            sessionStorage.setItem("selectedGuestType", "additional");
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Erro ao ler hóspede do sessionStorage", e);
+                }
+            }
+        }
+
+        router.push("./guest-profile");
+    };
+
+    // const isComplete = completedGuests >= totalGuests;
 
     return (
         <main>
@@ -193,7 +266,7 @@ export default function PrepareCheckIn() {
     <FaUsers size={30} color="#e6ac27" />
     <div className="flex flex-row gap-2 items-center">
         <p className="font-bold text-xl text-[#e6ac27]">Guests</p>
-        <p className="text-xs">({isComplete ? "Complete" : "Incomplete"})</p>
+        {/* <p className="text-xs">({isComplete ? "Complete" : "Incomplete"})</p> */}
     </div>
 </div>
 
@@ -201,45 +274,41 @@ export default function PrepareCheckIn() {
 
 <div className="flex flex-col">
     {/* Hóspede principal */}
-{mainGuestData && (
-    <div
-        className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white cursor-pointer"
-        onClick={() => handleGuestClick(mainGuestData.protelGuestID)}
-    >
-        <p>
-            {`${mainGuestData.protelsalutation || ""} ${mainGuestData.protelGuestFirstName || ""} ${mainGuestData.protelGuestLastName || ""}`}
-        </p>
-        <MdArrowForwardIos />
-    </div>
-)}
+    <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4 border-b-2 border-white">
+                                <p>{data.protelGuestFirstName} {data.protelGuestLastName}</p>
+                                <MdArrowForwardIos
+                                    onClick={() =>
+                                        handleGuestClick(`${data.protelGuestFirstName} ${data.protelGuestLastName}`)
+                                    }
+                                />
+                            </div>
 
-{/* Hóspedes adicionais */}
-{allGuestData
-    .filter((g) => g.id !== profileID)
-    .map((guest, index) => (
-        <div
-            key={guest.id || index}
-            className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white cursor-pointer"
-            onClick={() => handleGuestClick(guest.protelGuestID)}
-        >
-            <p>
-                {`${guest.protelsalutation || ""} ${guest.protelGuestFirstName || ""} ${guest.protelGuestLastName || ""}`}
-            </p>
-            <MdArrowForwardIos />
-        </div>
-    ))}
+                            {/* Hóspedes com dados do sessionStorage */}
+                            {additionalGuests.map((guest, index) => (
+                                <div
+                                    key={guest.protelGuestID || index}
+                                    className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white"
+                                >
+                                    <p>{guest.protelGuestFirstName} {guest.protelGuestLastName}</p>
+                                    <MdArrowForwardIos
+                                        onClick={() =>
+                                            handleGuestClick(`${guest.protelGuestFirstName} ${guest.protelGuestLastName}`)
+                                        }
+                                    />
+                                </div>
+                            ))}
 
-{/* Unknown guests */}
-{[...Array(totalGuests - allGuestData.length)].map((_, index) => (
-    <div
-        key={`unknown-${index}`}
-        className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white cursor-pointer"
-        onClick={() => handleGuestClick("unknown")}
-    >
-        <p>Unknown guest</p>
-        <MdArrowForwardIos />
-    </div>
-))}
+                            {/* Unknown guests restantes */}
+                            {remainingUnknowns > 0 &&
+                                [...Array(remainingUnknowns)].map((_, index) => (
+                                    <div
+                                        key={`unknown-${index}`}
+                                        className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white"
+                                    >
+                                        <p>Unknown guest</p>
+                                        <MdArrowForwardIos onClick={() => handleGuestClick("Unknown guest")} />
+                                    </div>
+                                ))}
 </div>
                         <div className="flex flex-row items-center gap-2 mt-10">
                             <FaRegCreditCard size={30} color="#e6ac27" />
