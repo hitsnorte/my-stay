@@ -149,31 +149,27 @@ export default function PrepareCheckIn() {
 
     const handleGuestClick = (guestFullName) => {
         sessionStorage.setItem("selectedGuestName", guestFullName);
-    
+
         const mainGuestFullName = `${data.protelGuestFirstName} ${data.protelGuestLastName}`;
-    
+
         if (guestFullName === "Unknown guest") {
             sessionStorage.removeItem("selectedGuestID");
             sessionStorage.setItem("selectedGuestType", "unknown");
             router.push("./guest-profile");
             return;
         }
-    
+
         if (guestFullName === mainGuestFullName) {
             sessionStorage.removeItem("selectedGuestID");
             sessionStorage.setItem("selectedGuestType", "main");
             router.push("./guest-profile");
             return;
         }
-    
+
         // Caso seja um hóspede adicional
         for (let i = 0; i < sessionStorage.length; i++) {
             const key = sessionStorage.key(i);
-            if (
-                key !== "reservationToken" &&
-                key !== "selectedGuestName" &&
-                key !== "selectedGuestType"
-            ) {
+            if (key !== "reservationToken" && key !== "selectedGuestName" && key !== "selectedGuestType") {
                 try {
                     const guestArray = JSON.parse(sessionStorage.getItem(key));
                     if (Array.isArray(guestArray)) {
@@ -182,8 +178,7 @@ export default function PrepareCheckIn() {
                         if (fullName === guestFullName) {
                             sessionStorage.setItem("selectedGuestID", key);
                             sessionStorage.setItem("selectedGuestType", "additional");
-                            router.push("./guest-profile");
-                            return;
+                            break;
                         }
                     }
                 } catch (e) {
@@ -191,7 +186,9 @@ export default function PrepareCheckIn() {
                 }
             }
         }
-    };    
+
+        router.push("./guest-profile");
+    }; 
 
     const totalGuests = parseInt(data?.adult || 0) + parseInt(data?.child || 0);
     const completedGuests = allGuestData.length;
@@ -215,38 +212,61 @@ export default function PrepareCheckIn() {
                     <div className="flex flex-col pl-92 pr-92 mt-4 main-page">
                         <p className="font-bold text-xl text-[#e6ac27]">Your check-in</p>
                         <div className="flex flex-row items-center gap-2 mt-10 mb-2">
-                            <FaUsers size={30} color="#e6ac27" />
-                            <div className="flex flex-row gap-2 items-center">
-                                <p className="font-bold text-xl text-[#e6ac27]">Guests</p>
-                                <p className="text-xs">({isComplete ? "Complete" : "Incomplete"})</p>
-                            </div>
-                        </div>
+    <FaUsers size={30} color="#e6ac27" />
+    <div className="flex flex-row gap-2 items-center">
+        <p className="font-bold text-xl text-[#e6ac27]">Guests</p>
+        <p className="text-xs">({isComplete ? "Complete" : "Incomplete"})</p>
+    </div>
+</div>
 
-                        <p>By entering some of your personal and payment data in advance we will be able to check you in much faster and more comfortably on the day of your arrival.</p>
+<p>By entering some of your personal and payment data in advance we will be able to check you in much faster and more comfortably on the day of your arrival.</p>
 
-                        <div>
-                            {[...Array(totalGuests)].map((_, index) => {
-                                const guest = allGuestData[index];
-                                const guestFullName = guest
-                                    ? `${guest.protelGuestFirstName || ""} ${guest.protelGuestLastName || ""}`
-                                    : "Unknown guest";
+<div className="flex flex-col">
+    {/* Hóspede principal */}
+    {mainGuestData && (
+        <div
+            className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white cursor-pointer"
+            onClick={() =>
+                handleGuestClick(`${mainGuestData.protelGuestFirstName} ${mainGuestData.protelGuestLastName}`)
+            }
+        >
+            <p>
+                {`${mainGuestData.protelsalutation || ""} ${mainGuestData.protelGuestFirstName || ""} ${mainGuestData.protelGuestLastName || ""}`}
+            </p>
+            <MdArrowForwardIos />
+        </div>
+    )}
 
-                                return (
-                                    <div
-                                        key={index}
-                                        className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white cursor-pointer"
-                                        onClick={() => handleGuestClick(guestFullName)}
-                                    >
-                                        <p>
-                                            {guest
-                                                ? `${guest.protelsalutation || ""} ${guest.protelGuestFirstName || ""} ${guest.protelGuestLastName || ""}`
-                                                : "Unknown guest"}
-                                        </p>
-                                        <MdArrowForwardIos />
-                                    </div>
-                                );
-                            })}
-                        </div>
+    {/* Hóspedes adicionais */}
+    {allGuestData
+        .filter((g) => g.id !== profileID)
+        .map((guest, index) => (
+            <div
+                key={guest.id || index}
+                className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white cursor-pointer"
+                onClick={() =>
+                    handleGuestClick(`${guest.protelGuestFirstName} ${guest.protelGuestLastName}`)
+                }
+            >
+                <p>
+                    {`${guest.protelsalutation || ""} ${guest.protelGuestFirstName || ""} ${guest.protelGuestLastName || ""}`}
+                </p>
+                <MdArrowForwardIos />
+            </div>
+        ))}
+
+    {/* Unknown guests restantes */}
+    {[...Array(totalGuests - allGuestData.length)].map((_, index) => (
+        <div
+            key={`unknown-${index}`}
+            className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 border-b-2 border-white cursor-pointer"
+            onClick={() => handleGuestClick("Unknown guest")}
+        >
+            <p>Unknown guest</p>
+            <MdArrowForwardIos />
+        </div>
+    ))}
+</div>
                         <div className="flex flex-row items-center gap-2 mt-10">
                             <FaRegCreditCard size={30} color="#e6ac27" />
                             <div className="flex flex-row gap-2 items-center">
