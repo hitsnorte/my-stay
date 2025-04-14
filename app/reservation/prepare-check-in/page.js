@@ -149,27 +149,31 @@ export default function PrepareCheckIn() {
 
     const handleGuestClick = (guestFullName) => {
         sessionStorage.setItem("selectedGuestName", guestFullName);
-
+    
         const mainGuestFullName = `${data.protelGuestFirstName} ${data.protelGuestLastName}`;
-
+    
         if (guestFullName === "Unknown guest") {
             sessionStorage.removeItem("selectedGuestID");
             sessionStorage.setItem("selectedGuestType", "unknown");
             router.push("./guest-profile");
             return;
         }
-
+    
         if (guestFullName === mainGuestFullName) {
             sessionStorage.removeItem("selectedGuestID");
             sessionStorage.setItem("selectedGuestType", "main");
             router.push("./guest-profile");
             return;
         }
-
+    
         // Caso seja um hóspede adicional
         for (let i = 0; i < sessionStorage.length; i++) {
             const key = sessionStorage.key(i);
-            if (key !== "reservationToken" && key !== "selectedGuestName" && key !== "selectedGuestType") {
+            if (
+                key !== "reservationToken" &&
+                key !== "selectedGuestName" &&
+                key !== "selectedGuestType"
+            ) {
                 try {
                     const guestArray = JSON.parse(sessionStorage.getItem(key));
                     if (Array.isArray(guestArray)) {
@@ -178,7 +182,8 @@ export default function PrepareCheckIn() {
                         if (fullName === guestFullName) {
                             sessionStorage.setItem("selectedGuestID", key);
                             sessionStorage.setItem("selectedGuestType", "additional");
-                            break;
+                            router.push("./guest-profile");
+                            return;
                         }
                     }
                 } catch (e) {
@@ -186,9 +191,7 @@ export default function PrepareCheckIn() {
                 }
             }
         }
-
-        router.push("./guest-profile");
-    };
+    };    
 
     const totalGuests = parseInt(data?.adult || 0) + parseInt(data?.child || 0);
     const completedGuests = allGuestData.length;
