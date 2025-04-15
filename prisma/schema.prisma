@@ -41,6 +41,8 @@ model properties {
   sendingServer            String?           @db.VarChar(2048)
   sendingPort              Int?
   infoEmail                String?           @db.VarChar(255)
+  emailBody                String?           @default("") @db.VarChar(1055)
+  emailSubject             String?           @default("") @db.VarChar(255)
   usersProperties          usersProperties[]
 }
 

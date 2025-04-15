@@ -88,67 +88,42 @@ export default function GuestProfile() {
 
     const [mainGuestID, setMainGuestID] = useState(null);
 
-    useEffect(() => {
-        const init = async () => {
-            const storedGuestName = sessionStorage.getItem("selectedGuestName");
-            const selectedGuestID = sessionStorage.getItem("selectedGuestID");
-            const token = sessionStorage.getItem("reservationToken");
+    const init = async () => {
+        const storedGuestName = sessionStorage.getItem("selectedGuestName");
+        const selectedGuestID = sessionStorage.getItem("selectedGuestID");
+        const selectedGuestType = sessionStorage.getItem("selectedGuestType"); // 👈 pega o tipo
+        const token = sessionStorage.getItem("reservationToken");
     
-            if (storedGuestName) {
-                setGuestName(storedGuestName);
-            } else {
-                setGuestName("Unknown guest");
-            }
+        if (storedGuestName) {
+            setGuestName(storedGuestName);
+        } else {
+            setGuestName("Unknown guest");
+        }
     
-            if (!token) {
-                router.push("/");
-                return;
-            }
+        if (!token) {
+            router.push("/");
+            return;
+        }
     
-            let decodedToken = null;
-            try {
-                decodedToken = jwtDecode(token);
-                if (decodedToken?.propertyID && decodedToken?.resNo && decodedToken?.profileID) {
-                    setPropertyID(decodedToken.propertyID);
-                    setReservationID(decodedToken.resNo);
-                    setMainGuestID(decodedToken.profileID);
+        let decodedToken = null;
+        try {
+            decodedToken = jwtDecode(token);
+            if (decodedToken?.propertyID && decodedToken?.resNo && decodedToken?.profileID) {
+                setPropertyID(decodedToken.propertyID);
+                setReservationID(decodedToken.resNo);
+                setMainGuestID(decodedToken.profileID);
     
-                    const mainData = sessionStorage.getItem(decodedToken.profileID);
-                    if (mainData) {
-                        const guestInfo = JSON.parse(mainData)[0];
+                // 🔄 Decide quem carregar: principal ou adicional
+                let guestDataRaw = null;
     
-                        setData(guestInfo);
-                        setSalutation(guestInfo.protelSalution || "");
-                        setBirthDate(guestInfo.birthDate || "");
-                        setNationality(guestInfo.nationality || "");
-                        setCountry(guestInfo.country || "");
-                        setEmail(guestInfo.email || "");
-                        setPhone(guestInfo.protelGuestPhone || "");
-                        setMobile(guestInfo.protelGuestMobilePhone || "");
-                        setDocNo(guestInfo.identificationDocument || "");
-                        setIdentificationDocument(guestInfo.protelDocType || "");
-                        setDocumentExpirationDate(guestInfo.documentExpirationDate || "");
-                        setDocumentIssueDate(guestInfo.documentIssueDate || "");
-                        setBirthCountry(guestInfo.birthCountry || "");
-                        setVatNo(guestInfo.vatNo || "");
-                        setStreetAddress(guestInfo.protelAddress || "");
-                        setPostalCode(guestInfo.postalCode || "");
-                        setCity(guestInfo.city || "");
-                        setFirstName(guestInfo.protelGuestFirstName || "");
-                        setLastName(guestInfo.protelGuestLastName || "");
-                        return; // Evita chamada abaixo se for hóspede principal com dados
-                    }
+                if (selectedGuestType === "additional" && selectedGuestID) {
+                    guestDataRaw = sessionStorage.getItem(selectedGuestID);
+                } else {
+                    guestDataRaw = sessionStorage.getItem(decodedToken.profileID); // default para principal
                 }
-            } catch (error) {
-                console.error("Erro ao decodificar o token:", error);
-            }
     
-            // Se não for hóspede principal, tenta carregar dados do adicional
-            const isUnknownGuest = storedGuestName === "Unknown guest";
-            if (!isUnknownGuest && selectedGuestID) {
-                const guestData = JSON.parse(sessionStorage.getItem(selectedGuestID));
-                if (guestData) {
-                    const guestInfo = guestData[0];
+                if (guestDataRaw) {
+                    const guestInfo = JSON.parse(guestDataRaw)[0];
     
                     setData(guestInfo);
                     setSalutation(guestInfo.protelSalution || "");
@@ -169,18 +144,19 @@ export default function GuestProfile() {
                     setCity(guestInfo.city || "");
                     setFirstName(guestInfo.protelGuestFirstName || "");
                     setLastName(guestInfo.protelGuestLastName || "");
-                    return;
                 } else {
-                    console.warn("selectedGuestID definido, mas dados não encontrados no sessionStorage.");
+                    console.warn("Dados do hóspede não encontrados no sessionStorage.");
                 }
             }
-        };
-    
+        } catch (error) {
+            console.error("Erro ao decodificar o token:", error);
+        }
+    };
+
+    useEffect(() => {
         init();
     }, [router]);
     
-
-
     const renderGuestData = (field, formatDateFlag = false) => {
         if (guestName === "Unknown guest") return "";
 

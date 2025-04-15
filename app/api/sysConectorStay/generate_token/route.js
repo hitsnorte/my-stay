@@ -58,6 +58,8 @@ export async function POST(request) {
         replyPassword: true,
         sendingServer: true,
         sendingPort: true,
+        emailBody: true,
+        emailSubject: true,
       },
     });
 
@@ -68,7 +70,7 @@ export async function POST(request) {
       );
     }
 
-    const { propertyServer, propertyPort, propertyID, replyEmail, replyPassword, sendingServer, sendingPort } = property;
+    const { propertyServer, propertyPort, propertyID, replyEmail, replyPassword, sendingServer, sendingPort, emailBody, emailSubject } = property;
     const uniqueId = uuidv4();
 
     // Função para transformar os dados recebidos para o novo formato
@@ -155,8 +157,8 @@ export async function POST(request) {
     }
 
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: expiresInSeconds });
-    // const link = `http://localhost:3001/reservation/reservation?token=${token}`;
-    const link = `https://stay.mypms.pt/reservation/reservation?token=${token}`;
+    const link = `http://localhost:3001/reservation/reservation?token=${token}`;
+    // const link = `https://stay.mypms.pt/reservation/reservation?token=${token}`;
 
     // Inserção no banco stayRecords
     const stayRecord = await prisma.stayRecords.create({
@@ -182,9 +184,9 @@ export async function POST(request) {
     const mailOptions = {
       from: `Reserva Confirmada <${replyEmail}>`,
       to: userEmail,
-      subject: "Confirmação de Reserva",
-      text: `Clique no link para confirmar sua reserva: ${link}`,
-      html: `<p>Clique no link para confirmar sua reserva: <a href="${link}">MyStay</a></p>`,
+      subject: `${emailSubject}`,
+      text: `${emailBody} ${link}`,
+      html: `<p>${emailBody} <a href="${link}">MyStay</a></p>`,
     };
 
     await transporter.sendMail(mailOptions);

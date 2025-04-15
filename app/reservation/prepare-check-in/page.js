@@ -263,18 +263,18 @@ export default function PrepareCheckIn() {
                     <div className="flex flex-col pl-92 pr-92 mt-4 main-page">
                         <p className="font-bold text-xl text-[#e6ac27]">Your check-in</p>
                         <div className="flex flex-row items-center gap-2 mt-10 mb-2">
-    <FaUsers size={30} color="#e6ac27" />
-    <div className="flex flex-row gap-2 items-center">
-        <p className="font-bold text-xl text-[#e6ac27]">Guests</p>
-        {/* <p className="text-xs">({isComplete ? "Complete" : "Incomplete"})</p> */}
-    </div>
-</div>
+                            <FaUsers size={30} color="#e6ac27" />
+                            <div className="flex flex-row gap-2 items-center">
+                                <p className="font-bold text-xl text-[#e6ac27]">Guests</p>
+                                {/* <p className="text-xs">({isComplete ? "Complete" : "Incomplete"})</p> */}
+                            </div>
+                        </div>
 
-<p>By entering some of your personal and payment data in advance we will be able to check you in much faster and more comfortably on the day of your arrival.</p>
+                        <p>By entering some of your personal and payment data in advance we will be able to check you in much faster and more comfortably on the day of your arrival.</p>
 
-<div className="flex flex-col">
-    {/* Hóspede principal */}
-    <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4 border-b-2 border-white">
+                        <div className="flex flex-col">
+                            {/* Hóspede principal */}
+                            <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4 border-b-2 border-white">
                                 <p>{data.protelGuestFirstName} {data.protelGuestLastName}</p>
                                 <MdArrowForwardIos
                                     onClick={() =>
@@ -309,7 +309,7 @@ export default function PrepareCheckIn() {
                                         <MdArrowForwardIos onClick={() => handleGuestClick("Unknown guest")} />
                                     </div>
                                 ))}
-</div>
+                        </div>
                         <div className="flex flex-row items-center gap-2 mt-10">
                             <FaRegCreditCard size={30} color="#e6ac27" />
                             <div className="flex flex-row gap-2 items-center">
@@ -317,9 +317,9 @@ export default function PrepareCheckIn() {
                                 <p className="text-xs">(Optional)</p>
                             </div>
                         </div>
-                        <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4">
-                            <p>Add credit card</p>
-                            <MdArrowForwardIos />
+                        <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4 opacity-50 cursor-not-allowed pointer-events-none">
+                            <p className="text-gray-600">Add credit card</p>
+                            <MdArrowForwardIos className="text-gray-600" />
                         </div>
                         <div className="flex flex-row items-center gap-2 mt-10">
                             <FaFileSignature size={30} color="#e6ac27" />
