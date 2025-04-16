@@ -252,11 +252,16 @@ export default function PrepareCheckIn() {
             ) : data ? (
                 <>
                     <div className="bg-[#8F857D] flex flex-row items-center h-12 pl-64 pr-64 header">
-                        <IoChevronBackOutline
+                    <IoChevronBackOutline
                             size={20}
                             color="white"
                             className="cursor-pointer"
-                            onClick={() => router.push("./reservation")}
+                            onClick={() => {
+                                const token = sessionStorage.getItem("reservationToken");
+                                if (token) {
+                                    router.push(`./reservation?token=${token}`);
+                                }
+                            }}
                         />
                         <p className="font-bold text-white flex-grow text-center">Prepare check-in</p>
                     </div>

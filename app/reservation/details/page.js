@@ -252,7 +252,12 @@ export default function ReservationInfo() {
                             size={20}
                             color="white"
                             className="cursor-pointer"
-                            onClick={() => router.push("./reservation")}
+                            onClick={() => {
+                                const token = sessionStorage.getItem("reservationToken");
+                                if (token) {
+                                    router.push(`./reservation?token=${token}`);
+                                }
+                            }}
                         />
                         <p className="font-bold text-white">Reservation {data.protelBookingID}</p>
                         <IoMdRefresh size={20} color="white" onClick={() => window.location.reload()} />
