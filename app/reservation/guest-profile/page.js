@@ -279,6 +279,7 @@ export default function GuestProfile() {
                 }
             
                 alert("Dados salvos com sucesso!");
+                router.push('/reservation/details');
             } else {
                 setError("Erro ao salvar os dados.");
             }            

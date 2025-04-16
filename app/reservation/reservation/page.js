@@ -75,32 +75,50 @@ function ReservationContent() {
         const fetchGuestData = async () => {
             try {
                 const token = sessionStorage.getItem("reservationToken");
-
+    
                 if (!token || !data?.protelGuestID) {
                     console.warn("Token ou protelGuestID ausente.");
                     return;
                 }
-
-                const response = await axios.get(
-                    `/api/sysConectorStay/get_guests?reservationToken=${token}&protelGuestID=${data.protelGuestID}`
-                );
-
-                const guestData = response.data;
-
-                Object.keys(guestData).forEach((guestID) => {
-                    sessionStorage.setItem(guestID, JSON.stringify(guestData[guestID]));
-                });
-
-                console.log("Hóspedes armazenados no sessionStorage:", guestData);
-                setGuestsFetched(true); // <- novo aqui
-
+    
+                // Função auxiliar para buscar e armazenar um hóspede
+                const fetchAndStoreGuest = async (guestID) => {
+                    try {
+                        const response = await axios.get(
+                            `/api/sysConectorStay/get_guests?reservationToken=${token}&protelGuestID=${guestID}`
+                        );
+                        const guestData = response.data;
+                        Object.keys(guestData).forEach((id) => {
+                            sessionStorage.setItem(id, JSON.stringify(guestData[id]));
+                        });
+                        console.log(`Hóspede ${guestID} armazenado no sessionStorage:`, guestData);
+                    } catch (err) {
+                        console.error(`Erro ao buscar dados do hóspede ${guestID}:`, err);
+                    }
+                };
+    
+                // Buscar dados do hóspede principal
+                await fetchAndStoreGuest(data.protelGuestID);
+    
+                // Se houver companions, buscar dados deles também
+                if (Array.isArray(data.companions) && data.companions.length > 0) {
+                    for (const companion of data.companions) {
+                        if (companion.protelGuestID) {
+                            await fetchAndStoreGuest(companion.protelGuestID);
+                        }
+                    }
+                }
+    
+                setGuestsFetched(true);
+    
             } catch (error) {
                 console.error("Erro ao buscar dados dos hóspedes:", error);
             }
         };
-
+    
         fetchGuestData();
-    }, [data?.protelGuestID]);
+    }, [data?.protelGuestID, data?.companions]);
+    
 
     // Função para converter a string de data para um formato correto
     const parseDate = (dateStr) => {
