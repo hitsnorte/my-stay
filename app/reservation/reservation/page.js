@@ -160,6 +160,7 @@ function ReservationContent() {
                         <p className="font-bold text-white">Reservation {data.protelBookingID}</p>
                         <IoMdRefresh size={20} color="white" onClick={() => window.location.reload()} />
                     </div>
+                    <p className="h-12 pl-64 pr-64 text-right -mb-5">en</p>
                     <div className="flex flex-col justify-center items-center">
                         <h1 className="text-2xl font-bold flex justify-center mt-4">
                             {mainGuestData

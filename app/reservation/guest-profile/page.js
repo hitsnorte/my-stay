@@ -88,23 +88,25 @@ export default function GuestProfile() {
 
     const [mainGuestID, setMainGuestID] = useState(null);
 
+    const [propertyInfo, setPropertyInfo] = useState(null);
+
     const init = async () => {
         const storedGuestName = sessionStorage.getItem("selectedGuestName");
         const selectedGuestID = sessionStorage.getItem("selectedGuestID");
         const selectedGuestType = sessionStorage.getItem("selectedGuestType"); // 👈 pega o tipo
         const token = sessionStorage.getItem("reservationToken");
-    
+
         if (storedGuestName) {
             setGuestName(storedGuestName);
         } else {
             setGuestName("Unknown guest");
         }
-    
+
         if (!token) {
             router.push("/");
             return;
         }
-    
+
         let decodedToken = null;
         try {
             decodedToken = jwtDecode(token);
@@ -112,19 +114,19 @@ export default function GuestProfile() {
                 setPropertyID(decodedToken.propertyID);
                 setReservationID(decodedToken.resNo);
                 setMainGuestID(decodedToken.profileID);
-    
+
                 // 🔄 Decide quem carregar: principal ou adicional
                 let guestDataRaw = null;
-    
+
                 if (selectedGuestType === "additional" && selectedGuestID) {
                     guestDataRaw = sessionStorage.getItem(selectedGuestID);
                 } else {
                     guestDataRaw = sessionStorage.getItem(decodedToken.profileID); // default para principal
                 }
-    
+
                 if (guestDataRaw) {
                     const guestInfo = JSON.parse(guestDataRaw)[0];
-    
+
                     setData(guestInfo);
                     setSalutation(guestInfo.protelSalution || "");
                     setBirthDate(guestInfo.birthDate || "");
@@ -156,7 +158,35 @@ export default function GuestProfile() {
     useEffect(() => {
         init();
     }, [router]);
-    
+
+    // Esse useEffect chama a API quando propertyID estiver definido
+    useEffect(() => {
+        const fetchPropertyInfo = async () => {
+            try {
+                const response = await fetch("/api/get_property_info", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ propertyID }),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erro ao buscar informações da propriedade");
+                }
+
+                const data = await response.json();
+                setPropertyInfo(data); // ou trate os dados conforme necessário
+            } catch (error) {
+                console.error("Erro ao buscar informações da propriedade:", error);
+            }
+        };
+
+        if (propertyID) {
+            fetchPropertyInfo();
+        }
+    }, [propertyID]);
+
     const renderGuestData = (field, formatDateFlag = false) => {
         if (guestName === "Unknown guest") return "";
 
@@ -270,18 +300,18 @@ export default function GuestProfile() {
                     protelGuestFirstName: firstName,
                     protelGuestLastName: lastName,
                 };
-            
+
                 // Atualiza sessionStorage conforme o tipo de hóspede
                 if (isMainGuest && mainGuestID) {
                     sessionStorage.setItem(mainGuestID, JSON.stringify([updatedGuestData]));
                 } else if (isAdditionalGuest && selectedGuestID) {
                     sessionStorage.setItem(selectedGuestID, JSON.stringify([updatedGuestData]));
                 }
-            
+
                 alert("Dados salvos com sucesso!");
             } else {
                 setError("Erro ao salvar os dados.");
-            }            
+            }
         } catch (err) {
             setError("Erro ao enviar os dados. Tente novamente.");
         }
@@ -621,7 +651,9 @@ export default function GuestProfile() {
                             <BsShieldLockFill size={30} color="#e6ac27" />
                             <p className="font-bold text-xl text-[#e6ac27]">Privacy</p>
                         </div>
-                        <p>PLEASE CUSTOMIZE: Add a short paragraph with your information regarding marketing and/or data processing here.</p>
+                        <p>
+                            {propertyInfo?.hotelTermsEN || ""}
+                        </p>
 
                         {/* First Switch */}
                         <div className="flex items-center mt-4">
