@@ -33,13 +33,17 @@ function ReservationContent() {
     // Novo estado para o idioma
     const [locale, setLocale] = useState("en");
 
-    // Carrega o idioma ao montar o componente
-    useEffect(() => {
-        // Verifica se há mainGuest no sessionStorage
-        const mainGuestData = sessionStorage.getItem("mainGuest");
-        if (mainGuestData) {
+  // Carrega o idioma ao montar o componente
+useEffect(() => {
+    // 1. Pega o ID do main guest
+    const mainGuestID = sessionStorage.getItem("mainGuestID");
+
+    if (mainGuestID) {
+        // 2. Usa o ID para buscar o JSON do guest
+        const guestDataRaw = sessionStorage.getItem(mainGuestID);
+        if (guestDataRaw) {
             try {
-                const guest = JSON.parse(mainGuestData)[0];
+                const guest = JSON.parse(guestDataRaw)[0]; // array com um objeto
                 const guestLangID = guest.guestLanguageID;
 
                 if (guestLangID === 9) {
@@ -54,16 +58,17 @@ function ReservationContent() {
                     return;
                 }
             } catch (err) {
-                console.error("Erro ao processar mainGuest do sessionStorage:", err);
+                console.error("Erro ao processar os dados do guest:", err);
             }
         }
+    }
 
-        // Se não encontrou ou deu erro, carrega do localStorage
-        const savedLocale = localStorage.getItem("lang");
-        if (savedLocale && ["en", "pt"].includes(savedLocale)) {
-            setLocale(savedLocale);
-        }
-    }, []);
+    // 3. Se não encontrou no sessionStorage, tenta no localStorage
+    const savedLocale = localStorage.getItem("lang");
+    if (savedLocale && ["en", "pt"].includes(savedLocale)) {
+        setLocale(savedLocale);
+    }
+}, []);
 
     // Traduções com base no idioma
     const t = translations[locale];
