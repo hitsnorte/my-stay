@@ -427,16 +427,30 @@ export default function GuestProfile() {
         }
     }, [data, guestName]);
 
-    // Função para obter o código de país
-    const getCountryCode = (countryText) => {
+       // Função para obter o código de país
+       const getCountryCode = (countryText) => {
         return countryDialCodes[countryText] || '+351'; // Portugal como default
     };
 
-    // Garantir que o número tenha apenas o código do país uma vez
+    // Função para atualizar o número com o novo código de país
+    const updatePhoneWithNewDialCode = (newCountryText, currentPhone) => {
+        const dialCode = getCountryCode(newCountryText);
+        // Se o número já contiver um código de país, remove-o e adiciona o novo
+        const phoneWithoutDialCode = currentPhone.replace(/^\+\d{1,4}\s*/, '').trim();
+        return dialCode + ' ' + phoneWithoutDialCode;
+    };
+
+    // Quando o país mudar, atualiza o número de telefone e celular
+    useEffect(() => {
+        setPhone(updatePhoneWithNewDialCode(countryText, phone));
+        setMobile(updatePhoneWithNewDialCode(countryText, mobile));
+    }, [countryText]); // Atualiza quando o país mudar
+
+    // Função para manipular a mudança do telefone
     const handlePhoneChange = (e) => {
         let value = e.target.value;
         const dialCode = getCountryCode(countryText);
-
+        
         // Remover o código de país caso o usuário tente digitar novamente
         if (value.startsWith(dialCode)) {
             value = value.slice(dialCode.length).trim(); // Remove o código de país
@@ -445,10 +459,11 @@ export default function GuestProfile() {
         setPhone(dialCode + ' ' + value); // Adiciona o código de país apenas uma vez
     };
 
+    // Função para manipular a mudança do celular
     const handleMobileChange = (e) => {
         let value = e.target.value;
         const dialCode = getCountryCode(countryText);
-
+        
         // Remover o código de país caso o usuário tente digitar novamente
         if (value.startsWith(dialCode)) {
             value = value.slice(dialCode.length).trim(); // Remove o código de país
