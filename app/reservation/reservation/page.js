@@ -33,8 +33,32 @@ function ReservationContent() {
     // Novo estado para o idioma
     const [locale, setLocale] = useState("en");
 
-    // Carrega o idioma do localStorage na primeira renderização
+    // Carrega o idioma ao montar o componente
     useEffect(() => {
+        // Verifica se há mainGuest no sessionStorage
+        const mainGuestData = sessionStorage.getItem("mainGuest");
+        if (mainGuestData) {
+            try {
+                const guest = JSON.parse(mainGuestData)[0];
+                const guestLangID = guest.guestLanguageID;
+
+                if (guestLangID === 9) {
+                    setLocale("pt");
+                    localStorage.setItem("lang", "pt");
+                    localStorage.setItem("langCode", "9");
+                    return;
+                } else if (guestLangID === 1) {
+                    setLocale("en");
+                    localStorage.setItem("lang", "en");
+                    localStorage.setItem("langCode", "1");
+                    return;
+                }
+            } catch (err) {
+                console.error("Erro ao processar mainGuest do sessionStorage:", err);
+            }
+        }
+
+        // Se não encontrou ou deu erro, carrega do localStorage
         const savedLocale = localStorage.getItem("lang");
         if (savedLocale && ["en", "pt"].includes(savedLocale)) {
             setLocale(savedLocale);
@@ -44,13 +68,12 @@ function ReservationContent() {
     // Traduções com base no idioma
     const t = translations[locale];
 
+    // Quando o usuário troca de idioma manualmente
     const handleChangeLanguage = (e) => {
         const selectedLang = e.target.value;
         setLocale(selectedLang);
-
-        // Salva o idioma e seu código correspondente no localStorage
-        localStorage.setItem("lang", selectedLang); 
-        localStorage.setItem("langCode", selectedLang === "en" ? "1" : "9"); // "1" para "en", "9" para "pt"
+        localStorage.setItem("lang", selectedLang);
+        localStorage.setItem("langCode", selectedLang === "en" ? "1" : "9");
     };
 
     useEffect(() => {
