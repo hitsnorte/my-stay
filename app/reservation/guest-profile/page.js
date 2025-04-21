@@ -98,16 +98,16 @@ export default function GuestProfile() {
     const [propertyInfo, setPropertyInfo] = useState(null);
 
     const [locale, setLocale] = useState("en"); // Idioma padrão
-    
-        useEffect(() => {
-            // Verifica o idioma armazenado no localStorage ao carregar a página
-            const storedLang = localStorage.getItem("lang");
-            if (storedLang) {
-                setLocale(storedLang);
-            }
-        }, []);
-    
-        const t = translations[locale];
+
+    useEffect(() => {
+        // Verifica o idioma armazenado no localStorage ao carregar a página
+        const storedLang = localStorage.getItem("lang");
+        if (storedLang) {
+            setLocale(storedLang);
+        }
+    }, []);
+
+    const t = translations[locale];
 
     const init = async () => {
         const storedGuestName = sessionStorage.getItem("selectedGuestName");
@@ -427,13 +427,36 @@ export default function GuestProfile() {
         }
     }, [data, guestName]);
 
+    // Função para obter o código de país
     const getCountryCode = (countryText) => {
-        return countryDialCodes[countryText] || "+351"; // Se não encontrar o país, usa o código de Portugal como default
+        return countryDialCodes[countryText] || '+351'; // Portugal como default
     };
-    
-    const formattedPhone = phone ? `${getCountryCode(countryText)} ${phone}` : phone;
-    const formattedMobile = mobile ? `${getCountryCode(countryText)} ${mobile}` : mobile;
-    
+
+    // Garantir que o número tenha apenas o código do país uma vez
+    const handlePhoneChange = (e) => {
+        let value = e.target.value;
+        const dialCode = getCountryCode(countryText);
+
+        // Remover o código de país caso o usuário tente digitar novamente
+        if (value.startsWith(dialCode)) {
+            value = value.slice(dialCode.length).trim(); // Remove o código de país
+        }
+
+        setPhone(dialCode + ' ' + value); // Adiciona o código de país apenas uma vez
+    };
+
+    const handleMobileChange = (e) => {
+        let value = e.target.value;
+        const dialCode = getCountryCode(countryText);
+
+        // Remover o código de país caso o usuário tente digitar novamente
+        if (value.startsWith(dialCode)) {
+            value = value.slice(dialCode.length).trim(); // Remove o código de país
+        }
+
+        setMobile(dialCode + ' ' + value); // Adiciona o código de país apenas uma vez
+    };
+
     return (
         <main>
             {error ? (
@@ -585,8 +608,8 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.Contact.Phone}</p>
                                 <input
                                     type="text"
-                                    value={formattedPhone}
-                                    onChange={(e) => setPhone(e.target.value)}
+                                    value={phone}
+                                    onChange={handlePhoneChange}
                                     className="text-right focus:outline-none"
                                 />
                             </div>
@@ -594,8 +617,8 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.Contact.Mobile}</p>
                                 <input
                                     type="text"
-                                    value={formattedMobile}
-                                    onChange={(e) => setMobile(e.target.value)}
+                                    value={mobile}
+                                    onChange={handleMobileChange}
                                     className="text-right focus:outline-none"
                                 />
                             </div>
