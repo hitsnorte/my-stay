@@ -18,6 +18,8 @@ import Select from "react-select";
 import en from "../../../public/locales/english/common.json";
 import pt from "../../../public/locales/portuguesePT/common.json";
 
+import countryDialCodes from "@/lib/countryDialCodes.json";
+
 import "./style.css";
 
 const translations = { en, pt };
@@ -425,7 +427,13 @@ export default function GuestProfile() {
         }
     }, [data, guestName]);
 
-
+    const getCountryCode = (countryText) => {
+        return countryDialCodes[countryText] || "+351"; // Se não encontrar o país, usa o código de Portugal como default
+    };
+    
+    const formattedPhone = phone ? `${getCountryCode(countryText)} ${phone}` : phone;
+    const formattedMobile = mobile ? `${getCountryCode(countryText)} ${mobile}` : mobile;
+    
     return (
         <main>
             {error ? (
@@ -577,7 +585,7 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.Contact.Phone}</p>
                                 <input
                                     type="text"
-                                    value={phone}
+                                    value={formattedPhone}
                                     onChange={(e) => setPhone(e.target.value)}
                                     className="text-right focus:outline-none"
                                 />
@@ -586,7 +594,7 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.Contact.Mobile}</p>
                                 <input
                                     type="text"
-                                    value={mobile}
+                                    value={formattedMobile}
                                     onChange={(e) => setMobile(e.target.value)}
                                     className="text-right focus:outline-none"
                                 />
