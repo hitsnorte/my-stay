@@ -345,10 +345,16 @@ export default function GuestProfile() {
     };
 
     const fetchSalutation = async () => {
-        const response = await axios.get(`/api/sysConectorStay/get_salutation?propertyID=${propertyID}`);
+        const langCode = localStorage.getItem("langCode") || "1"; // fallback para "1" (en) se não houver
+        const response = await axios.get(`/api/sysConectorStay/get_salutation`, {
+            params: {
+                propertyID: propertyID,
+                langCode: langCode
+            }
+        });
         return response.data;
     };
-
+    
     const fetchDocType = async () => {
         const response = await axios.get(`/api/sysConectorStay/get_doc_type?propertyID=${propertyID}`);
         return response.data;

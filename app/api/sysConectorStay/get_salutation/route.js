@@ -7,6 +7,7 @@ export async function GET(request) {
     // Obtém os parâmetros da requisição (pode vir do client-side)
     const { searchParams } = new URL(request.url);
     const propertyID = searchParams.get("propertyID");
+    const langCode = searchParams.get("langCode"); // Novo
 
     if (!propertyID) {
       return new NextResponse(
@@ -39,7 +40,7 @@ export async function GET(request) {
 
     // Construir a URL da API externa
     const { propertyServer, propertyPortStay } = property;
-    const url = `http://${propertyServer}:${propertyPortStay}/salution`;
+    const url = `http://${propertyServer}:${propertyPortStay}/salution?landID=${langCode}`; 
 
     // Fazer a requisição para buscar as saudações
     const response = await axios.get(url, {

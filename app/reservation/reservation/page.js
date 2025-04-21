@@ -46,8 +46,11 @@ function ReservationContent() {
 
     const handleChangeLanguage = (e) => {
         const selectedLang = e.target.value;
-        setLocale(selectedLang); // Atualiza o estado
-        localStorage.setItem("lang", selectedLang); // Salva no localStorage
+        setLocale(selectedLang);
+
+        // Salva o idioma e seu código correspondente no localStorage
+        localStorage.setItem("lang", selectedLang); 
+        localStorage.setItem("langCode", selectedLang === "en" ? "1" : "9"); // "1" para "en", "9" para "pt"
     };
 
     useEffect(() => {
