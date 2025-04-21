@@ -13,9 +13,14 @@ import { MdQrCode2 } from "react-icons/md";
 
 import { QRCodeCanvas } from "qrcode.react";
 
+import en from "../../../public/locales/english/common.json";
+import pt from "../../../public/locales/portuguesePT/common.json";
+
 import "./style.css";
 
 import AES from "crypto-js/aes";
+
+const translations = { en, pt };
 
 // Função para criptografar os dados
 const encryptData = (data) => {
@@ -40,6 +45,18 @@ export default function ReservationInfo() {
     const [requestID, setRequestID] = useState(null);
     const [propertyID, setPropertyID] = useState(null);
     const [mainGuestData, setMainGuestData] = useState(null);
+
+    const [locale, setLocale] = useState("en"); // Idioma padrão
+
+    useEffect(() => {
+        // Verifica o idioma armazenado no localStorage ao carregar a página
+        const storedLang = localStorage.getItem("lang");
+        if (storedLang) {
+            setLocale(storedLang);
+        }
+    }, []);
+
+    const t = translations[locale];
 
     useEffect(() => {
         // Recupera o token do sessionStorage
@@ -259,7 +276,7 @@ export default function ReservationInfo() {
                                 }
                             }}
                         />
-                        <p className="font-bold text-white">Reservation {data.protelBookingID}</p>
+                        <p className="font-bold text-white">{t.Reservation.Reservation} {data.protelBookingID}</p>
                         <IoMdRefresh size={20} color="white" onClick={() => window.location.reload()} />
                     </div>
                     <div className="flex flex-col pl-92 pr-92 main-page">
@@ -277,7 +294,7 @@ export default function ReservationInfo() {
                                         <p>{checkIn.month}</p>
                                     </div>
                                 </div>
-                                <p>{numNights} Night(s)</p>
+                                <p>{numNights} {t.Reservation.Nights}</p>
                                 <div className="flex flex-row items-center font-bold">
                                     <div className="text-right">
                                         <p>{checkOut.weekDay}</p>
@@ -291,9 +308,9 @@ export default function ReservationInfo() {
                             {/* GUESTS */}
                             <div className="flex flex-row items-center gap-2">
                                 <FaUsers size={30} color="#e6ac27" />
-                                <p className="font-bold text-xl text-[#e6ac27]">Guests</p>
+                                <p className="font-bold text-xl text-[#e6ac27]">{t.Reservation.Details.Guests}</p>
                             </div>
-                            <p>Select a guest name to view guest information.</p>
+                            <p>{t.Reservation.Details.GuestsInfo}</p>
 
                             {/* Hóspede principal */}
                             <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4 border-b-2 border-white">
@@ -334,9 +351,9 @@ export default function ReservationInfo() {
                             {/* EXTRAS */}
                             <div className="flex flex-row items-center gap-2 mt-6">
                                 <TiDocumentAdd size={30} color="#e6ac27" />
-                                <p className="font-bold text-xl text-[#e6ac27]">Extras</p>
+                                <p className="font-bold text-xl text-[#e6ac27]">{t.Reservation.Details.Extras}</p>
                             </div>
-                            <p>Just go for that little extra something. Here is what we have got on offer for you.</p>
+                            <p>{t.Reservation.Details.ExtrasInfo}</p>
                             <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4">
                                 <p>Available Extras</p>
                                 <div className="flex flex-row justify-center items-center gap-2">
@@ -347,7 +364,7 @@ export default function ReservationInfo() {
                             {/* ROOM */}
                             <div className="flex flex-row items-center gap-2 mt-6">
                                 <FaBed size={26} color="#e6ac27" />
-                                <p className="font-bold text-xl text-[#e6ac27]">My room</p>
+                                <p className="font-bold text-xl text-[#e6ac27]">{t.Reservation.Details.Room}</p>
                             </div>
                             <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4">
                                 <p>Not yet assigned.</p>
@@ -355,10 +372,10 @@ export default function ReservationInfo() {
                             {/* QR CODE */}
                             <div className="flex flex-row items-center gap-2 mt-6">
                                 <MdQrCode2 size={26} color="#e6ac27" />
-                                <p className="font-bold text-xl text-[#e6ac27]">QR code</p>
+                                <p className="font-bold text-xl text-[#e6ac27]">{t.Reservation.Details.QrCode}</p>
                             </div>
-                            <p>Create a QR code containing your reservation information.</p>
-                            <p>Speed up your check in by having it scanned it at the reception desk.</p>
+                            <p>{t.Reservation.Details.QrCodeInfo1}</p>
+                            <p>{t.Reservation.Details.QrCodeInfo2}</p>
                             <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4" onClick={handleQRCodeClick}>
                                 <p>Show QR code</p>
                                 <MdArrowForwardIos />

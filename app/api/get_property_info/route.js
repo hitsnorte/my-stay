@@ -16,7 +16,7 @@ export async function POST(request) {
     }
 
     const property = await prisma.properties.findUnique({
-      where: { id: propertyID },
+      where: { propertyID: propertyID },
     });
 
     if (!property) {

@@ -1,0 +1,95 @@
+{
+    "Reservation": {
+        "Reservation": "Reserva",
+        "Nights": "Noite(s)",
+        "ContactUs": "Contacte-nos",
+        "CheckIn": "Prepare Check-In",
+        "CheckInInfo": "Faça check-in e descubra todas as funcionalidades",
+        "Details": {
+            "Guests": "Hospedes",
+            "GuestsInfo": "Selecione o nome de um hóspede para visualizar informações sobre ele.",
+            "Extras": "Extras",
+            "ExtrasInfo": "Aproveite aquele mimo extra. Aqui está o que temos para lhe oferecer.",
+            "Room": "O meu quarto",
+            "QrCode": "QR Code",
+            "QrCodeInfo1": "Crie um código QR contendo as informações da sua reserva.",
+            "QrCodeInfo2": "Acelere seu check-in escaneando-o na recepção."
+        }
+    },
+    "PrepareCheckIn": {
+        "Title": "Prepare o Check-In",
+        "YourCheckIn": "O seu check-in",
+        "Guests": "Hospedes",
+        "CheckInInfo": "Ao inserir alguns dos seus dados pessoais e de pagamento com antecedência, poderemos fazer o seu check-in muito mais rápido e confortável no dia da sua chegada.",
+        "PaymentData": "Dados de pagamento",
+        "CreditCard": "Adicionar cartão de crédito",
+        "Optional": "(Opcional)",
+        "Signature": "Assinatura",
+        "AddSignature": "Adicione a assinatura",
+        "Missing": "(Em falta)",
+        "Done": "(Submetida)",
+        "Save": "Guardar"
+    },
+    "GuestProfile": {
+        "Title": "Perfil do Hóspede",
+        "GuestDetails": {
+            "Title": "Detalhes do Hóspede",
+            "Salutation": "Tratamento",
+            "FirstName": "Primeiro Nome",
+            "LastName": "Último Nome",
+            "DateOfBirth": "Data de Nascimento",
+            "Nationality": "Nacionalidade"
+        },
+        "Address": {
+            "Title": "Morada",
+            "StreetAddress": "Morada",
+            "PostalCode": "Código-Postal",
+            "City": "Cidade",
+            "Country": "País"
+        },
+        "Contact": {
+            "Title": "Contactos",
+            "Email": "Email",
+            "Phone": "Telefone",
+            "Mobile": "Telemóvel"
+        },
+        "PersonalID": {
+            "Title": "Personal ID",
+            "DocumentType": "Tipo de documento",
+            "DocumentNumber": "Nrm. de documento",
+            "IssueDate": "Data de Emissão",
+            "ExpiracyDate": "Data de Validade",
+            "CountryOfBirth": "País de Nascimento"
+        },
+        "InvoiceData": {
+            "Title": "Dados da fatura",
+            "VatNo": "Nrm. contribuinte"
+        },
+        "Privacy": {
+            "Title": "Privacidade",
+            "Marketing": "Marketing",
+            "DataProcessing": "Processamento de Dados",
+            "PrivacyPolicy": "Clique aqui para abrir nossa política de privacidade.",
+            "Save": "Guardar"
+        }
+    },
+    "AddSignature": {
+        "Title": "Assinatura",
+        "SignBelow": "Assine em baixo",
+        "Save": "Guardar",
+        "Clear": "Apagar",
+        "SignatureSaved": "Assinatura guardada!"
+    },
+    "ContactUs": {
+        "Title": "Contacte-nos",
+        "ContactUs": "Contacte-nos",
+        "ContactUsInfo": "Como podemos melhorar a sua estadia? Tem algum desejo adicional?",
+        "ContactUsInfo2": "Não hesite em entrar em contato com a recepção para dúvidas ou solicitações.",
+        "ContactUsInfo3": "Insira seu endereço de e-mail para que possamos entrar em contato o mais breve possível.",
+        "Email": "Insira o seu email",
+        "TypeYourMessage": "Escreva a sua mensagem aqui...",
+        "Clear": "Apagar",
+        "Sending": "A enviar...",
+        "Send": "Enviar"
+    }
+}

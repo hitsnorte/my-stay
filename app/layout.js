@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { LanguageProvider } from "@/context/LanguageContext/page"; // Importando o LanguageProvider
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,10 +20,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <LanguageProvider>
+          {children}  {/* Envolvendo os filhos com o LanguageProvider */}
+        </LanguageProvider>
       </body>
     </html>
   );

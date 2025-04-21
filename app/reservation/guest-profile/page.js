@@ -15,7 +15,12 @@ import { jwtDecode } from "jwt-decode";
 
 import Select from "react-select";
 
+import en from "../../../public/locales/english/common.json";
+import pt from "../../../public/locales/portuguesePT/common.json";
+
 import "./style.css";
+
+const translations = { en, pt };
 
 // Função para formatar a data
 const formatDate = (dateStr) => {
@@ -89,6 +94,18 @@ export default function GuestProfile() {
     const [mainGuestID, setMainGuestID] = useState(null);
 
     const [propertyInfo, setPropertyInfo] = useState(null);
+
+    const [locale, setLocale] = useState("en"); // Idioma padrão
+    
+        useEffect(() => {
+            // Verifica o idioma armazenado no localStorage ao carregar a página
+            const storedLang = localStorage.getItem("lang");
+            if (storedLang) {
+                setLocale(storedLang);
+            }
+        }, []);
+    
+        const t = translations[locale];
 
     const init = async () => {
         const storedGuestName = sessionStorage.getItem("selectedGuestName");
@@ -309,7 +326,9 @@ export default function GuestProfile() {
                 }
 
                 alert("Dados salvos com sucesso!");
-                router.push('/reservation/details');
+                router.push('/reservation/details').then(() => {
+                    window.location.reload();
+                });
             } else {
                 setError("Erro ao salvar os dados.");
             }
@@ -420,17 +439,17 @@ export default function GuestProfile() {
                             className="cursor-pointer"
                             onClick={() => router.push("./details")}
                         />
-                        <p className="font-bold text-white flex-grow text-center">Guest Profile</p>
+                        <p className="font-bold text-white flex-grow text-center">{t.GuestProfile.Title}</p>
                     </div>
                     <div className="flex flex-col pl-110 pr-110 mt-8 main-page">
                         {/* GUEST DETAILS */}
                         <div className="flex flex-row items-center mb-4 gap-4">
                             <FaClipboardUser size={30} color="#e6ac27" />
-                            <p className="font-bold text-xl text-[#e6ac27]">Guest Details</p>
+                            <p className="font-bold text-xl text-[#e6ac27]">{t.GuestProfile.GuestDetails.Title}</p>
                         </div>
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Salutation</p>
+                                <p>{t.GuestProfile.GuestDetails.Salutation}</p>
                                 <Select
                                     options={salutationOptions}
                                     value={
@@ -445,7 +464,7 @@ export default function GuestProfile() {
                             </div>
 
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Last Name</p>
+                                <p>{t.GuestProfile.GuestDetails.LastName}</p>
                                 <input
                                     type="text"
                                     value={lastName}  // Usa diretamente o estado lastName
@@ -455,7 +474,7 @@ export default function GuestProfile() {
                             </div>
 
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>First Name</p>
+                                <p>{t.GuestProfile.GuestDetails.FirstName}</p>
                                 <input
                                     type="text"
                                     value={firstName}
@@ -464,7 +483,7 @@ export default function GuestProfile() {
                                 />
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Date of birth</p>
+                                <p>{t.GuestProfile.GuestDetails.DateOfBirth}</p>
                                 <input
                                     type="date"
                                     value={formatDate(birthDate)}
@@ -474,7 +493,7 @@ export default function GuestProfile() {
                             </div>
 
                             <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Nationality</p>
+                                <p>{t.GuestProfile.GuestDetails.Nationality}</p>
                                 <Select
                                     options={countryOptions}
                                     value={
@@ -491,11 +510,11 @@ export default function GuestProfile() {
                         {/* ADDRESS */}
                         <div className="flex flex-row items-center mb-4 mt-6 gap-4">
                             <FaLocationPin size={30} color="#e6ac27" />
-                            <p className="font-bold text-xl text-[#e6ac27]">Address</p>
+                            <p className="font-bold text-xl text-[#e6ac27]">{t.GuestProfile.Address.Title}</p>
                         </div>
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Street Address</p>
+                                <p>{t.GuestProfile.Address.StreetAddress}</p>
                                 <input
                                     type="text"
                                     value={streetAddress}
@@ -504,7 +523,7 @@ export default function GuestProfile() {
                                 />
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Zip Code</p>
+                                <p>{t.GuestProfile.Address.PostalCode}</p>
                                 <input
                                     type="text"
                                     value={postalCode}
@@ -513,7 +532,7 @@ export default function GuestProfile() {
                                 />
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>City</p>
+                                <p>{t.GuestProfile.Address.City}</p>
                                 <input
                                     type="text"
                                     value={city}
@@ -522,7 +541,7 @@ export default function GuestProfile() {
                                 />
                             </div>
                             <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Country</p>
+                                <p>{t.GuestProfile.Address.Country}</p>
                                 <Select
                                     options={countryOptions}
                                     value={
@@ -542,11 +561,11 @@ export default function GuestProfile() {
                         {/* COMMUNICATION */}
                         <div className="flex flex-row items-center mb-4 mt-6 gap-4">
                             <MdEmail size={30} color="#e6ac27" />
-                            <p className="font-bold text-xl text-[#e6ac27]">Contacts</p>
+                            <p className="font-bold text-xl text-[#e6ac27]">{t.GuestProfile.Contact.Title}</p>
                         </div>
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Email</p>
+                                <p>{t.GuestProfile.Contact.Email}</p>
                                 <input
                                     type="text"
                                     value={email}
@@ -555,7 +574,7 @@ export default function GuestProfile() {
                                 />
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Phone</p>
+                                <p>{t.GuestProfile.Contact.Phone}</p>
                                 <input
                                     type="text"
                                     value={phone}
@@ -564,7 +583,7 @@ export default function GuestProfile() {
                                 />
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Mobile</p>
+                                <p>{t.GuestProfile.Contact.Mobile}</p>
                                 <input
                                     type="text"
                                     value={mobile}
@@ -576,11 +595,11 @@ export default function GuestProfile() {
                         {/* PERSONAL ID */}
                         <div className="flex flex-row items-center mb-4 mt-6 gap-4">
                             <MdEmail size={30} color="#e6ac27" />
-                            <p className="font-bold text-xl text-[#e6ac27]">Personal ID</p>
+                            <p className="font-bold text-xl text-[#e6ac27]">{t.GuestProfile.PersonalID.Title}</p>
                         </div>
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Document type</p>
+                                <p>{t.GuestProfile.PersonalID.DocumentType}</p>
                                 <Select
                                     options={docTypeOptions}
                                     value={docTypeOptions.find(option => option.value === identificationDocument) || null} // Garantir que está usando 'value'
@@ -591,7 +610,7 @@ export default function GuestProfile() {
 
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Document no.</p>
+                                <p>{t.GuestProfile.PersonalID.DocumentNumber}</p>
                                 <input
                                     type="text"
                                     value={docNo}
@@ -600,7 +619,7 @@ export default function GuestProfile() {
                                 />
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Issue date</p>
+                                <p>{t.GuestProfile.PersonalID.IssueDate}</p>
                                 <input
                                     type="date"
                                     value={formatDate(documentIssueDate)}
@@ -609,7 +628,7 @@ export default function GuestProfile() {
                                 />
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Expiry date</p>
+                                <p>{t.GuestProfile.PersonalID.ExpiracyDate}</p>
                                 <input
                                     type="date"
                                     value={formatDate(documentExpirationDate)}
@@ -618,7 +637,7 @@ export default function GuestProfile() {
                                 />
                             </div>
                             <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>Country of birth</p>
+                                <p>{t.GuestProfile.PersonalID.CountryOfBirth}</p>
                                 <Select
                                     options={countryOptions}
                                     value={
@@ -635,10 +654,10 @@ export default function GuestProfile() {
                         {/* INVOICE DATA */}
                         <div className="flex flex-row items-center mb-4 mt-6 gap-4">
                             <MdEmail size={30} color="#e6ac27" />
-                            <p className="font-bold text-xl text-[#e6ac27]">Invoice Data</p>
+                            <p className="font-bold text-xl text-[#e6ac27]">{t.GuestProfile.InvoiceData.Title}</p>
                         </div>
                         <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                            <p>Vat No</p>
+                            <p>{t.GuestProfile.InvoiceData.VatNo}</p>
                             <input
                                 type="text"
                                 value={vatNo}
@@ -650,7 +669,7 @@ export default function GuestProfile() {
                         {/* PRIVACY */}
                         <div className="flex flex-row items-center mb-4 mt-6 gap-4">
                             <BsShieldLockFill size={30} color="#e6ac27" />
-                            <p className="font-bold text-xl text-[#e6ac27]">Privacy</p>
+                            <p className="font-bold text-xl text-[#e6ac27]">{t.GuestProfile.Privacy.Title}</p>
                         </div>
                         <p>
                             {propertyInfo?.hotelTermsEN || ""}
@@ -667,7 +686,7 @@ export default function GuestProfile() {
                                     className={`${enabledMarketing ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition`}
                                 />
                             </Switch>
-                            <span className="ml-4">CUSTOMIZE: Marketing</span>
+                            <span className="ml-4">{t.GuestProfile.Privacy.Marketing}</span>
                         </div>
 
                         {/* Second Switch */}
@@ -681,15 +700,15 @@ export default function GuestProfile() {
                                     className={`${enabledDataP ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition`}
                                 />
                             </Switch>
-                            <span className="ml-4">CUSTOMIZE: Data Processing</span>
+                            <span className="ml-4">{t.GuestProfile.Privacy.DataProcessing}</span>
                         </div>
-                        <p>Please click here to open our privacy policy.</p>
+                        <p>{t.GuestProfile.Privacy.PrivacyPolicy}</p>
                         {/* SAVE */}
                         <button
                             onClick={handleSave}
                             className="bg-[#e6ac27] text-white mt-4 mb-4 p-3"
                         >
-                            SAVE
+                            {t.GuestProfile.Privacy.Save}
                         </button>
 
                     </div>

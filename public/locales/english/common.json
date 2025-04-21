@@ -1,0 +1,95 @@
+{
+    "Reservation": {
+        "Reservation":"Reservation",
+        "Nights": "Night(s)",
+        "ContactUs": "Contact us",
+        "CheckIn": "Prepare Check-In",
+        "CheckInInfo": "Check-in and discover all features",
+        "Details": {
+            "Guests": "Guests",
+            "GuestsInfo": "Select a guest name to view guest information.",
+            "Extras": "Extras",
+            "ExtrasInfo": "Just go for that little extra something. Here is what we have got on offer for you.",
+            "Room": "My Room",
+            "QrCode": "QR Code",
+            "QrCodeInfo1": "Create a QR code containing your reservation information.",
+            "QrCodeInfo2": "Speed up your check in by having it scanned it at the reception desk."
+        }
+    },
+    "PrepareCheckIn": {
+        "Title": "Prepare Check-In",
+        "YourCheckIn": "Your check-in",
+        "Guests": "Guests",
+        "CheckInInfo": "By entering some of your personal and payment data in advance we will be able to check you in much faster and more comfortably on the day of your arrival.",
+        "PaymentData": "Payment data",
+        "CreditCard": "Add credit card",
+        "Optional": "(Optional)",
+        "Signature": "Signature",
+        "AddSignature": "Add signature",
+        "Missing": "(Missing)",
+        "Done": "(Done)",
+        "Save": "Save"
+    },
+    "GuestProfile": {
+        "Title": "Guest Profile",
+        "GuestDetails": {
+            "Title": "Guest Details",
+            "Salutation": "Salutation",
+            "FirstName": "First Name",
+            "LastName": "Last Name",
+            "DateOfBirth": "Date of Birth",
+            "Nationality": "Nationality"
+        },
+        "Address": {
+            "Title": "Address",
+            "StreetAddress": "Street Address",
+            "PostalCode": "Zip Code",
+            "City": "City",
+            "Country": "Country"
+        },
+        "Contact": {
+            "Title": "Contact",
+            "Email": "Email",
+            "Phone": "Phone",
+            "Mobile": "Mobile"
+        },
+        "PersonalID": {
+            "Title": "Personal ID",
+            "DocumentType": "Document type",
+            "DocumentNumber": "Document no.",
+            "IssueDate": "Issue Date",
+            "ExpiracyDate": "Expiry Date",
+            "CountryOfBirth": "Country of Birth"
+        },
+        "InvoiceData": {
+            "Title": "Invoice Data",
+            "VatNo": "VAT No."
+        },
+        "Privacy": {
+            "Title": "Privacy",
+            "Marketing": "Marketing",
+            "DataProcessing": "Data Processing",
+            "PrivacyPolicy": "Please click here to open our privacy policy.",
+            "Save": "Save"
+        }
+    },
+    "AddSignature": {
+        "Title": "Signature",
+        "SignBelow": "Sign Below",
+        "Save": "Save",
+        "Clear": "Clear",
+        "SignatureSaved": "Signature saved!"
+    },
+    "ContactUs": {
+        "Title": "Contact Us",
+        "ContactUs": "Contact us",
+        "ContactUsInfo": "How can we enhance your stay? Do you have any additional wishes?",
+        "ContactUsInfo2": "Dont hesitate to contact the front desk for questions or requests.",
+        "ContactUsInfo3": "Please enter your email address so that we can get back to you as soon as possible.",
+        "Email": "Enter your email",
+        "TypeYourMessage": "Type your message here...",
+        "Clear": "Clear",
+        "Sending": "Sending...",
+        "Send": "Send"
+    }
+}

@@ -13,7 +13,12 @@ import { MdEmail } from "react-icons/md";
 
 import { jwtDecode } from "jwt-decode";
 
+import en from "../../../public/locales/english/common.json";
+import pt from "../../../public/locales/portuguesePT/common.json";
+
 import "./style.css";
+
+const translations = { en, pt };
 
 function ReservationContent() {
     const router = useRouter();
@@ -24,6 +29,26 @@ function ReservationContent() {
     const [profileID, setProfileID] = useState(null);
     const [mainGuestData, setMainGuestData] = useState(null);
     const [guestsFetched, setGuestsFetched] = useState(false);
+
+    // Novo estado para o idioma
+    const [locale, setLocale] = useState("en");
+
+    // Carrega o idioma do localStorage na primeira renderização
+    useEffect(() => {
+        const savedLocale = localStorage.getItem("lang");
+        if (savedLocale && ["en", "pt"].includes(savedLocale)) {
+            setLocale(savedLocale);
+        }
+    }, []);
+
+    // Traduções com base no idioma
+    const t = translations[locale];
+
+    const handleChangeLanguage = (e) => {
+        const selectedLang = e.target.value;
+        setLocale(selectedLang); // Atualiza o estado
+        localStorage.setItem("lang", selectedLang); // Salva no localStorage
+    };
 
     useEffect(() => {
         // Recupera o token da URL
@@ -75,12 +100,12 @@ function ReservationContent() {
         const fetchGuestData = async () => {
             try {
                 const token = sessionStorage.getItem("reservationToken");
-    
+
                 if (!token || !data?.protelGuestID) {
                     console.warn("Token ou protelGuestID ausente.");
                     return;
                 }
-    
+
                 // Função auxiliar para buscar e armazenar um hóspede
                 const fetchAndStoreGuest = async (guestID) => {
                     try {
@@ -96,10 +121,10 @@ function ReservationContent() {
                         console.error(`Erro ao buscar dados do hóspede ${guestID}:`, err);
                     }
                 };
-    
+
                 // Buscar dados do hóspede principal
                 await fetchAndStoreGuest(data.protelGuestID);
-    
+
                 // Se houver companions, buscar dados deles também
                 if (Array.isArray(data.companions) && data.companions.length > 0) {
                     for (const companion of data.companions) {
@@ -108,17 +133,17 @@ function ReservationContent() {
                         }
                     }
                 }
-    
+
                 setGuestsFetched(true);
-    
+
             } catch (error) {
                 console.error("Erro ao buscar dados dos hóspedes:", error);
             }
         };
-    
+
         fetchGuestData();
     }, [data?.protelGuestID, data?.companions]);
-    
+
 
     // Função para converter a string de data para um formato correto
     const parseDate = (dateStr) => {
@@ -175,10 +200,19 @@ function ReservationContent() {
                 <>
                     <div className="bg-[#8F857D] flex flex-row justify-between items-center h-12 pl-64 pr-64 header">
                         <IoChevronBackOutline size={20} color="white" onClick={() => router.push("/")} />
-                        <p className="font-bold text-white">Reservation {data.protelBookingID}</p>
+                        <p className="font-bold text-white">{t.Reservation.Reservation} {data.protelBookingID}</p>
                         <IoMdRefresh size={20} color="white" onClick={() => window.location.reload()} />
                     </div>
-                    <p className="h-12 pl-64 pr-64 text-right -mb-5">en</p>
+                    <div className="h-12 pl-64 pr-64 -mb-5 text-right">
+                        <select
+                            className="w-12 h-8 text-right bg-transparent outline-none cursor-pointer"
+                            value={locale}
+                            onChange={handleChangeLanguage}
+                        >
+                            <option value="en">en</option>
+                            <option value="pt">pt</option>
+                        </select>
+                    </div>
                     <div className="flex flex-col justify-center items-center">
                         <h1 className="text-2xl font-bold flex justify-center mt-4">
                             {mainGuestData
@@ -193,7 +227,7 @@ function ReservationContent() {
                                     <p>{checkIn.month}</p>
                                 </div>
                             </div>
-                            <p>{numNights} Night(s)</p>
+                            <p>{numNights} {t.Reservation.Nights}</p>
                             <div className="flex flex-row items-center font-bold">
                                 <div className="text-right">
                                     <p>{checkOut.weekDay}</p>
@@ -204,7 +238,7 @@ function ReservationContent() {
                         </div>
                         <div className="flex flex-row gap-2 items-center text-[#8F857D] mt-4">
                             <MdEmail />
-                            <a href={`./contact-us?email=${encodeURIComponent(data?.email)}`} className="font-bold">Contact us</a>
+                            <a href={`./contact-us?email=${encodeURIComponent(data?.email)}`} className="font-bold">{t.Reservation.ContactUs}</a>
                             <MdEmail />
                         </div>
                         <div className="flex justify-center mt-4">
@@ -214,16 +248,16 @@ function ReservationContent() {
                                     onClick={() => router.push("./details")}
                                 >
                                     <FaCalendarAlt size={35} />
-                                    <p className="uppercase">Reservation</p>
+                                    <p className="uppercase">{t.Reservation.Reservation}</p>
                                 </div>
                                 <div className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#DECBB7] w-48 h-48 text-center text-sm cursor-pointer cards"
                                     onClick={() => router.push("./prepare-check-in")}
                                 >
                                     <FaRegCalendarCheck size={35} />
-                                    <p className="uppercase">Prepare check-in</p>
+                                    <p className="uppercase">{t.Reservation.CheckIn}</p>
                                 </div>
                                 <div className="flex flex-col items-center justify-center gap-4 border border-gray-800 p-6 rounded-lg bg-[#8F857D] w-48 h-48 text-center font-bold text-sm text-white cards">
-                                    <p className="uppercase">Check-in and discover all features</p>
+                                    <p className="uppercase">{t.Reservation.CheckInInfo}</p>
                                 </div>
                             </div>
                         </div>

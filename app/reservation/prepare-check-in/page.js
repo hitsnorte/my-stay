@@ -10,7 +10,12 @@ import { FaFileSignature } from "react-icons/fa6";
 
 import { jwtDecode } from "jwt-decode";
 
+import en from "../../../public/locales/english/common.json";
+import pt from "../../../public/locales/portuguesePT/common.json";
+
 import "./style.css";
+
+const translations = { en, pt };
 
 export default function PrepareCheckIn() {
     const [data, setData] = useState(null);
@@ -24,6 +29,19 @@ export default function PrepareCheckIn() {
     const [mainGuestData, setMainGuestData] = useState(null);
     const [allGuestData, setAllGuestData] = useState([]);
     const [additionalGuests, setAdditionalGuests] = useState([]);
+
+    const [locale, setLocale] = useState("en"); // Idioma padrão
+
+    useEffect(() => {
+        // Verifica o idioma armazenado no localStorage ao carregar a página
+        const storedLang = localStorage.getItem("lang");
+        if (storedLang) {
+            setLocale(storedLang);
+        }
+    }, []);
+
+    const t = translations[locale];
+
     useEffect(() => {
         const token = sessionStorage.getItem("reservationToken");
 
@@ -252,7 +270,7 @@ export default function PrepareCheckIn() {
             ) : data ? (
                 <>
                     <div className="bg-[#8F857D] flex flex-row items-center h-12 pl-64 pr-64 header">
-                    <IoChevronBackOutline
+                        <IoChevronBackOutline
                             size={20}
                             color="white"
                             className="cursor-pointer"
@@ -263,19 +281,19 @@ export default function PrepareCheckIn() {
                                 }
                             }}
                         />
-                        <p className="font-bold text-white flex-grow text-center">Prepare check-in</p>
+                        <p className="font-bold text-white flex-grow text-center">{t.PrepareCheckIn.Title}</p>
                     </div>
                     <div className="flex flex-col pl-92 pr-92 mt-4 main-page">
-                        <p className="font-bold text-xl text-[#e6ac27]">Your check-in</p>
+                        <p className="font-bold text-xl text-[#e6ac27]">{t.PrepareCheckIn.YourCheckIn}</p>
                         <div className="flex flex-row items-center gap-2 mt-10 mb-2">
                             <FaUsers size={30} color="#e6ac27" />
                             <div className="flex flex-row gap-2 items-center">
-                                <p className="font-bold text-xl text-[#e6ac27]">Guests</p>
+                                <p className="font-bold text-xl text-[#e6ac27]">{t.PrepareCheckIn.Guests}</p>
                                 {/* <p className="text-xs">({isComplete ? "Complete" : "Incomplete"})</p> */}
                             </div>
                         </div>
 
-                        <p>By entering some of your personal and payment data in advance we will be able to check you in much faster and more comfortably on the day of your arrival.</p>
+                        <p>{t.PrepareCheckIn.CheckInInfo}</p>
 
                         <div className="flex flex-col">
                             {/* Hóspede principal */}
@@ -318,25 +336,25 @@ export default function PrepareCheckIn() {
                         <div className="flex flex-row items-center gap-2 mt-10">
                             <FaRegCreditCard size={30} color="#e6ac27" />
                             <div className="flex flex-row gap-2 items-center">
-                                <p className="font-bold text-xl text-[#e6ac27]">Payment data</p>
-                                <p className="text-xs">(Optional)</p>
+                                <p className="font-bold text-xl text-[#e6ac27]">{t.PrepareCheckIn.PaymentData}</p>
+                                <p className="text-xs">{t.PrepareCheckIn.Optional}</p>
                             </div>
                         </div>
                         <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4 opacity-50 cursor-not-allowed pointer-events-none">
-                            <p className="text-gray-600">Add credit card</p>
+                            <p className="text-gray-600">{t.PrepareCheckIn.CreditCard}</p>
                             <MdArrowForwardIos className="text-gray-600" />
                         </div>
                         <div className="flex flex-row items-center gap-2 mt-10">
                             <FaFileSignature size={30} color="#e6ac27" />
                             <div className="flex flex-row gap-2 items-center">
-                                <p className="font-bold text-xl text-[#e6ac27]">Signature</p>
+                                <p className="font-bold text-xl text-[#e6ac27]">{t.PrepareCheckIn.Signature}</p>
                                 <p className={`text-xs ${signatureExists ? "text-green-500" : "text-red-500"}`}>
-                                    {signatureExists ? "(Done)" : "(Missing)"}
+                                    {signatureExists ? t.PrepareCheckIn.Done : t.PrepareCheckIn.Missing}
                                 </p>
                             </div>
                         </div>
                         <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4">
-                            <p>Add signature</p>
+                            <p>{t.PrepareCheckIn.AddSignature}</p>
                             <MdArrowForwardIos onClick={() => router.push("./signature")} className="cursor-pointer" />
                         </div>
                         {/* SAVE */}
@@ -344,7 +362,7 @@ export default function PrepareCheckIn() {
                             onClick={handleSave}
                             className="bg-[#e6ac27] text-white mt-4 mb-4 p-3"
                         >
-                            SAVE
+                            {t.PrepareCheckIn.Save}
                         </button>
                     </div>
                 </>
