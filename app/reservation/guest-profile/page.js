@@ -99,6 +99,8 @@ export default function GuestProfile() {
 
     const [locale, setLocale] = useState("en"); // Idioma padrão
 
+    const [open, setOpen] = useState(false);
+
     useEffect(() => {
         // Verifica o idioma armazenado no localStorage ao carregar a página
         const storedLang = localStorage.getItem("lang");
@@ -759,7 +761,40 @@ export default function GuestProfile() {
                             </Switch>
                             <span className="ml-4">{t.GuestProfile.Privacy.DataProcessing}</span>
                         </div>
-                        <p>{t.GuestProfile.Privacy.PrivacyPolicy}</p>
+                        {/* <p>{t.GuestProfile.Privacy.PrivacyPolicy}</p> */}
+                        <p
+                            onClick={() => setOpen(true)}
+                            className="cursor-pointer text-sky-600 underline inline-block"
+                        >
+                            {t.GuestProfile.Privacy.PrivacyPolicy}
+                        </p>
+                        {/* overlay + modal */}
+                        {open && (
+                            <div
+                                className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+                                onClick={() => setOpen(false)}            // fecha se clicar fora
+                            >
+                                <div
+                                    className="bg-white p-6 max-w-lg rounded-2xl shadow-xl"
+                                    onClick={e => e.stopPropagation()}      // impede fecho ao clicar dentro
+                                >
+                                    <h2 className="text-xl font-semibold mb-4">Política de Privacidade</h2>
+
+                                    {/* conteúdo real da política vai aqui */}
+                                    <p className="text-sm leading-relaxed">
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque
+                                        at urna et neque tristique placerat. {/* … */}
+                                    </p>
+
+                                    <button
+                                        onClick={() => setOpen(false)}
+                                        className="mt-6 px-4 py-2 rounded-xl shadow-sm border"
+                                    >
+                                        Fechar
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                         {/* SAVE */}
                         <button
                             onClick={handleSave}
