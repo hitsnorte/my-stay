@@ -150,7 +150,7 @@ export default function GuestProfile() {
                     setSalutation(guestInfo.protelSalution || "");
                     setBirthDate(guestInfo.birthDate || "");
                     setNationality(guestInfo.nationality || "");
-                    setCountry(guestInfo.country || "");
+                    setCountry(guestInfo.protelCountryID || "");
                     setEmail(guestInfo.email || "");
                     setPhone(guestInfo.protelGuestPhone || "");
                     setMobile(guestInfo.protelGuestMobilePhone || "");
@@ -411,7 +411,7 @@ export default function GuestProfile() {
         setSalutation(renderGuestData("protelSalutation"));
         setBirthDate(renderGuestData("birthDate"));
         setNationality(renderGuestData("nationality"));
-        setCountry(renderGuestData("country"));
+        setCountry(renderGuestData("protelCountryID"));
         setStreetAddress(renderGuestData("protelAddress"));
         setPostalCode(renderGuestData("postalCode"));
         setCity(renderGuestData("city"));
@@ -600,7 +600,7 @@ export default function GuestProfile() {
                                     options={countryOptions}
                                     value={
                                         countryOptions.find(
-                                            option => option.value === country || option.label === country
+                                            option => option.value === country
                                         ) || null
                                     }
                                     onChange={(selectedOption) => {
