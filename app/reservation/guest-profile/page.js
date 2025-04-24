@@ -552,7 +552,7 @@ export default function GuestProfile() {
                                     options={countryOptions}
                                     value={
                                         countryOptions.find(
-                                            option => option.value === nationality || option.label === nationality
+                                            option => option.value === String(nationality) || option.label === nationality
                                         ) || null
                                     }
                                     onChange={(selectedOption) => setNationality(selectedOption.value)}
@@ -656,7 +656,7 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.PersonalID.DocumentType}</p>
                                 <Select
                                     options={docTypeOptions}
-                                    value={docTypeOptions.find(option => option.value === identificationDocument) || null} // Garantir que está usando 'value'
+                                    value={docTypeOptions.find(option => option.value === String(identificationDocument)) || null} // Garantir que está usando 'value'
                                     onChange={(selectedOption) => setIdentificationDocument(selectedOption.value)} // Usar 'value' ao invés de 'label'
                                     isSearchable
                                     styles={customStyles}
@@ -696,7 +696,7 @@ export default function GuestProfile() {
                                     options={countryOptions}
                                     value={
                                         countryOptions.find(
-                                            option => option.value === birthCountry || option.label === birthCountry
+                                            option => option.value === String(birthCountry) || option.label === birthCountry
                                         ) || null
                                     }
                                     onChange={(selectedOption) => setBirthCountry(selectedOption.value)}
