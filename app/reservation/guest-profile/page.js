@@ -404,18 +404,14 @@ export default function GuestProfile() {
         }
     }, [propertyID]);
 
+
     useEffect(() => {
         if (!data) return;
-      
+
         setSalutation(renderGuestData("protelSalutation"));
         setBirthDate(renderGuestData("birthDate"));
         setNationality(renderGuestData("nationality"));
-      
-        // 👉 país
-        const guestCountry = renderGuestData("protelCountryID");
-        setCountry(guestCountry);
-        console.log("Country (protelCountryID):", guestCountry);   // ← aqui
-      
+        setCountry(renderGuestData("protelCountryID"));
         setStreetAddress(renderGuestData("protelAddress"));
         setPostalCode(renderGuestData("postalCode"));
         setCity(renderGuestData("city"));
@@ -428,15 +424,16 @@ export default function GuestProfile() {
         setDocumentIssueDate(renderGuestData("documentIssueDate"));
         setBirthCountry(renderGuestData("birthCountry"));
         setVatNo(renderGuestData("vatNo"));
-      
+
+        // Verificar se o guestName é diferente de "Unknown guest"
         if (guestName !== "Unknown guest") {
-          setFirstName(data.protelGuestFirstName || "");
-          setLastName(data.protelGuestLastName || "");
+            setFirstName(data.protelGuestFirstName || "");
+            setLastName(data.protelGuestLastName || "");
         } else {
-          setFirstName("");
-          setLastName("");
+            setFirstName(""); // Para o hóspede desconhecido
+            setLastName("");  // Para o hóspede desconhecido
         }
-      }, [data, guestName]);      
+    }, [data, guestName]);
 
     // Função para obter o código de país
     const getCountryCode = (countryText) => {
@@ -603,7 +600,7 @@ export default function GuestProfile() {
                                     options={countryOptions}
                                     value={
                                         countryOptions.find(
-                                            option => option.value === country
+                                            option => option.value === String(country)
                                         ) || null
                                     }
                                     onChange={(selectedOption) => {
