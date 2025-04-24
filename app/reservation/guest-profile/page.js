@@ -250,7 +250,9 @@ export default function GuestProfile() {
             marketingOptIn: enabledMarketing,
             dataProcessingOptIn: enabledDataP,
         };
-
+        console.log("Country: ", country);
+        console.log("Salutation: ", salutation);
+        console.log("identificationDocument: ", identificationDocument);
         // Verifica o tipo de hóspede (main, adicional ou desconhecido)
         const guestType = sessionStorage.getItem("selectedGuestType"); // Pode ser "main", "acompanhante" ou "unknown"
         const selectedGuestID = sessionStorage.getItem("selectedGuestID"); // ID do hóspede, se existir
@@ -354,7 +356,7 @@ export default function GuestProfile() {
         });
         return response.data;
     };
-    
+
     const fetchDocType = async () => {
         const response = await axios.get(`/api/sysConectorStay/get_doc_type?propertyID=${propertyID}`);
         return response.data;
@@ -433,8 +435,8 @@ export default function GuestProfile() {
         }
     }, [data, guestName]);
 
-       // Função para obter o código de país
-       const getCountryCode = (countryText) => {
+    // Função para obter o código de país
+    const getCountryCode = (countryText) => {
         return countryDialCodes[countryText] || '+351'; // Portugal como default
     };
 
@@ -456,7 +458,7 @@ export default function GuestProfile() {
     const handlePhoneChange = (e) => {
         let value = e.target.value;
         const dialCode = getCountryCode(countryText);
-        
+
         // Remover o código de país caso o usuário tente digitar novamente
         if (value.startsWith(dialCode)) {
             value = value.slice(dialCode.length).trim(); // Remove o código de país
@@ -469,7 +471,7 @@ export default function GuestProfile() {
     const handleMobileChange = (e) => {
         let value = e.target.value;
         const dialCode = getCountryCode(countryText);
-        
+
         // Remover o código de país caso o usuário tente digitar novamente
         if (value.startsWith(dialCode)) {
             value = value.slice(dialCode.length).trim(); // Remove o código de país
@@ -724,9 +726,12 @@ export default function GuestProfile() {
                             <p className="font-bold text-xl text-[#e6ac27]">{t.GuestProfile.Privacy.Title}</p>
                         </div>
                         <p>
-                            {propertyInfo?.hotelTermsEN || ""}
+                            {locale === "en"
+                                ? propertyInfo?.hotelTermsEN
+                                : locale === "pt"
+                                    ? propertyInfo?.hotelTermsPT
+                                    : ""}
                         </p>
-
                         {/* First Switch */}
                         <div className="flex items-center mt-4">
                             <Switch

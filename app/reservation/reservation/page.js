@@ -236,7 +236,7 @@ useEffect(() => {
                     </div>
                     <div className="h-12 pl-64 pr-64 -mb-5 text-right">
                         <select
-                            className="w-12 h-8 text-right bg-transparent outline-none cursor-pointer"
+                            className="h-8 text-center bg-transparent outline-none cursor-pointer"
                             value={locale}
                             onChange={handleChangeLanguage}
                         >

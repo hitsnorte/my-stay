@@ -17,8 +17,6 @@ import "./style.css";
 
 const translations = { en, pt };
 
-import countryDialCodes from "@/lib/countryDialCodes.json";
-
 export default function PrepareCheckIn() {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
@@ -34,7 +32,6 @@ export default function PrepareCheckIn() {
 
     const [locale, setLocale] = useState("en"); // Idioma padrão
 
-    console.log(countryDialCodes["Portugal"]); // "+351"
     useEffect(() => {
         // Verifica o idioma armazenado no localStorage ao carregar a página
         const storedLang = localStorage.getItem("lang");
