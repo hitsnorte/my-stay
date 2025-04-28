@@ -15,35 +15,36 @@ model counter {
 }
 
 model properties {
-  propertyID               Int               @id @default(autoincrement())
-  propertyTag              String            @unique(map: "propertyTag_UNIQUE") @db.VarChar(100)
-  propertyName             String            @db.VarChar(100)
-  propertyServer           String            @db.VarChar(2048)
-  propertyPort             Int?
-  propertyConnectionString String?           @db.VarChar(2048)
-  mpehotel                 Int?
-  hotelName                String?           @db.VarChar(255)
-  hotelTermsEN             String?           @db.VarChar(2048)
-  hotelPhone               String?           @db.VarChar(20)
-  hotelEmail               String?           @db.VarChar(255)
-  hotelAddress             String?           @db.VarChar(255)
-  hotelPostalCode          String?           @db.VarChar(255)
-  hotelRNET                String?           @db.VarChar(50)
-  hotelNIF                 String?           @db.VarChar(50)
-  passeIni                 String?           @db.VarChar(255)
-  pdfFilePath              String?           @db.VarChar(255)
-  hotelTermsPT             String?           @db.VarChar(2048)
-  hotelTermsES             String?           @db.VarChar(2048)
-  propertyPortStay         Int?
-  hasStay                  Boolean           @default(false)
-  replyEmail               String?           @db.VarChar(255)
-  replyPassword            String?           @db.VarChar(255)
-  sendingServer            String?           @db.VarChar(2048)
-  sendingPort              Int?
-  infoEmail                String?           @db.VarChar(255)
-  emailBody                String?           @default("") @db.VarChar(1055)
-  emailSubject             String?           @default("") @db.VarChar(255)
-  usersProperties          usersProperties[]
+  propertyID       Int               @id @default(autoincrement())
+  propertyTag      String            @unique(map: "propertyTag_UNIQUE") @db.VarChar(100)
+  propertyName     String            @db.VarChar(100)
+  propertyServer   String            @db.VarChar(40)
+  propertyPort     String?           @db.VarChar(10)
+  mpehotel         Int?
+  hotelName        String?           @db.VarChar(255)
+  hotelTermsEN     String?           @db.VarChar(2048)
+  hotelPhone       String?           @db.VarChar(20)
+  hotelEmail       String?           @db.VarChar(255)
+  hotelAddress     String?           @db.VarChar(255)
+  hotelPostalCode  String?           @db.VarChar(255)
+  hotelRNET        String?           @db.VarChar(50)
+  hotelNIF         String?           @db.VarChar(50)
+  passeIni         String?           @db.VarChar(255)
+  pdfFilePath      String?           @db.VarChar(255)
+  hotelTermsPT     String?           @db.VarChar(2048)
+  hotelTermsES     String?           @db.VarChar(2048)
+  propertyPortStay Int?
+  hasStay          Boolean           @default(false)
+  replyEmail       String?           @db.VarChar(255)
+  replyPassword    String?           @db.VarChar(255)
+  sendingServer    String?           @db.VarChar(2048)
+  sendingPort      Int?
+  infoEmail        String?           @db.VarChar(255)
+  emailBody        String?           @default("") @db.VarChar(1055)
+  emailSubject     String?           @default("") @db.VarChar(255)
+  privacyPolicyEN  String?           @default("") @db.VarChar(1000)
+  privacyPolicyPT  String?           @default("") @db.VarChar(1000)
+  usersProperties  usersProperties[]
 }
 
 model requestRecords {

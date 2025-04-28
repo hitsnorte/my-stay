@@ -770,31 +770,37 @@ export default function GuestProfile() {
                         </p>
                         {/* overlay + modal */}
                         {open && (
+                        <div
+                            className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+                            onClick={() => setOpen(false)} // fecha se clicar fora
+                        >
                             <div
-                                className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
-                                onClick={() => setOpen(false)}            // fecha se clicar fora
+                                className="bg-white max-w-2xl w-full h-auto rounded-2xl shadow-xl relative"
+                                onClick={e => e.stopPropagation()} // impede fecho ao clicar dentro
                             >
-                                <div
-                                    className="bg-white p-6 max-w-lg rounded-2xl shadow-xl"
-                                    onClick={e => e.stopPropagation()}      // impede fecho ao clicar dentro
+                                {/* Cruz no canto superior direito */}
+                                <button
+                                    onClick={() => setOpen(false)}
+                                    className="absolute top-4 right-4 text-2xl text-gray-700 hover:text-gray-900"
                                 >
-                                    <h2 className="text-xl font-semibold mb-4">Política de Privacidade</h2>
+                                    &times; {/* Aqui usamos o símbolo "×" para a cruz */}
+                                </button>
 
-                                    {/* conteúdo real da política vai aqui */}
-                                    <p className="text-sm leading-relaxed">
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque
-                                        at urna et neque tristique placerat. {/* … */}
-                                    </p>
+                                <h2 className="text-xl text-white font-semibold mb-2 bg-[#e6ac27] p-6 rounded-t-2xl text-left">
+                                    {t.GuestProfile.Privacy.PrivacyPolicyTerms}
+                                </h2>
 
-                                    <button
-                                        onClick={() => setOpen(false)}
-                                        className="mt-6 px-4 py-2 rounded-xl shadow-sm border"
-                                    >
-                                        Fechar
-                                    </button>
-                                </div>
+                                {/* conteúdo real da política vai aqui */}
+                                <p className="text-sm leading-relaxed p-6">
+                                    {locale === "en"
+                                        ? propertyInfo?.privacyPolicyEN
+                                        : locale === "pt"
+                                            ? propertyInfo?.privacyPolicyPT
+                                            : ""}
+                                </p>
                             </div>
-                        )}
+                        </div>
+                    )}
                         {/* SAVE */}
                         <button
                             onClick={handleSave}

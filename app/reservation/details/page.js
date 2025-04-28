@@ -314,14 +314,19 @@ export default function ReservationInfo() {
 
                             {/* Hóspede principal */}
                             <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4 border-b-2 border-white">
-                                <p>{data.protelGuestFirstName} {data.protelGuestLastName}</p>
+                                <p>
+                                    {mainGuestData
+                                        ? `${mainGuestData.protelGuestFirstName} ${mainGuestData.protelGuestLastName}`
+                                        : `${data.protelGuestFirstName} ${data.protelGuestLastName}`}
+                                </p>
                                 <MdArrowForwardIos
                                     onClick={() =>
-                                        handleGuestClick(`${data.protelGuestFirstName} ${data.protelGuestLastName}`)
+                                        handleGuestClick(
+                                            `${mainGuestData ? mainGuestData.protelGuestFirstName : data.protelGuestFirstName} ${mainGuestData ? mainGuestData.protelGuestLastName : data.protelGuestLastName}`
+                                        )
                                     }
                                 />
                             </div>
-
                             {/* Hóspedes com dados do sessionStorage */}
                             {additionalGuests.map((guest, index) => (
                                 <div

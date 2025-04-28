@@ -67,6 +67,7 @@
         },
         "Privacy": {
             "Title": "Privacidade",
+            "PrivacyPolicyTerms": "Política de Privacidade",
             "Marketing": "Marketing",
             "DataProcessing": "Processamento de Dados",
             "PrivacyPolicy": "Clique aqui para abrir nossa política de privacidade.",
