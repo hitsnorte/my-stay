@@ -10,6 +10,8 @@ import { FaFileSignature } from "react-icons/fa6";
 
 import { jwtDecode } from "jwt-decode";
 
+import { generatePDFTemplate } from "@/components/pages/generatePDFTemplate/page";
+
 import en from "../../../public/locales/english/common.json";
 import pt from "../../../public/locales/portuguesePT/common.json";
 
@@ -91,62 +93,27 @@ export default function PrepareCheckIn() {
         if (!mainGuestData) {
             alert("Erro: Dados do hóspede principal não encontrados.");
             return;
-          }
-          
-    
+        }
         if (!data || !propertyID) return;
     
         console.log("Dados a serem enviados:", propertyID, data.protelReservationID, data.protelMpeHotel);
     
         try {
-            // Criar o documento PDF
-            const doc = new jsPDF();
-    
-            // Adicionar o título
-            doc.setFontSize(20);
-            doc.text("Prepare Check-In", 20, 20);
-    
-            // Adicionar dados da reserva
-            doc.setFontSize(12);
-            doc.text(`Property ID: ${propertyID}`, 20, 40);
-            doc.text(`Reservation ID: ${data.protelReservationID}`, 20, 50);
-            doc.text(`Hotel: ${data.protelMpeHotel}`, 20, 60);
-    
-            // Adicionar informações do hóspede principal
-            doc.text(`Main Guest: ${mainGuestData.protelGuestFirstName} ${mainGuestData.protelGuestLastName}`, 20, 70);
-            doc.text(`Guest ID: ${mainGuestData.protelGuestID}`, 20, 80);
-            doc.text(`Email: ${mainGuestData.protelGuestEmail || "Not Provided"}`, 20, 90);
-            doc.text(`Phone: ${mainGuestData.protelGuestPhone || "Not Provided"}`, 20, 100);
-            doc.text(`Address: ${mainGuestData.protelAddress || "Not Provided"}`, 20, 110);
-            doc.text(`Country: ${mainGuestData.protelGuestCountry || "Not Provided"}`, 20, 120);
-    
-            // Adicionar outros hóspedes (caso existam)
-            additionalGuests.forEach((mainGuestData, index) => {
-                doc.text(`Guest ${index + 1}: ${mainGuestData.protelGuestFirstName} ${mainGuestData.protelGuestLastName}`, 20, 130 + (index * 10));
-                doc.text(`Email: ${mainGuestData.protelGuestEmail || "Not Provided"}`, 20, 140 + (index * 10));
-                doc.text(`Phone: ${mainGuestData.protelGuestPhone || "Not Provided"}`, 20, 150 + (index * 10));
-                doc.text(`Address: ${mainGuestData.protelAddress || "Not Provided"}`, 20, 160 + (index * 10));
-                doc.text(`Country: ${mainGuestData.protelGuestCountry || "Not Provided"}`, 20, 170 + (index * 10));
+            // ⚡ Aqui você chama a função que gera o PDF
+            const pdfBase64 = await generatePDFTemplate({
+                propertyID,
+                reservationData: data,
+                mainGuestData,
             });
     
-            // Adicionar a assinatura (se existir)
-            const signature = sessionStorage.getItem("userSignature");
-            if (signature) {
-                const imageData = signature; // Assumindo que a assinatura é uma imagem em base64
-                doc.addImage(imageData, 'PNG', 20, 200, 100, 50); // Ajuste as dimensões conforme necessário
-            } else {
-                doc.text("Signature: Not Provided", 20, 200);
-            }
-    
-            // Salvar o documento como base64
-            const pdfBase64 = doc.output('datauristring');
             console.log(pdfBase64);
-            // Enviar os dados para o backend (incluindo o PDF em base64)
+    
+            // Agora envia normalmente
             await axios.post("/api/sysConectorStay/precheckin", {
                 protelReservationID: data.protelReservationID,
                 protelMpeHotel: data.protelMpeHotel,
                 propertyID: propertyID,
-                pdfBase64: pdfBase64, 
+                pdfBase64: pdfBase64,
             });
     
             alert("Dados enviados com sucesso!");
@@ -154,7 +121,7 @@ export default function PrepareCheckIn() {
             console.error("Erro ao criar o PDF ou enviar os dados:", err);
             alert("Ocorreu um erro ao salvar.");
         }
-    };
+    };    
     
 
     useEffect(() => {
