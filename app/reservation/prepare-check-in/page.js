@@ -144,6 +144,7 @@ export default function PrepareCheckIn() {
 
             // Codifica como base64 para enviar no JSON
             const compressedBase64 = btoa(String.fromCharCode(...compressed));
+            console.log("base 64 codificado: ", compressedBase64);
 
             // Envia como string comprimida (e marca no header ou payload que está comprimido)
             await axios.post("/api/sysConectorStay/precheckin", {
