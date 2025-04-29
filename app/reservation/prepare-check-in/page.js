@@ -17,7 +17,7 @@ import pt from "../../../public/locales/portuguesePT/common.json";
 
 import "./style.css";
 
-import { jsPDF } from "jspdf";
+import pako from "pako";
 
 const translations = { en, pt };
 
@@ -38,8 +38,8 @@ export default function PrepareCheckIn() {
 
     const [locale, setLocale] = useState("en"); // Idioma padrão
 
-     // Esse useEffect chama a API quando propertyID estiver definido
-     useEffect(() => {
+    // Esse useEffect chama a API quando propertyID estiver definido
+    useEffect(() => {
         const fetchPropertyInfo = async () => {
             try {
                 const response = await fetch("/api/get_property_info", {
@@ -120,14 +120,14 @@ export default function PrepareCheckIn() {
             alert("Você precisa adicionar a assinatura antes de continuar.");
             return;
         }
-        // if (!mainGuestData) {
-        //     alert("Erro: Dados do hóspede principal não encontrados.");
-        //     return;
-        // }
+        if (!mainGuestData) {
+            alert("Erro: Dados do hóspede principal não encontrados.");
+            return;
+        }
         if (!data || !propertyID) return;
-    
+
         console.log("Dados a serem enviados:", propertyID, data.protelReservationID, data.protelMpeHotel);
-    
+
         try {
             // ⚡ Aqui você chama a função que gera o PDF
             const pdfBase64 = await generatePDFTemplate({
@@ -136,24 +136,27 @@ export default function PrepareCheckIn() {
                 mainGuestData,
                 propertyInfo
             });
-    
+
             console.log(pdfBase64);
-    
-            // Agora envia normalmente
+
+            // Comprime o base64
+            const compressedBase64 = pako.deflate(pdfBase64, { to: "string" });
+
+            // Envia como string comprimida (e marca no header ou payload que está comprimido)
             await axios.post("/api/sysConectorStay/precheckin", {
                 protelReservationID: data.protelReservationID,
                 protelMpeHotel: data.protelMpeHotel,
                 propertyID: propertyID,
-                pdfBase64: pdfBase64,
+                pdfBase64: compressedBase64,
             });
-    
+
             alert("Dados enviados com sucesso!");
         } catch (err) {
             console.error("Erro ao criar o PDF ou enviar os dados:", err);
             alert("Ocorreu um erro ao salvar.");
         }
-    };    
-    
+    };
+
 
     useEffect(() => {
         const fetchGuestData = async () => {
