@@ -252,9 +252,6 @@ export default function GuestProfile() {
             marketingOptIn: enabledMarketing,
             dataProcessingOptIn: enabledDataP,
         };
-        console.log("Country: ", country);
-        console.log("Salutation: ", salutation);
-        console.log("identificationDocument: ", identificationDocument);
         // Verifica o tipo de hóspede (main, adicional ou desconhecido)
         const guestType = sessionStorage.getItem("selectedGuestType"); // Pode ser "main", "acompanhante" ou "unknown"
         const selectedGuestID = sessionStorage.getItem("selectedGuestID"); // ID do hóspede, se existir
@@ -303,6 +300,21 @@ export default function GuestProfile() {
             const response = await axios.post(url, {}, { headers });
 
             if (response.status === 200) {
+                // Verifica se houve um InsertedID (para unknown guest recém-criado)
+                if (!guestID && response.data?.InsertedID) {
+                    guestID = response.data.InsertedID;
+                }
+
+                // Se for opt-in, faz update da política de privacidade com o ID retornado
+                if (enabledDataP && guestID) {
+                    try {
+                        await axios.post("/api/sysConectorStay/update_guest_privacy_policy", {
+                            profileID: guestID,
+                        });
+                    } catch (privacyErr) {
+                        console.log("Erro ao atualizar política de privacidade:", privacyErr);
+                    }
+                }
                 const updatedGuestData = {
                     protelSalution: salutation,
                     birthDate,
@@ -770,37 +782,37 @@ export default function GuestProfile() {
                         </p>
                         {/* overlay + modal */}
                         {open && (
-                        <div
-                            className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
-                            onClick={() => setOpen(false)} // fecha se clicar fora
-                        >
                             <div
-                                className="bg-white max-w-2xl w-full h-auto rounded-2xl shadow-xl relative"
-                                onClick={e => e.stopPropagation()} // impede fecho ao clicar dentro
+                                className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+                                onClick={() => setOpen(false)} // fecha se clicar fora
                             >
-                                {/* Cruz no canto superior direito */}
-                                <button
-                                    onClick={() => setOpen(false)}
-                                    className="absolute top-4 right-4 text-2xl text-gray-700 hover:text-gray-900"
+                                <div
+                                    className="bg-white max-w-2xl w-full h-auto rounded-2xl shadow-xl relative"
+                                    onClick={e => e.stopPropagation()} // impede fecho ao clicar dentro
                                 >
-                                    &times; {/* Aqui usamos o símbolo "×" para a cruz */}
-                                </button>
+                                    {/* Cruz no canto superior direito */}
+                                    <button
+                                        onClick={() => setOpen(false)}
+                                        className="absolute top-4 right-4 text-2xl text-gray-700 hover:text-gray-900"
+                                    >
+                                        &times; {/* Aqui usamos o símbolo "×" para a cruz */}
+                                    </button>
 
-                                <h2 className="text-xl text-white font-semibold mb-2 bg-[#e6ac27] p-6 rounded-t-2xl text-left">
-                                    {t.GuestProfile.Privacy.PrivacyPolicyTerms}
-                                </h2>
+                                    <h2 className="text-xl text-white font-semibold mb-2 bg-[#e6ac27] p-6 rounded-t-2xl text-left">
+                                        {t.GuestProfile.Privacy.PrivacyPolicyTerms}
+                                    </h2>
 
-                                {/* conteúdo real da política vai aqui */}
-                                <p className="text-sm leading-relaxed p-6">
-                                    {locale === "en"
-                                        ? propertyInfo?.privacyPolicyEN
-                                        : locale === "pt"
-                                            ? propertyInfo?.privacyPolicyPT
-                                            : ""}
-                                </p>
+                                    {/* conteúdo real da política vai aqui */}
+                                    <p className="text-sm leading-relaxed p-6">
+                                        {locale === "en"
+                                            ? propertyInfo?.privacyPolicyEN
+                                            : locale === "pt"
+                                                ? propertyInfo?.privacyPolicyPT
+                                                : ""}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
                         {/* SAVE */}
                         <button
                             onClick={handleSave}

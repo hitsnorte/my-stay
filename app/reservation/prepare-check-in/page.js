@@ -34,7 +34,37 @@ export default function PrepareCheckIn() {
     const [allGuestData, setAllGuestData] = useState([]);
     const [additionalGuests, setAdditionalGuests] = useState([]);
 
+    const [propertyInfo, setPropertyInfo] = useState(null);
+
     const [locale, setLocale] = useState("en"); // Idioma padrão
+
+     // Esse useEffect chama a API quando propertyID estiver definido
+     useEffect(() => {
+        const fetchPropertyInfo = async () => {
+            try {
+                const response = await fetch("/api/get_property_info", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ propertyID }),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erro ao buscar informações da propriedade");
+                }
+
+                const data = await response.json();
+                setPropertyInfo(data); // ou trate os dados conforme necessário
+            } catch (error) {
+                console.error("Erro ao buscar informações da propriedade:", error);
+            }
+        };
+
+        if (propertyID) {
+            fetchPropertyInfo();
+        }
+    }, [propertyID]);
 
     useEffect(() => {
         // Verifica o idioma armazenado no localStorage ao carregar a página
@@ -90,10 +120,10 @@ export default function PrepareCheckIn() {
             alert("Você precisa adicionar a assinatura antes de continuar.");
             return;
         }
-        if (!mainGuestData) {
-            alert("Erro: Dados do hóspede principal não encontrados.");
-            return;
-        }
+        // if (!mainGuestData) {
+        //     alert("Erro: Dados do hóspede principal não encontrados.");
+        //     return;
+        // }
         if (!data || !propertyID) return;
     
         console.log("Dados a serem enviados:", propertyID, data.protelReservationID, data.protelMpeHotel);
@@ -104,6 +134,7 @@ export default function PrepareCheckIn() {
                 propertyID,
                 reservationData: data,
                 mainGuestData,
+                propertyInfo
             });
     
             console.log(pdfBase64);
@@ -318,14 +349,19 @@ export default function PrepareCheckIn() {
                         <div className="flex flex-col">
                             {/* Hóspede principal */}
                             <div className="flex flex-row justify-between items-center bg-[#DECBB7] p-4 mt-4 border-b-2 border-white">
-                                <p>{data.protelGuestFirstName} {data.protelGuestLastName}</p>
+                                <p>
+                                    {mainGuestData
+                                        ? `${mainGuestData.protelGuestFirstName} ${mainGuestData.protelGuestLastName}`
+                                        : `${data.protelGuestFirstName} ${data.protelGuestLastName}`}
+                                </p>
                                 <MdArrowForwardIos
                                     onClick={() =>
-                                        handleGuestClick(`${data.protelGuestFirstName} ${data.protelGuestLastName}`)
+                                        handleGuestClick(
+                                            `${mainGuestData ? mainGuestData.protelGuestFirstName : data.protelGuestFirstName} ${mainGuestData ? mainGuestData.protelGuestLastName : data.protelGuestLastName}`
+                                        )
                                     }
                                 />
                             </div>
-
                             {/* Hóspedes com dados do sessionStorage */}
                             {additionalGuests.map((guest, index) => (
                                 <div
