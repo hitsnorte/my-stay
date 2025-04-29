@@ -221,12 +221,12 @@ export default function GuestProfile() {
     const handleSave = async () => {
         const token = sessionStorage.getItem("reservationToken");
         console.log("ID", mainGuestID);
-
+    
         if (!token) {
             setError("Token de reserva não encontrado.");
             return;
         }
-
+    
         const guestProfileData = {
             propertyID,
             reservationID,
@@ -252,69 +252,63 @@ export default function GuestProfile() {
             marketingOptIn: enabledMarketing,
             dataProcessingOptIn: enabledDataP,
         };
-        // Verifica o tipo de hóspede (main, adicional ou desconhecido)
-        const guestType = sessionStorage.getItem("selectedGuestType"); // Pode ser "main", "acompanhante" ou "unknown"
-        const selectedGuestID = sessionStorage.getItem("selectedGuestID"); // ID do hóspede, se existir
-
-        // Verifica se o hóspede é desconhecido, principal ou adicional
-        const isUnknownGuest = guestType === "unknown"; // Hóspede desconhecido
-        const isMainGuest = guestType === "main"; // Hóspede principal
-        const isAdditionalGuest = guestType === "additional" && selectedGuestID; // Hóspede adicional (tem selectedGuestID)
-
-        // Determina o endpoint a ser chamado com base no tipo de hóspede
-        let url = "/api/sysConectorStay/submit_guest_profile";  // Default para Unknown Guest
+    
+        const guestType = sessionStorage.getItem("selectedGuestType");
+        const selectedGuestID = sessionStorage.getItem("selectedGuestID");
+    
+        const isUnknownGuest = guestType === "unknown";
+        const isMainGuest = guestType === "main";
+        const isAdditionalGuest = guestType === "additional" && selectedGuestID;
+    
+        let url = "/api/sysConectorStay/submit_guest_profile";
         if (isMainGuest || isAdditionalGuest) {
-            url = "/api/sysConectorStay/update_guest_profile";  // Para hóspede principal ou adicional
+            url = "/api/sysConectorStay/update_guest_profile";
         }
-
+    
         try {
             const headers = {
                 "Content-Type": "application/json",
                 "Reservation-Token": token,
             };
-
-            // Adiciona cada campo do guestProfileData no header
+    
             Object.entries(guestProfileData).forEach(([key, value]) => {
                 headers[`Guest-${key}`] = value !== undefined ? String(value) : "";
             });
-
-            // Se for o hóspede principal ou adicional, adiciona o guestID como profileID
+    
             let guestID = "";
-
+    
             if (isMainGuest) {
-                guestID = mainGuestID; // Para o hóspede principal, usa o mainGuestID
+                guestID = mainGuestID;
             } else if (isAdditionalGuest) {
-                guestID = selectedGuestID; // Para o hóspede adicional, usa o selectedGuestID
+                guestID = selectedGuestID;
             }
-
-            // Se houver guestID (para principal ou adicional), inclui no header
+    
             if (guestID) {
                 headers["profileID"] = guestID;
             }
-
-            // Aqui estamos logando os dados que serão enviados
+    
             console.log("Enviando dados para o servidor com os seguintes headers:");
             console.log(headers);
-
-            // Envia os dados para o endpoint determinado
+    
             const response = await axios.post(url, {}, { headers });
-
+    
             if (response.status === 200) {
-                // Verifica se houve um InsertedID (para unknown guest recém-criado)
-                if (!guestID && response.data?.InsertedID) {
+                // Só atualiza guestID com InsertedID se for hóspede desconhecido
+                if (isUnknownGuest && response.data?.InsertedID) {
                     guestID = response.data.InsertedID;
                 }
-
-                // Se for opt-in, faz update da política de privacidade com o ID retornado
+    
+                // Atualiza política de privacidade, se necessário
                 if (enabledDataP && guestID) {
                     try {
                         await axios.post("/api/sysConectorStay/update_guest_privacy_policy", {
                             profileID: guestID,
                         });
                     } catch (privacyErr) {
-                        console.log("Erro ao atualizar política de privacidade:", privacyErr);
+                        console.warn("Erro ao atualizar política de privacidade:", privacyErr);
                     }
                 }
+    
                 const updatedGuestData = {
                     protelSalution: salutation,
                     birthDate,
@@ -335,14 +329,15 @@ export default function GuestProfile() {
                     protelGuestFirstName: firstName,
                     protelGuestLastName: lastName,
                 };
-
-                // Atualiza sessionStorage conforme o tipo de hóspede
+    
                 if (isMainGuest && mainGuestID) {
                     sessionStorage.setItem(mainGuestID, JSON.stringify([updatedGuestData]));
                 } else if (isAdditionalGuest && selectedGuestID) {
                     sessionStorage.setItem(selectedGuestID, JSON.stringify([updatedGuestData]));
+                } else if (isUnknownGuest && guestID) {
+                    sessionStorage.setItem(guestID, JSON.stringify([updatedGuestData]));
                 }
-
+    
                 alert("Dados salvos com sucesso!");
                 router.push('/reservation/details').then(() => {
                     window.location.reload();
@@ -353,7 +348,7 @@ export default function GuestProfile() {
         } catch (err) {
             setError("Erro ao enviar os dados. Tente novamente.");
         }
-    };
+    };    
 
     const fetchNationalities = async () => {
         const response = await axios.get(`/api/sysConectorStay/get_countries?propertyID=${propertyID}`);
