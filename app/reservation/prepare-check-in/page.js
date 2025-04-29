@@ -139,8 +139,11 @@ export default function PrepareCheckIn() {
 
             console.log(pdfBase64);
 
-            // Comprime o base64
-            const compressedBase64 = pako.deflate(pdfBase64, { to: "string" });
+            // Comprime o base64 como Uint8Array
+            const compressed = pako.deflate(pdfBase64);
+
+            // Codifica como base64 para enviar no JSON
+            const compressedBase64 = btoa(String.fromCharCode(...compressed));
 
             // Envia como string comprimida (e marca no header ou payload que está comprimido)
             await axios.post("/api/sysConectorStay/precheckin", {
