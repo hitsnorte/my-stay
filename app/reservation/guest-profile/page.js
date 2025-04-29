@@ -293,21 +293,21 @@ export default function GuestProfile() {
             const response = await axios.post(url, {}, { headers });
     
             if (response.status === 200) {
-                // Só atualiza guestID com InsertedID se for hóspede desconhecido
-                if (isUnknownGuest && response.data?.InsertedID) {
-                    guestID = response.data.InsertedID;
-                }
+                // // Só atualiza guestID com InsertedID se for hóspede desconhecido
+                // if (isUnknownGuest && response.data?.InsertedID) {
+                //     guestID = response.data.InsertedID;
+                // }
     
-                // Atualiza política de privacidade, se necessário
-                if (enabledDataP && guestID) {
-                    try {
-                        await axios.post("/api/sysConectorStay/update_guest_privacy_policy", {
-                            profileID: guestID,
-                        });
-                    } catch (privacyErr) {
-                        console.warn("Erro ao atualizar política de privacidade:", privacyErr);
-                    }
-                }
+                // // Atualiza política de privacidade, se necessário
+                // if (enabledDataP && guestID) {
+                //     try {
+                //         await axios.post("/api/sysConectorStay/update_guest_privacy_policy", {
+                //             profileID: guestID,
+                //         });
+                //     } catch (privacyErr) {
+                //         console.warn("Erro ao atualizar política de privacidade:", privacyErr);
+                //     }
+                // }
     
                 const updatedGuestData = {
                     protelSalution: salutation,
