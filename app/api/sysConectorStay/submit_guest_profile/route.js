@@ -23,7 +23,7 @@ export async function POST(request) {
       birthday_date: headers.get("Guest-birthDate"),
       nationality_integer: parseInt(headers.get("Guest-nationality")),
       CountryID_CodeNrColumnFromNatcode_integer: parseInt(headers.get("Guest-country")),
-      CountryID_LandColumnFromNatcode_string80: headers.get("Guest-countryText"),
+      CountryID_LandColumnFromNatcode_string80: "Portugal",
       emailaddress_string75: headers.get("Guest-email"),
       guestPhone_string50: headers.get("Guest-phone"),
       mobilePhone_string50: headers.get("Guest-mobile"),
