@@ -54,8 +54,14 @@ export async function POST(request) {
   } catch (error) {
     console.error("Erro no precheckin:", error.message);
     return new NextResponse(
-      JSON.stringify({ error: "Erro ao processar o precheckin." }),
-      { status: 500, headers: { "Content-Type": "application/json; charset=utf-8" } }
+      JSON.stringify({
+        error: "Erro ao processar o precheckin.",
+        message: error.message, // Corrigido aqui
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+      }
     );
-  }
+  }  
 }
