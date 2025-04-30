@@ -221,12 +221,12 @@ export default function GuestProfile() {
     const handleSave = async () => {
         const token = sessionStorage.getItem("reservationToken");
         console.log("ID", mainGuestID);
-    
+
         if (!token) {
             setError("Token de reserva não encontrado.");
             return;
         }
-    
+
         const guestProfileData = {
             propertyID,
             reservationID,
@@ -252,63 +252,64 @@ export default function GuestProfile() {
             marketingOptIn: enabledMarketing,
             dataProcessingOptIn: enabledDataP,
         };
-    
+
         const guestType = sessionStorage.getItem("selectedGuestType");
         const selectedGuestID = sessionStorage.getItem("selectedGuestID");
-    
+
         const isUnknownGuest = guestType === "unknown";
-        const isMainGuest = guestType === "main";
-        const isAdditionalGuest = guestType === "additional" && selectedGuestID;
-    
+        const isKnownGuest = guestType === "main" || guestType === "additional";
+
         let url = "/api/sysConectorStay/submit_guest_profile";
-        if (isMainGuest || isAdditionalGuest) {
+        if (isKnownGuest && selectedGuestID) {
             url = "/api/sysConectorStay/update_guest_profile";
         }
-    
+
         try {
             const headers = {
                 "Content-Type": "application/json",
                 "Reservation-Token": token,
             };
-    
+
             Object.entries(guestProfileData).forEach(([key, value]) => {
                 headers[`Guest-${key}`] = value !== undefined ? String(value) : "";
             });
-    
-            let guestID = "";
-    
-            if (isMainGuest) {
-                guestID = mainGuestID;
-            } else if (isAdditionalGuest) {
-                guestID = selectedGuestID;
+
+            // Envia guestID (profileID) se conhecido
+            if (isKnownGuest && selectedGuestID && selectedGuestID !== "unknown") {
+                headers["profileID"] = selectedGuestID;
             }
-    
-            if (guestID) {
-                headers["profileID"] = guestID;
-            }
-    
-            console.log("Enviando dados para o servidor com os seguintes headers:");
-            console.log(headers);
-    
+
+            console.log("Enviando headers:", headers);
+
             const response = await axios.post(url, {}, { headers });
-    
+
+            let guestID = selectedGuestID;
+
             if (response.status === 200) {
-                // Só atualiza guestID com InsertedID se for hóspede desconhecido
                 if (isUnknownGuest && response.data?.InsertedID) {
                     guestID = response.data.InsertedID;
                 }
-    
-                // Atualiza política de privacidade, se necessário
+
+                // Atualiza política de privacidade se necessário
                 if (enabledDataP && guestID) {
+                    console.log("Tentando atualizar política de privacidade...");
+                    console.log("enabledDataP:", enabledDataP);
+                    console.log("guestID enviado para política de privacidade:", guestID);
+
                     try {
-                        await axios.post("/api/sysConectorStay/update_guest_privacy_policy", {
+                        const response = await axios.post("/api/sysConectorStay/update_guest_privacy_policy", {
                             profileID: guestID,
                         });
+                        console.log("Resposta da política de privacidade:", response.data);
                     } catch (privacyErr) {
                         console.warn("Erro ao atualizar política de privacidade:", privacyErr);
                     }
+                } else {
+                    console.warn("Política de privacidade NÃO atualizada.");
+                    console.log("enabledDataP:", enabledDataP);
+                    console.log("guestID:", guestID);
                 }
-    
+
                 const updatedGuestData = {
                     protelSalution: salutation,
                     birthDate,
@@ -329,15 +330,11 @@ export default function GuestProfile() {
                     protelGuestFirstName: firstName,
                     protelGuestLastName: lastName,
                 };
-    
-                if (isMainGuest && mainGuestID) {
-                    sessionStorage.setItem(mainGuestID, JSON.stringify([updatedGuestData]));
-                } else if (isAdditionalGuest && selectedGuestID) {
-                    sessionStorage.setItem(selectedGuestID, JSON.stringify([updatedGuestData]));
-                } else if (isUnknownGuest && guestID) {
+
+                if (guestID) {
                     sessionStorage.setItem(guestID, JSON.stringify([updatedGuestData]));
                 }
-    
+
                 alert("Dados salvos com sucesso!");
                 router.push('/reservation/details').then(() => {
                     window.location.reload();
@@ -346,10 +343,10 @@ export default function GuestProfile() {
                 setError("Erro ao salvar os dados.");
             }
         } catch (err) {
+            console.error(err);
             setError("Erro ao enviar os dados. Tente novamente.");
         }
-    };    
-
+    };
     const fetchNationalities = async () => {
         const response = await axios.get(`/api/sysConectorStay/get_countries?propertyID=${propertyID}`);
         return response.data;
