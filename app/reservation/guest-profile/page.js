@@ -299,6 +299,7 @@ export default function GuestProfile() {
                     try {
                         const response = await axios.post("/api/sysConectorStay/update_guest_privacy_policy", {
                             profileID: guestID,
+                            propertyID: propertyID
                         });
                         console.log("Resposta da política de privacidade:", response.data);
                     } catch (privacyErr) {
