@@ -34,7 +34,7 @@
         "Title": "Perfil do Hóspede",
         "GuestDetails": {
             "Title": "Detalhes do Hóspede",
-            "Salutation": "Tratamento",
+            "Salutation": "Saudação",
             "FirstName": "Primeiro Nome",
             "LastName": "Último Nome",
             "DateOfBirth": "Data de Nascimento",
@@ -55,15 +55,15 @@
         },
         "PersonalID": {
             "Title": "Personal ID",
-            "DocumentType": "Tipo de documento",
-            "DocumentNumber": "Nrm. de documento",
+            "DocumentType": "Tipo de Documento",
+            "DocumentNumber": "Número de Documento",
             "IssueDate": "Data de Emissão",
             "ExpiracyDate": "Data de Validade",
             "CountryOfBirth": "País de Nascimento"
         },
         "InvoiceData": {
-            "Title": "Dados da fatura",
-            "VatNo": "Nrm. contribuinte"
+            "Title": "Dados da Fatura",
+            "VatNo": "Número Contribuinte"
         },
         "Privacy": {
             "Title": "Privacidade",
