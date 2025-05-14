@@ -32,6 +32,10 @@
     },
     "GuestProfile": {
         "Title": "Perfil do Hóspede",
+        "PopUpModal": {
+            "Title": "Campos Obrigatórios por Preencher",
+            "Message": "Por favor, preencha os campos obrigatórios: Nome, Apelido, Email e País."
+        },
         "GuestDetails": {
             "Title": "Detalhes do Hóspede",
             "Salutation": "Saudação",

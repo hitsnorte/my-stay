@@ -22,6 +22,8 @@ import countryDialCodes from "@/lib/countryDialCodes.json";
 
 import "./style.css";
 
+import PopUpModal from "@/components/popup_modal/page";
+
 const translations = { en, pt };
 
 // Função para formatar a data
@@ -97,6 +99,9 @@ export default function GuestProfile() {
     const [locale, setLocale] = useState("en"); // Idioma padrão
 
     const [open, setOpen] = useState(false);
+
+    const [showModal, setShowModal] = useState(false);
+    const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
     useEffect(() => {
         // Verifica o idioma armazenado no localStorage ao carregar a página
@@ -216,6 +221,15 @@ export default function GuestProfile() {
     };
 
     const handleSave = async () => {
+        if (!firstName || !lastName || !email || !country) {
+            setModalContent({
+                title: t.GuestProfile.PopUpModal.Title,
+                message: t.GuestProfile.PopUpModal.Message,
+            });
+            setShowModal(true);
+            return;
+        }
+
         const token = sessionStorage.getItem("reservationToken");
         console.log("ID", mainGuestID);
 
@@ -629,6 +643,7 @@ export default function GuestProfile() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="text-right focus:outline-none w-120"
+                                    pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
                                 />
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
@@ -815,6 +830,13 @@ export default function GuestProfile() {
                 </>
             ) : (
                 <p>Carregando...</p>
+            )}
+            {showModal && (
+                <PopUpModal
+                    title={modalContent.title}
+                    message={modalContent.message}
+                    onClose={() => setShowModal(false)}
+                />
             )}
         </main>
     );

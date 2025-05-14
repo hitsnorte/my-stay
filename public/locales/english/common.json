@@ -1,6 +1,6 @@
 {
     "Reservation": {
-        "Reservation":"Reservation",
+        "Reservation": "Reservation",
         "Nights": "Night(s)",
         "ContactUs": "Contact us",
         "CheckIn": "Prepare Check-In",
@@ -32,6 +32,10 @@
     },
     "GuestProfile": {
         "Title": "Guest Profile",
+        "PopUpModal": {
+            "Title": "Mandatory Fields to Fill Out",
+            "Message": "Please fill in the required fields: First Name, Last Name, Email and Country."
+        },
         "GuestDetails": {
             "Title": "Guest Details",
             "Salutation": "Salutation",
