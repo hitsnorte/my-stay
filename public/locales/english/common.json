@@ -44,7 +44,9 @@
             "Title": "Mandatory Fields to Fill Out",
             "Message": "Please make sure you fill in all required fields before proceeding: First Name, Last Name, Email, Country, Document Type and Number, Expiry Date and Country of Birth.",
             "ErrorTitle": "Action not completed",
-            "ErrorMessage": "An error occurred while saving. Please contact support."
+            "ErrorMessage": "An error occurred while saving. Please contact support.",
+            "SuccessTitle": "Saved successfully",
+            "SuccessMessage": "The operation was performed successfully."
         },
         "GuestDetails": {
             "Title": "Guest Details",

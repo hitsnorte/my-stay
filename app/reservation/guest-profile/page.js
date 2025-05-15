@@ -102,6 +102,7 @@ export default function GuestProfile() {
 
     const [showModal, setShowModal] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
+    const [wasSuccessful, setWasSuccessful] = useState(false);
 
     useEffect(() => {
         // Verifica o idioma armazenado no localStorage ao carregar a página
@@ -218,6 +219,13 @@ export default function GuestProfile() {
         // Caso contrário, retorna normalmente
         const value = data[field] || "";
         return formatDateFlag && value ? formatDate(value) : value;
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        if (wasSuccessful) {
+            router.push('/reservation/details');
+        }
     };
 
     const handleSave = async () => {
@@ -347,10 +355,12 @@ export default function GuestProfile() {
                     sessionStorage.setItem(guestID, JSON.stringify([updatedGuestData]));
                 }
 
-                alert("Dados salvos com sucesso!");
-                router.push('/reservation/details').then(() => {
-                    window.location.reload();
+                setModalContent({
+                    title: t.GuestProfile.PopUpModal.SuccessTitle,
+                    message: t.GuestProfile.PopUpModal.SuccessMessage,
                 });
+                setWasSuccessful(true);
+                setShowModal(true);
             } else {
                 setError("Erro ao salvar os dados.");
                 setModalContent({
@@ -844,7 +854,7 @@ export default function GuestProfile() {
                 <PopUpModal
                     title={modalContent.title}
                     message={modalContent.message}
-                    onClose={() => setShowModal(false)}
+                    onClose={handleCloseModal}
                 />
             )}
         </main>

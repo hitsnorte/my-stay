@@ -44,7 +44,9 @@
             "Title": "Campos Obrigatórios por Preencher",
             "Message": "Certifique-se de preencher todos os campos obrigatórios antes de prosseguir: Nome, Apelido, E-mail, País, Tipo e Número do Documento, Data de Validade e País de Nascimento.",
             "ErrorTitle": "Ação não concluída",
-            "ErrorMessage": "Ocorreu um erro ao guardar. Por favor contacte o suporte."
+            "ErrorMessage": "Ocorreu um erro ao guardar. Por favor contacte o suporte.",
+            "SuccessTitle": "Guardado com sucesso",
+            "SuccessMessage": "A operação foi executada com êxito"
         },
         "GuestDetails": {
             "Title": "Detalhes do Hóspede",
