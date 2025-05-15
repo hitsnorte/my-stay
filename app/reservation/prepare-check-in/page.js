@@ -19,6 +19,8 @@ import "./style.css";
 
 import pako from "pako";
 
+import PopUpModal from "@/components/popup_modal/page";
+
 const translations = { en, pt };
 
 export default function PrepareCheckIn() {
@@ -37,6 +39,10 @@ export default function PrepareCheckIn() {
     const [propertyInfo, setPropertyInfo] = useState(null);
 
     const [locale, setLocale] = useState("en"); // Idioma padrão
+
+    const [showModal, setShowModal] = useState(false);
+    const [modalContent, setModalContent] = useState({ title: '', message: '' });
+    const [wasSuccessful, setWasSuccessful] = useState(false);
 
     // Esse useEffect chama a API quando propertyID estiver definido
     useEffect(() => {
@@ -115,13 +121,29 @@ export default function PrepareCheckIn() {
         setSignatureExists(!!savedSignature);
     }, []);
 
+    const handleCloseModal = () => {
+        setShowModal(false);
+        if (wasSuccessful) {
+            router.push('/reservation/details');
+        }
+    };
+
     const handleSave = async () => {
         if (!signatureExists) {
-            alert("Você precisa adicionar a assinatura antes de continuar.");
+            setModalContent({
+                title: t.PrepareCheckIn.PopUpModal.ErrorTitle,
+                message: t.PrepareCheckIn.PopUpModal.MissingSignature,
+            });
+            setShowModal(true);
             return;
         }
         if (!mainGuestData) {
-            alert("Erro: Dados do hóspede principal não encontrados.");
+            setModalContent({
+                title: t.PrepareCheckIn.PopUpModal.ErrorTitle,
+                message: t.PrepareCheckIn.PopUpModal.MissingGuest,
+            });
+            setWasSuccessful(true);
+            setShowModal(true);
             return;
         }
         if (!data || !propertyID) return;
@@ -154,10 +176,19 @@ export default function PrepareCheckIn() {
                 pdfBase64: compressedBase64,
             });
 
-            alert("Dados enviados com sucesso!");
+            setModalContent({
+                title: t.PrepareCheckIn.PopUpModal.SuccessTitle,
+                message: t.PrepareCheckIn.PopUpModal.SuccessMessage,
+            });
+            setWasSuccessful(true);
+            setShowModal(true);
         } catch (err) {
             console.error("Erro ao criar o PDF ou enviar os dados:", err);
-            alert("Ocorreu um erro ao salvar.");
+            setModalContent({
+                title: t.PrepareCheckIn.PopUpModal.ErrorTitle,
+                message: t.PrepareCheckIn.PopUpModal.ErrorMessage,
+            });
+            setShowModal(true);
         }
     };
 
@@ -432,6 +463,13 @@ export default function PrepareCheckIn() {
                 </>
             ) : (
                 <p>Carregando...</p>
+            )}
+            {showModal && (
+                <PopUpModal
+                    title={modalContent.title}
+                    message={modalContent.message}
+                    onClose={handleCloseModal}
+                />
             )}
         </main>
     )

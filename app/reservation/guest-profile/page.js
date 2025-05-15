@@ -221,7 +221,7 @@ export default function GuestProfile() {
     };
 
     const handleSave = async () => {
-        if (!firstName || !lastName || !email || !country) {
+        if (!firstName || !lastName || !email || !country || !identificationDocument || !docNo || !documentExpirationDate || !birthCountry) {
             setModalContent({
                 title: t.GuestProfile.PopUpModal.Title,
                 message: t.GuestProfile.PopUpModal.Message,
@@ -353,10 +353,19 @@ export default function GuestProfile() {
                 });
             } else {
                 setError("Erro ao salvar os dados.");
+                setModalContent({
+                    title: t.GuestProfile.PopUpModal.ErrorTitle,
+                    message: t.GuestProfile.PopUpModal.ErrorMessage,
+                });
+                setShowModal(true);
             }
         } catch (err) {
-            console.error(err);
-            setError("Erro ao enviar os dados. Tente novamente.");
+            console.log(err);
+            setModalContent({
+                title: t.GuestProfile.PopUpModal.ErrorTitle,
+                message: t.GuestProfile.PopUpModal.ErrorMessage,
+            });
+            setShowModal(true);
         }
     };
     const fetchNationalities = async () => {
@@ -536,7 +545,7 @@ export default function GuestProfile() {
                             </div>
 
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>{t.GuestProfile.GuestDetails.LastName}</p>
+                                <p>{t.GuestProfile.GuestDetails.LastName}*</p>
                                 <input
                                     type="text"
                                     value={lastName}  // Usa diretamente o estado lastName
@@ -546,7 +555,7 @@ export default function GuestProfile() {
                             </div>
 
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>{t.GuestProfile.GuestDetails.FirstName}</p>
+                                <p>{t.GuestProfile.GuestDetails.FirstName}*</p>
                                 <input
                                     type="text"
                                     value={firstName}
@@ -613,7 +622,7 @@ export default function GuestProfile() {
                                 />
                             </div>
                             <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>{t.GuestProfile.Address.Country}</p>
+                                <p>{t.GuestProfile.Address.Country}*</p>
                                 <Select
                                     options={countryOptions}
                                     value={
@@ -637,7 +646,7 @@ export default function GuestProfile() {
                         </div>
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>{t.GuestProfile.Contact.Email}</p>
+                                <p>{t.GuestProfile.Contact.Email}*</p>
                                 <input
                                     type="text"
                                     value={email}
@@ -672,7 +681,7 @@ export default function GuestProfile() {
                         </div>
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>{t.GuestProfile.PersonalID.DocumentType}</p>
+                                <p>{t.GuestProfile.PersonalID.DocumentType}*</p>
                                 <Select
                                     options={docTypeOptions}
                                     value={docTypeOptions.find(option => option.value === String(identificationDocument)) || null} // Garantir que está usando 'value'
@@ -683,7 +692,7 @@ export default function GuestProfile() {
 
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>{t.GuestProfile.PersonalID.DocumentNumber}</p>
+                                <p>{t.GuestProfile.PersonalID.DocumentNumber}*</p>
                                 <input
                                     type="text"
                                     value={docNo}
@@ -701,7 +710,7 @@ export default function GuestProfile() {
                                 />
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>{t.GuestProfile.PersonalID.ExpiracyDate}</p>
+                                <p>{t.GuestProfile.PersonalID.ExpiracyDate}*</p>
                                 <input
                                     type="date"
                                     value={formatDate(documentExpirationDate)}
@@ -710,7 +719,7 @@ export default function GuestProfile() {
                                 />
                             </div>
                             <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>{t.GuestProfile.PersonalID.CountryOfBirth}</p>
+                                <p>{t.GuestProfile.PersonalID.CountryOfBirth}*</p>
                                 <Select
                                     options={countryOptions}
                                     value={

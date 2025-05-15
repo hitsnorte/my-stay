@@ -28,13 +28,23 @@
         "AddSignature": "Adicione a assinatura",
         "Missing": "(Em falta)",
         "Done": "(Submetida)",
-        "Save": "Guardar"
+        "Save": "Guardar",
+        "PopUpModal": {
+            "ErrorTitle": "Ação não concluída",
+            "ErrorMessage": "Ocorreu um erro ao guardar. Por favor contacte o suporte.",
+            "MissingSignature": "Você precisa adicionar a assinatura antes de continuar.",
+            "MissingGuest": "Dados do hóspede principal não encontrados.",
+            "SuccessTitle": "Guardado com sucesso",
+            "SuccessMessage": "A operação foi executada com êxito"
+        }
     },
     "GuestProfile": {
         "Title": "Perfil do Hóspede",
         "PopUpModal": {
             "Title": "Campos Obrigatórios por Preencher",
-            "Message": "Por favor, preencha os campos obrigatórios: Nome, Apelido, Email e País."
+            "Message": "Certifique-se de preencher todos os campos obrigatórios antes de prosseguir: Nome, Apelido, E-mail, País, Tipo e Número do Documento, Data de Validade e País de Nascimento.",
+            "ErrorTitle": "Ação não concluída",
+            "ErrorMessage": "Ocorreu um erro ao guardar. Por favor contacte o suporte."
         },
         "GuestDetails": {
             "Title": "Detalhes do Hóspede",
