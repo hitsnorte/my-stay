@@ -7,7 +7,7 @@ const PopUpModal = ({ title, message, onClose }) => {
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
                 {/* Header com título à esquerda */}
                 <div className="bg-[#E6AC27] rounded-t-2xl p-4">
-                    <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+                    <h2 className="text-xl font-semibold text-white">{title}</h2>
                 </div>
 
                 {/* Conteúdo do modal */}
