@@ -25,11 +25,6 @@ module.exports = {
             header: '#8F857D',
         },
       },
-      dark: {
-        colors: {
-
-        }
-      }
     }
   })],
 };

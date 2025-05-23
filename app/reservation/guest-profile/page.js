@@ -13,6 +13,8 @@ import { BsShieldLockFill } from "react-icons/bs";
 
 import { jwtDecode } from "jwt-decode";
 
+import { IMaskInput } from 'react-imask';
+
 import Select from "react-select";
 
 import en from "../../../public/locales/english/common.json";
@@ -575,10 +577,11 @@ export default function GuestProfile() {
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>{t.GuestProfile.GuestDetails.DateOfBirth}</p>
-                                <input
-                                    type="date"
+                                <IMaskInput
+                                    mask="0000-00-00"
                                     value={formatDate(birthDate)}
-                                    onChange={(e) => { setBirthDate(e.target.value); }}
+                                    onAccept={(value) => setBirthDate(value)}
+                                    placeholder="yyyy-mm-dd"
                                     className="text-right focus:outline-none"
                                 />
                             </div>
@@ -712,19 +715,21 @@ export default function GuestProfile() {
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>{t.GuestProfile.PersonalID.IssueDate}</p>
-                                <input
-                                    type="date"
+                                <IMaskInput
+                                    mask="0000-00-00"
                                     value={formatDate(documentIssueDate)}
-                                    onChange={(e) => setDocumentIssueDate(e.target.value)}
+                                    onAccept={(value) => setDocumentIssueDate(value)}
+                                    placeholder="yyyy-mm-dd"
                                     className="text-right focus:outline-none"
                                 />
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>{t.GuestProfile.PersonalID.ExpiracyDate}*</p>
-                                <input
-                                    type="date"
+                                <IMaskInput
+                                    mask="0000-00-00"
                                     value={formatDate(documentExpirationDate)}
-                                    onChange={(e) => setDocumentExpirationDate(e.target.value)}
+                                    onAccept={(value) => setDocumentExpirationDate(value)}
+                                    placeholder="yyyy-mm-dd"
                                     className="text-right focus:outline-none"
                                 />
                             </div>

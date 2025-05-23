@@ -33,42 +33,42 @@ function ReservationContent() {
     // Novo estado para o idioma
     const [locale, setLocale] = useState("en");
 
-  // Carrega o idioma ao montar o componente
-useEffect(() => {
-    // 1. Pega o ID do main guest
-    const mainGuestID = sessionStorage.getItem("mainGuestID");
+    // Carrega o idioma ao montar o componente
+    useEffect(() => {
+        // 1. Pega o ID do main guest
+        const mainGuestID = sessionStorage.getItem("mainGuestID");
 
-    if (mainGuestID) {
-        // 2. Usa o ID para buscar o JSON do guest
-        const guestDataRaw = sessionStorage.getItem(mainGuestID);
-        if (guestDataRaw) {
-            try {
-                const guest = JSON.parse(guestDataRaw)[0]; // array com um objeto
-                const guestLangID = guest.guestLanguageID;
+        if (mainGuestID) {
+            // 2. Usa o ID para buscar o JSON do guest
+            const guestDataRaw = sessionStorage.getItem(mainGuestID);
+            if (guestDataRaw) {
+                try {
+                    const guest = JSON.parse(guestDataRaw)[0]; // array com um objeto
+                    const guestLangID = guest.guestLanguageID;
 
-                if (guestLangID === 9) {
-                    setLocale("pt");
-                    localStorage.setItem("lang", "pt");
-                    localStorage.setItem("langCode", "9");
-                    return;
-                } else if (guestLangID === 1) {
-                    setLocale("en");
-                    localStorage.setItem("lang", "en");
-                    localStorage.setItem("langCode", "1");
-                    return;
+                    if (guestLangID === 9) {
+                        setLocale("pt");
+                        localStorage.setItem("lang", "pt");
+                        localStorage.setItem("langCode", "9");
+                        return;
+                    } else if (guestLangID === 1) {
+                        setLocale("en");
+                        localStorage.setItem("lang", "en");
+                        localStorage.setItem("langCode", "1");
+                        return;
+                    }
+                } catch (err) {
+                    console.error("Erro ao processar os dados do guest:", err);
                 }
-            } catch (err) {
-                console.error("Erro ao processar os dados do guest:", err);
             }
         }
-    }
 
-    // 3. Se não encontrou no sessionStorage, tenta no localStorage
-    const savedLocale = localStorage.getItem("lang");
-    if (savedLocale && ["en", "pt"].includes(savedLocale)) {
-        setLocale(savedLocale);
-    }
-}, []);
+        // 3. Se não encontrou no sessionStorage, tenta no localStorage
+        const savedLocale = localStorage.getItem("lang");
+        if (savedLocale && ["en", "pt"].includes(savedLocale)) {
+            setLocale(savedLocale);
+        }
+    }, []);
 
     // Traduções com base no idioma
     const t = translations[locale];
@@ -230,7 +230,7 @@ useEffect(() => {
             ) : data ? (
                 <>
                     <div className="bg-[#8F857D] flex flex-row justify-between items-center h-12 pl-64 pr-64 header">
-                        <IoChevronBackOutline size={20} color="white" onClick={() => router.push("/")} />
+                        <div style={{ width: 20, height: 20 }}></div>
                         <p className="font-bold text-white">{t.Reservation.Reservation} {data.protelBookingID}</p>
                         <IoMdRefresh size={20} color="white" onClick={() => window.location.reload()} />
                     </div>
