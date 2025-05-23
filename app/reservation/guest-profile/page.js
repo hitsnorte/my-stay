@@ -579,6 +579,7 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.GuestDetails.DateOfBirth}</p>
                                 <IMaskInput
                                     mask="0000-00-00"
+                                    unmask={true} // valor bruto (sem formatação automática interna)
                                     value={formatDate(birthDate)}
                                     onChange={(e) => setBirthDate(e.target.value)}
                                     placeholder="yyyy-mm-dd"
@@ -717,6 +718,7 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.PersonalID.IssueDate}</p>
                                 <IMaskInput
                                     mask="0000-00-00"
+                                    unmask={true} // valor bruto (sem formatação automática interna)
                                     value={formatDate(documentIssueDate)}
                                     onChange={(e) => setDocumentIssueDate(e.target.value)}
                                     placeholder="yyyy-mm-dd"
@@ -727,6 +729,7 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.PersonalID.ExpiracyDate}*</p>
                                 <IMaskInput
                                     mask="0000-00-00"
+                                    unmask={true} // valor bruto (sem formatação automática interna)
                                     value={formatDate(documentExpirationDate)}
                                     onChange={(e) => setDocumentExpirationDate(e.target.value)}
                                     placeholder="yyyy-mm-dd"
