@@ -580,7 +580,7 @@ export default function GuestProfile() {
                                 <IMaskInput
                                     mask="0000-00-00"
                                     value={formatDate(birthDate)}
-                                    onAccept={(value) => setBirthDate(value)}
+                                    onChange={(e) => setBirthDate(e.target.value)}
                                     placeholder="yyyy-mm-dd"
                                     className="text-right focus:outline-none"
                                 />
@@ -718,7 +718,7 @@ export default function GuestProfile() {
                                 <IMaskInput
                                     mask="0000-00-00"
                                     value={formatDate(documentIssueDate)}
-                                    onAccept={(value) => setDocumentIssueDate(value)}
+                                    onChange={(e) => setDocumentIssueDate(e.target.value)}
                                     placeholder="yyyy-mm-dd"
                                     className="text-right focus:outline-none"
                                 />
@@ -728,7 +728,7 @@ export default function GuestProfile() {
                                 <IMaskInput
                                     mask="0000-00-00"
                                     value={formatDate(documentExpirationDate)}
-                                    onAccept={(value) => setDocumentExpirationDate(value)}
+                                    onChange={(e) => setDocumentExpirationDate(e.target.value)}
                                     placeholder="yyyy-mm-dd"
                                     className="text-right focus:outline-none"
                                 />
