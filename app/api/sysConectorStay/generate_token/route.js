@@ -157,7 +157,7 @@ export async function POST(request) {
     }
 
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: expiresInSeconds });
-    // const link = `http://localhost:3000/reservation/reservation?token=${token}`;
+    //const link = `http://localhost:3000/reservation/reservation?token=${token}`;
     const link = `https://stay.mypms.pt/reservation/reservation?token=${token}`;
 
     // Inserção no banco stayRecords
