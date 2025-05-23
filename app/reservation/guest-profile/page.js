@@ -519,6 +519,22 @@ export default function GuestProfile() {
         setMobile(dialCode + ' ' + value); // Adiciona o código de país apenas uma vez
     };
 
+    const handleDateInput = (value, setFn) => {
+        let digits = value.replace(/\D/g, "");
+
+        if (digits.length > 8) digits = digits.slice(0, 8);
+
+        let formatted = digits;
+        if (digits.length > 4) {
+            formatted = `${digits.slice(0, 4)}-${digits.slice(4, 6)}`;
+        }
+        if (digits.length > 6) {
+            formatted = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+        }
+
+        setFn(formatted);
+    };
+
     return (
         <main>
             {error ? (
@@ -577,21 +593,16 @@ export default function GuestProfile() {
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>{t.GuestProfile.GuestDetails.DateOfBirth}</p>
-                                {/* <IMaskInput
-                                    mask="0000-00-00"
+                                {/* <input
+                                    type="date"
                                     value={formatDate(birthDate)}
-                                    onAccept={(value) => setBirthDate(value)}
-                                    placeholder="yyyy-mm-dd"
+                                    onChange={(e) => { setBirthDate(e.target.value); }}
                                     className="text-right focus:outline-none"
                                 /> */}
-                                 <IMaskInput
-                                    mask="0000-00-00"
-                                    lazy={false}             
-                                    autofix={false}       
-                                    overwrite={true}         
-                                    unmask={true}            
-                                    value={formatDate(birthDate)} 
-                                    onAccept={(value) => setBirthDate(value)} 
+                                <input
+                                    type="text"
+                                    value={formatDate(birthDate)}
+                                    onChange={(e) => handleDateInput(e.target.value, setBirthDate)}
                                     placeholder="yyyy-mm-dd"
                                     className="text-right focus:outline-none"
                                 />
@@ -726,42 +737,32 @@ export default function GuestProfile() {
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>{t.GuestProfile.PersonalID.IssueDate}</p>
-                                {/* <IMaskInput
-                                    mask="0000-00-00"
+                                {/* <input
+                                    type="date"
                                     value={formatDate(documentIssueDate)}
-                                    onAccept={(value) => setDocumentIssueDate(value)}
-                                    placeholder="yyyy-mm-dd"
+                                    onChange={(e) => setDocumentIssueDate(e.target.value)}
                                     className="text-right focus:outline-none"
                                 /> */}
-                                <IMaskInput
-                                    mask="0000-00-00"
-                                    lazy={false}             
-                                    autofix={false}       
-                                    overwrite={true}         
-                                    unmask={true}            
-                                    value={formatDate(documentIssueDate)} 
-                                    onAccept={(value) => setDocumentIssueDate(value)} 
+                                <input
+                                    type="text"
+                                    value={formatDate(documentIssueDate)}
+                                    onChange={(e) => handleDateInput(e.target.value, setDocumentIssueDate)}
                                     placeholder="yyyy-mm-dd"
                                     className="text-right focus:outline-none"
                                 />
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>{t.GuestProfile.PersonalID.ExpiracyDate}*</p>
-                                {/* <IMaskInput
-                                    mask="0000-00-00"
+                                {/* <input
+                                    type="date"
                                     value={formatDate(documentExpirationDate)}
                                     onChange={(e) => setDocumentExpirationDate(e.target.value)}
-                                    placeholder="yyyy-mm-dd"
                                     className="text-right focus:outline-none"
                                 /> */}
-                                <IMaskInput
-                                    mask="0000-00-00"
-                                    lazy={false}             
-                                    autofix={false}       
-                                    overwrite={true}         
-                                    unmask={true}            
-                                    value={formatDate(documentExpirationDate)} 
-                                    onAccept={(value) => setDocumentExpirationDate(value)} 
+                                <input
+                                    type="text"
+                                    value={formatDate(documentExpirationDate)}
+                                    onChange={(e) => handleDateInput(e.target.value, setDocumentExpirationDate)}
                                     placeholder="yyyy-mm-dd"
                                     className="text-right focus:outline-none"
                                 />
