@@ -45,7 +45,7 @@ export default function ReservationInfo() {
     const [requestID, setRequestID] = useState(null);
     const [propertyID, setPropertyID] = useState(null);
     const [mainGuestData, setMainGuestData] = useState(null);
-  const [birthDate, setBirthDate] = useState('2002-05-25');
+
     const [locale, setLocale] = useState("en"); // Idioma padrão
 
     useEffect(() => {
@@ -386,19 +386,6 @@ export default function ReservationInfo() {
                                 <MdArrowForwardIos />
                             </div>
                         </div>
-                    <input
-  type="text"
-  value={birthDate}
-  onChange={(e) => {
-    let input = e.target.value.replace(/\D/g, ""); // Remove tudo que não for número
-    if (input.length > 4) input = input.slice(0, 4) + "-" + input.slice(4);
-    if (input.length > 7) input = input.slice(0, 7) + "-" + input.slice(7, 10);
-    setBirthDate(input);
-  }}
-  placeholder="aaaa-mm-dd"
-  maxLength={10}
-  className="text-right focus:outline-none border p-2"
-/>
                         {/* Exibe o QR Code se showQRCode for true */}
                         {showQRCode && encryptedData && (
                             <div className="flex justify-center mt-4">
