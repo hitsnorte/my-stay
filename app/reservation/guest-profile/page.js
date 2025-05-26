@@ -13,8 +13,6 @@ import { BsShieldLockFill } from "react-icons/bs";
 
 import { jwtDecode } from "jwt-decode";
 
-import { IMaskInput } from 'react-imask';
-
 import Select from "react-select";
 
 import en from "../../../public/locales/english/common.json";
@@ -30,18 +28,25 @@ const translations = { en, pt };
 
 // Função para formatar a data
 const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    try {
-        const date = new Date(dateStr);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-    } catch (err) {
-        console.error("Erro ao formatar a data:", err);
-        return "";
-    }
+  if (!dateStr || typeof dateStr !== "string") return "";
+
+  // Se já estiver no formato "yyyy-mm-dd", retorna como está
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return ""; // Data inválida
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  } catch (err) {
+    console.error("Erro ao formatar a data:", err);
+    return "";
+  }
 };
+
 
 const customStyles = {
     control: (provided) => ({
@@ -444,7 +449,7 @@ export default function GuestProfile() {
         if (!data) return;
 
         setSalutation(renderGuestData("protelSalutation"));
-        setBirthDate(renderGuestData("birthDate"));
+       setBirthDate(formatDate(renderGuestData("birthDate")));
         setNationality(renderGuestData("nationality"));
         setCountry(renderGuestData("protelCountryID"));
         setStreetAddress(renderGuestData("protelAddress"));
@@ -455,8 +460,8 @@ export default function GuestProfile() {
         setMobile(renderGuestData("protelGuestMobilePhone"));
         setDocNo(renderGuestData("identificationDocument"));
         setIdentificationDocument(renderGuestData("protelDocType"));
-        setDocumentExpirationDate(renderGuestData("documentExpirationDate"));
-        setDocumentIssueDate(renderGuestData("documentIssueDate"));
+        setDocumentExpirationDate(formatDate(renderGuestData("documentExpirationDate")));
+        setDocumentIssueDate(formatDate(renderGuestData("documentIssueDate")));
         setBirthCountry(renderGuestData("birthCountry"));
         setVatNo(renderGuestData("vatNo"));
 
@@ -582,7 +587,7 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.GuestDetails.DateOfBirth}</p>
                                 <input
                                     type="text"
-                                    value={formatDate(birthDate)}
+                                    value={birthDate}
                                     onChange={(e) => setBirthDate(formatInputDate(e.target.value))}
                                     placeholder="aaaa-mm-dd"
                                     className="text-right focus:outline-none border p-2"
@@ -720,7 +725,7 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.PersonalID.IssueDate}</p>
                                 <input
                                     type="text"
-                                    value={formatDate(documentIssueDate)}
+                                    value={documentIssueDate}
                                     onChange={(e) => setDocumentIssueDate(formatInputDate(e.target.value))}
                                     placeholder="aaaa-mm-dd"
                                     className="text-right focus:outline-none border p-2"
@@ -730,7 +735,7 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.PersonalID.ExpiracyDate}*</p>
                                 <input
                                     type="text"
-                                    value={formatDate(documentExpirationDate)}
+                                    value={documentExpirationDate}
                                     onChange={(e) => setDocumentExpirationDate(formatInputDate(e.target.value))}
                                     placeholder="aaaa-mm-dd"
                                     className="text-right focus:outline-none border p-2"
