@@ -590,7 +590,7 @@ export default function GuestProfile() {
                                     value={birthDate}
                                     onChange={(e) => setBirthDate(formatInputDate(e.target.value))}
                                     placeholder="aaaa-mm-dd"
-                                    className="text-right focus:outline-none border p-2"
+                                    className="text-right focus:outline-none p-2"
                                 />
                             </div>
 
@@ -728,7 +728,7 @@ export default function GuestProfile() {
                                     value={documentIssueDate}
                                     onChange={(e) => setDocumentIssueDate(formatInputDate(e.target.value))}
                                     placeholder="aaaa-mm-dd"
-                                    className="text-right focus:outline-none border p-2"
+                                    className="text-right focus:outline-none p-2"
                                 />
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
@@ -738,7 +738,7 @@ export default function GuestProfile() {
                                     value={documentExpirationDate}
                                     onChange={(e) => setDocumentExpirationDate(formatInputDate(e.target.value))}
                                     placeholder="aaaa-mm-dd"
-                                    className="text-right focus:outline-none border p-2"
+                                    className="text-right focus:outline-none p-2"
                                 />
                             </div>
                             <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
