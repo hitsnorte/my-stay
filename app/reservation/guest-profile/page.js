@@ -31,9 +31,7 @@ const translations = { en, pt };
 // Função para formatar a data
 const formatDate = (dateStr) => {
     if (!dateStr) return "";
-
     try {
-        // Converte diretamente se vier no formato ISO
         const date = new Date(dateStr);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -44,8 +42,6 @@ const formatDate = (dateStr) => {
         return "";
     }
 };
-
-
 
 const customStyles = {
     control: (provided) => ({
@@ -519,20 +515,11 @@ export default function GuestProfile() {
         setMobile(dialCode + ' ' + value); // Adiciona o código de país apenas uma vez
     };
 
-    const handleDateInput = (value, setFn) => {
-        let digits = value.replace(/\D/g, "");
-
-        if (digits.length > 8) digits = digits.slice(0, 8);
-
-        let formatted = digits;
-        if (digits.length > 4) {
-            formatted = `${digits.slice(0, 4)}-${digits.slice(4, 6)}`;
-        }
-        if (digits.length > 6) {
-            formatted = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
-        }
-
-        setFn(formatted);
+    const formatInputDate = (value) => {
+        let input = value.replace(/\D/g, "");
+        if (input.length > 4) input = input.slice(0, 4) + "-" + input.slice(4);
+        if (input.length > 7) input = input.slice(0, 7) + "-" + input.slice(7, 10);
+        return input;
     };
 
     return (
@@ -593,18 +580,12 @@ export default function GuestProfile() {
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>{t.GuestProfile.GuestDetails.DateOfBirth}</p>
-                                {/* <input
-                                    type="date"
-                                    value={formatDate(birthDate)}
-                                    onChange={(e) => { setBirthDate(e.target.value); }}
-                                    className="text-right focus:outline-none"
-                                /> */}
                                 <input
                                     type="text"
                                     value={formatDate(birthDate)}
-                                    onChange={(e) => handleDateInput(e.target.value, setBirthDate)}
-                                    placeholder="yyyy-mm-dd"
-                                    className="text-right focus:outline-none"
+                                    onChange={(e) => setBirthDate(formatInputDate(e.target.value))}
+                                    placeholder="aaaa-mm-dd"
+                                    className="text-right focus:outline-none border p-2"
                                 />
                             </div>
 
@@ -737,34 +718,22 @@ export default function GuestProfile() {
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>{t.GuestProfile.PersonalID.IssueDate}</p>
-                                {/* <input
-                                    type="date"
-                                    value={formatDate(documentIssueDate)}
-                                    onChange={(e) => setDocumentIssueDate(e.target.value)}
-                                    className="text-right focus:outline-none"
-                                /> */}
                                 <input
                                     type="text"
                                     value={formatDate(documentIssueDate)}
-                                    onChange={(e) => handleDateInput(e.target.value, setDocumentIssueDate)}
-                                    placeholder="yyyy-mm-dd"
-                                    className="text-right focus:outline-none"
+                                    onChange={(e) => setDocumentIssueDate(formatInputDate(e.target.value))}
+                                    placeholder="aaaa-mm-dd"
+                                    className="text-right focus:outline-none border p-2"
                                 />
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>{t.GuestProfile.PersonalID.ExpiracyDate}*</p>
-                                {/* <input
-                                    type="date"
-                                    value={formatDate(documentExpirationDate)}
-                                    onChange={(e) => setDocumentExpirationDate(e.target.value)}
-                                    className="text-right focus:outline-none"
-                                /> */}
                                 <input
                                     type="text"
                                     value={formatDate(documentExpirationDate)}
-                                    onChange={(e) => handleDateInput(e.target.value, setDocumentExpirationDate)}
-                                    placeholder="yyyy-mm-dd"
-                                    className="text-right focus:outline-none"
+                                    onChange={(e) => setDocumentExpirationDate(formatInputDate(e.target.value))}
+                                    placeholder="aaaa-mm-dd"
+                                    className="text-right focus:outline-none border p-2"
                                 />
                             </div>
                             <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
