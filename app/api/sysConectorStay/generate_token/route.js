@@ -157,8 +157,8 @@ export async function POST(request) {
     }
 
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: expiresInSeconds });
-    // const link = `http://localhost:3000/reservation/reservation?token=${token}`;
-    const link = `https://stay.mypms.pt/reservation/reservation?token=${token}`;
+    const link = `http://localhost:3002/reservation/reservation?token=${token}`;
+    // const link = `https://stay.mypms.pt/reservation/reservation?token=${token}`;
 
     // Inserção no banco stayRecords
     const stayRecord = await prisma.stayRecords.create({
@@ -173,6 +173,34 @@ export async function POST(request) {
       },
     });
 
+    // Função para interpolar o conteúdo com os dados do body
+    function interpolate(template, data, isHTML = false) {
+      let result = template.replace(/{{\s*([\w]+)\s*}}/g, (_, key) => {
+        return data[key] !== undefined ? data[key] : "";
+      });
+
+      // Converte **texto** para <strong>texto</strong> em HTML
+      if (isHTML) {
+        result = result.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+      } else {
+        // Remove os ** na versão de texto simples
+        result = result.replace(/\*\*(.*?)\*\*/g, "$1");
+      }
+
+      return result;
+    }
+
+    // Adiciona as versões de link ao body
+    body.STAY_LINK = `<a href="${link}">MyStay</a>`; // para HTML
+    body.STAY_LINK_TEXT = link; // para texto simples (opcional)
+
+    // Interpolações separadas para HTML e texto do corpo do email
+    const interpolatedBodyHTML = interpolate(emailBody, body, true);
+    const interpolatedBodyText = interpolate(emailBody, { ...body, STAY_LINK: body.STAY_LINK_TEXT }, false);
+
+    // Interpola o assunto do email (normalmente só texto, não HTML)
+    const interpolatedSubject = interpolate(emailSubject, body, false);
+
     // Configuração do envio de e-mail
     const transporter = nodemailer.createTransport({
       host: sendingServer,
@@ -184,9 +212,9 @@ export async function POST(request) {
     const mailOptions = {
       from: `Reserva Confirmada <${replyEmail}>`,
       to: userEmail,
-      subject: `${emailSubject}`,
-      text: `${emailBody} ${link}`,
-      html: `<p>${emailBody} <a href="${link}">MyStay</a></p>`,
+      subject: interpolatedSubject,  // usa o assunto interpolado aqui
+      text: interpolatedBodyText,
+      html: `<p>${interpolatedBodyHTML.replace(/\n/g, "<br>")}</p>`,
     };
 
     await transporter.sendMail(mailOptions);
