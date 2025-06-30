@@ -184,12 +184,15 @@ export default function PrepareCheckIn() {
             setShowModal(true);
         } catch (err) {
             console.error("Erro ao criar o PDF ou enviar os dados:", err);
+            const errorMessage = err?.response?.data?.message || err?.message;
+
             setModalContent({
                 title: t.PrepareCheckIn.PopUpModal.ErrorTitle,
-                message: t.PrepareCheckIn.PopUpModal.ErrorMessage,
+                message: `${t.PrepareCheckIn.PopUpModal.ErrorMessage} ${errorMessage}`,
             });
             setShowModal(true);
         }
+
     };
 
 

@@ -31,7 +31,7 @@
         "Save": "Save",
         "PopUpModal": {
             "ErrorTitle": "Action not completed",
-            "ErrorMessage": "An error occurred while saving. Please contact support.",
+            "ErrorMessage": "An error occurred while saving: ",
             "MissingSignature": "You need to add the signature before continuing.",
             "MissingGuest": "Primary guest data not found.",
             "SuccessTitle": "Saved successfully",
@@ -42,9 +42,9 @@
         "Title": "Guest Profile",
         "PopUpModal": {
             "Title": "Mandatory Fields to Fill Out",
-            "Message": "Please make sure you fill in all required fields before proceeding: First Name, Last Name, Email, Country, Document Type and Number, Expiry Date and Country of Birth.",
+            "Message": "Please make sure you fill in all required fields before proceeding: ",
             "ErrorTitle": "Action not completed",
-            "ErrorMessage": "An error occurred while saving. Please contact support.",
+            "ErrorMessage": "An error occurred while saving: ",
             "SuccessTitle": "Saved successfully",
             "SuccessMessage": "The operation was performed successfully."
         },

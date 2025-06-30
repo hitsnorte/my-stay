@@ -31,7 +31,7 @@
         "Save": "Guardar",
         "PopUpModal": {
             "ErrorTitle": "Ação não concluída",
-            "ErrorMessage": "Ocorreu um erro ao guardar. Por favor contacte o suporte.",
+            "ErrorMessage": "Ocorreu um erro ao guardar: ",
             "MissingSignature": "Você precisa adicionar a assinatura antes de continuar.",
             "MissingGuest": "Dados do hóspede principal não encontrados.",
             "SuccessTitle": "Guardado com sucesso",
@@ -42,9 +42,9 @@
         "Title": "Perfil do Hóspede",
         "PopUpModal": {
             "Title": "Campos Obrigatórios por Preencher",
-            "Message": "Certifique-se de preencher todos os campos obrigatórios antes de prosseguir: Nome, Apelido, E-mail, País, Tipo e Número do Documento, Data de Validade e País de Nascimento.",
+            "Message": "Certifique-se de preencher todos os campos obrigatórios antes de prosseguir: ",
             "ErrorTitle": "Ação não concluída",
-            "ErrorMessage": "Ocorreu um erro ao guardar. Por favor contacte o suporte.",
+            "ErrorMessage": "Ocorreu um erro ao guardar: ",
             "SuccessTitle": "Guardado com sucesso",
             "SuccessMessage": "A operação foi executada com êxito"
         },

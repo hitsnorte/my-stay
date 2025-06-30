@@ -28,23 +28,23 @@ const translations = { en, pt };
 
 // Função para formatar a data
 const formatDate = (dateStr) => {
-  if (!dateStr || typeof dateStr !== "string") return "";
+    if (!dateStr || typeof dateStr !== "string") return "";
 
-  // Se já estiver no formato "yyyy-mm-dd", retorna como está
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    // Se já estiver no formato "yyyy-mm-dd", retorna como está
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
 
-  try {
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return ""; // Data inválida
+    try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return ""; // Data inválida
 
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  } catch (err) {
-    console.error("Erro ao formatar a data:", err);
-    return "";
-  }
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    } catch (err) {
+        console.error("Erro ao formatar a data:", err);
+        return "";
+    }
 };
 
 
@@ -232,10 +232,21 @@ export default function GuestProfile() {
     };
 
     const handleSave = async () => {
-        if (!firstName || !lastName || !email || !country || !identificationDocument || !docNo || !documentExpirationDate || !birthCountry) {
+        const missingFields = [];
+
+        if (!firstName) missingFields.push("First Name");
+        if (!lastName) missingFields.push("Last Name");
+        if (!email) missingFields.push("Email");
+        if (!country) missingFields.push("Country");
+        if (!identificationDocument) missingFields.push("Document Type");
+        if (!docNo) missingFields.push("Document Number");
+        if (!documentExpirationDate) missingFields.push("Expiry Date");
+        if (!birthCountry) missingFields.push("Country of Birth");
+
+        if (missingFields.length > 0) {
             setModalContent({
                 title: t.GuestProfile.PopUpModal.Title,
-                message: t.GuestProfile.PopUpModal.Message,
+                message: `${t.GuestProfile.PopUpModal.Message} (${missingFields.join(", ")})`,
             });
             setShowModal(true);
             return;
@@ -296,7 +307,6 @@ export default function GuestProfile() {
                 headers[`Guest-${key}`] = value !== undefined ? String(value) : "";
             });
 
-            // Envia guestID (profileID) se conhecido
             if (isKnownGuest && selectedGuestID && selectedGuestID !== "unknown") {
                 headers["profileID"] = selectedGuestID;
             }
@@ -312,25 +322,16 @@ export default function GuestProfile() {
                     guestID = response.data.InsertedID;
                 }
 
-                // Atualiza política de privacidade se necessário
                 if (enabledDataP && guestID) {
-                    console.log("Tentando atualizar política de privacidade...");
-                    console.log("enabledDataP:", enabledDataP);
-                    console.log("guestID enviado para política de privacidade:", guestID);
-
                     try {
                         const response = await axios.post("/api/sysConectorStay/update_guest_privacy_policy", {
                             profileID: guestID,
-                            propertyID: propertyID
+                            propertyID: propertyID,
                         });
                         console.log("Resposta da política de privacidade:", response.data);
                     } catch (privacyErr) {
                         console.warn("Erro ao atualizar política de privacidade:", privacyErr);
                     }
-                } else {
-                    console.warn("Política de privacidade NÃO atualizada.");
-                    console.log("enabledDataP:", enabledDataP);
-                    console.log("guestID:", guestID);
                 }
 
                 const updatedGuestData = {
@@ -365,22 +366,25 @@ export default function GuestProfile() {
                 setWasSuccessful(true);
                 setShowModal(true);
             } else {
+                const errorMessage = response?.data?.message;
                 setError("Erro ao salvar os dados.");
                 setModalContent({
                     title: t.GuestProfile.PopUpModal.ErrorTitle,
-                    message: t.GuestProfile.PopUpModal.ErrorMessage,
+                    message: `${t.GuestProfile.PopUpModal.ErrorMessage} ${errorMessage}`,
                 });
                 setShowModal(true);
             }
         } catch (err) {
             console.log(err);
+            const errorMessage = err?.response?.data?.message || err?.message;
             setModalContent({
                 title: t.GuestProfile.PopUpModal.ErrorTitle,
-                message: t.GuestProfile.PopUpModal.ErrorMessage,
+                message: `${t.GuestProfile.PopUpModal.ErrorMessage} ${errorMessage}`,
             });
             setShowModal(true);
         }
     };
+
     const fetchNationalities = async () => {
         const response = await axios.get(`/api/sysConectorStay/get_countries?propertyID=${propertyID}`);
         return response.data;
@@ -449,7 +453,7 @@ export default function GuestProfile() {
         if (!data) return;
 
         setSalutation(renderGuestData("protelSalutation"));
-       setBirthDate(formatDate(renderGuestData("birthDate")));
+        setBirthDate(formatDate(renderGuestData("birthDate")));
         setNationality(renderGuestData("nationality"));
         setCountry(renderGuestData("protelCountryID"));
         setStreetAddress(renderGuestData("protelAddress"));
