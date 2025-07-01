@@ -537,12 +537,14 @@ export default function GuestProfile() {
         return input;
     };
 
+    const [expirationDateError, setExpirationDateError] = useState("");
+
     const isDateValidAndNotPast = (dateStr) => {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
 
-        const inputDate = new Date(dateStr + "T00:00:00"); // evita timezone
+        const inputDate = new Date(dateStr + "T00:00:00");
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // ignora horário para comparação só da data
+        today.setHours(0, 0, 0, 0);
 
         return inputDate >= today;
     };
@@ -550,15 +552,13 @@ export default function GuestProfile() {
     const handleExpirationDateChange = (e) => {
         const formattedDate = formatInputDate(e.target.value);
 
-        // Atualiza se a data estiver no formato correto e não for inferior a hoje
-        if (
-            formattedDate.length === 10 && // data completa
-            !isDateValidAndNotPast(formattedDate)
-        ) {
-            // Data inválida (menor que hoje), não atualiza (ou pode mostrar alerta)
+        if (formattedDate.length === 10 && !isDateValidAndNotPast(formattedDate)) {
+            setExpirationDateError(t.GuestProfile.ExpirationDate);
+            // Não atualiza o valor inválido
             return;
         }
 
+        setExpirationDateError("");
         setDocumentExpirationDate(formattedDate);
     };
 
@@ -766,15 +766,20 @@ export default function GuestProfile() {
                                     className="text-right focus:outline-none"
                                 />
                             </div>
-                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
-                                <p>{t.GuestProfile.PersonalID.ExpiracyDate}*</p>
-                                <input
-                                    type="text"
-                                    value={documentExpirationDate}
-                                    onChange={handleExpirationDateChange}
-                                    placeholder="aaaa-mm-dd"
-                                    className="text-right focus:outline-none"
-                                />
+                            <div>
+                                <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                                    <p>{t.GuestProfile.PersonalID.ExpiracyDate}*</p>
+                                    <input
+                                        type="text"
+                                        value={documentExpirationDate}
+                                        onChange={handleExpirationDateChange}
+                                        placeholder="aaaa-mm-dd"
+                                        className="text-right focus:outline-none"
+                                    />
+                                </div>
+                                {expirationDateError && (
+                                    <p className="text-red-600 text-sm mt-1">{expirationDateError}</p>
+                                )}
                             </div>
                             <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>{t.GuestProfile.PersonalID.CountryOfBirth}*</p>

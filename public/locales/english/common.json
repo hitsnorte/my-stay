@@ -40,6 +40,7 @@
     },
     "GuestProfile": {
         "Title": "Guest Profile",
+        "ExpirationDate": "The expiration date cannot be earlier than today.",
         "PopUpModal": {
             "Title": "Mandatory Fields to Fill Out",
             "Message": "Please make sure you fill in all required fields before proceeding: ",

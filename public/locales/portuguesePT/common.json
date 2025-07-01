@@ -40,6 +40,7 @@
     },
     "GuestProfile": {
         "Title": "Perfil do Hóspede",
+        "ExpirationDate": "A data de expiração não pode ser inferior à data de hoje.",
         "PopUpModal": {
             "Title": "Campos Obrigatórios por Preencher",
             "Message": "Certifique-se de preencher todos os campos obrigatórios antes de prosseguir: ",
