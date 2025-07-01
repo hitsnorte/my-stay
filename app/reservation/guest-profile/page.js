@@ -525,10 +525,41 @@ export default function GuestProfile() {
     };
 
     const formatInputDate = (value) => {
+        // Remove tudo que não for número
         let input = value.replace(/\D/g, "");
+
+        // Limita a 8 dígitos (aaaa mm dd)
+        input = input.slice(0, 8);
+
         if (input.length > 4) input = input.slice(0, 4) + "-" + input.slice(4);
-        if (input.length > 7) input = input.slice(0, 7) + "-" + input.slice(7, 10);
+        if (input.length > 7) input = input.slice(0, 7) + "-" + input.slice(7);
+
         return input;
+    };
+
+    const isDateValidAndNotPast = (dateStr) => {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+
+        const inputDate = new Date(dateStr + "T00:00:00"); // evita timezone
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // ignora horário para comparação só da data
+
+        return inputDate >= today;
+    };
+
+    const handleExpirationDateChange = (e) => {
+        const formattedDate = formatInputDate(e.target.value);
+
+        // Atualiza se a data estiver no formato correto e não for inferior a hoje
+        if (
+            formattedDate.length === 10 && // data completa
+            !isDateValidAndNotPast(formattedDate)
+        ) {
+            // Data inválida (menor que hoje), não atualiza (ou pode mostrar alerta)
+            return;
+        }
+
+        setDocumentExpirationDate(formattedDate);
     };
 
     return (
@@ -740,7 +771,7 @@ export default function GuestProfile() {
                                 <input
                                     type="text"
                                     value={documentExpirationDate}
-                                    onChange={(e) => setDocumentExpirationDate(formatInputDate(e.target.value))}
+                                    onChange={handleExpirationDateChange}
                                     placeholder="aaaa-mm-dd"
                                     className="text-right focus:outline-none"
                                 />
