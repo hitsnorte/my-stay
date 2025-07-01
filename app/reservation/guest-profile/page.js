@@ -232,6 +232,17 @@ export default function GuestProfile() {
     };
 
     const handleSave = async () => {
+
+        if (!isDateValidAndNotPast(documentExpirationDate)) {
+            setExpirationDateError(t.GuestProfile.ExpirationDate);
+            setModalContent({
+                title: t.GuestProfile.PopUpModal.Title,
+                message: t.GuestProfile.ExpirationDate,
+            });
+            setShowModal(true);
+            return;
+        }
+        
         const missingFields = [];
 
         if (!firstName) missingFields.push("First Name");
