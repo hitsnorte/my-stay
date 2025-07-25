@@ -11,7 +11,7 @@ RUN npx prisma generate
 
 COPY . .
 
-# ✅ Variável de ambiente necessária no momento do build
+# Variável de ambiente 
 ENV NEXT_PUBLIC_SECRET_KEY=fec3ee9596164653946d66b88a7b1d7041b1b73cb6337686743c984a173e92da
 
 # Agora sim, a variável será usada no build
