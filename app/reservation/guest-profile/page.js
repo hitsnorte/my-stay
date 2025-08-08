@@ -535,22 +535,7 @@ export default function GuestProfile() {
         setMobile(dialCode + ' ' + value); // Adiciona o código de país apenas uma vez
     };
 
-    const DEFAULT_DATES = ["01/01/1900", "31/12/2050"];
-
-    const getDisplayDate = (value) => {
-        if (!value) return "";
-
-        // Pega só a parte da data antes do espaço
-        const [datePart] = value.split(" "); // ex: "13/03/2025"
-
-        // Se a parte da data estiver nos defaults → mostra placeholder
-        if (DEFAULT_DATES.includes(datePart)) {
-            return "";
-        }
-
-        const [day, month, year] = datePart.split("/");
-        return `${year}-${month}-${day}`;
-    };
+    const DEFAULT_DATES = ["1900-01-01", "2050-12-31"];
 
     const formatInputDate = (value) => {
         // Remove tudo que não for número
@@ -589,7 +574,6 @@ export default function GuestProfile() {
         setExpirationDateError("");
         setDocumentExpirationDate(formattedDate);
     };
-
 
     return (
         <main>
@@ -651,8 +635,11 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.GuestDetails.DateOfBirth}</p>
                                 <input
                                     type="text"
-                                    value={getDisplayDate(birthDate)}
-                                    onChange={(e) => setBirthDate(formatInputDate(e.target.value))}
+                                    value={birthDate}
+                                    onChange={(e) => {
+                                        const formatted = formatInputDate(e.target.value);
+                                        setBirthDate(DEFAULT_DATES.includes(formatted) ? "" : formatted);
+                                    }}
                                     placeholder="aaaa-mm-dd"
                                     className="text-right focus:outline-none"
                                 />
@@ -789,8 +776,11 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.PersonalID.IssueDate}</p>
                                 <input
                                     type="text"
-                                    value={getDisplayDate(documentIssueDate)}
-                                    onChange={(e) => setDocumentIssueDate(formatInputDate(e.target.value))}
+                                    value={documentIssueDate}
+                                    onChange={(e) => {
+                                        const formatted = formatInputDate(e.target.value);
+                                        setDocumentIssueDate(DEFAULT_DATES.includes(formatted) ? "" : formatted);
+                                    }}
                                     placeholder="aaaa-mm-dd"
                                     className="text-right focus:outline-none"
                                 />
@@ -800,7 +790,7 @@ export default function GuestProfile() {
                                     <p>{t.GuestProfile.PersonalID.ExpiracyDate}*</p>
                                     <input
                                         type="text"
-                                        value={getDisplayDate(documentExpirationDate)}
+                                        value={documentExpirationDate}
                                         onChange={handleExpirationDateChange}
                                         placeholder="aaaa-mm-dd"
                                         className="text-right focus:outline-none"
