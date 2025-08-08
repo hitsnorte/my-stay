@@ -535,18 +535,20 @@ export default function GuestProfile() {
         setMobile(dialCode + ' ' + value); // Adiciona o código de país apenas uma vez
     };
 
-    const DEFAULT_DATES = [
-        "01/01/1900 00:00:00",
-        "31/12/2050 00:00:00"
-    ];
+    const DEFAULT_DATES = ["01/01/1900", "31/12/2050"];
 
-    // Função para exibir no input
     const getDisplayDate = (value) => {
-        if (!value || DEFAULT_DATES.includes(value)) {
-            return ""; // deixa vazio para aparecer o placeholder
+        if (!value) return "";
+
+        // Pega só a parte da data antes do espaço
+        const [datePart] = value.split(" "); // ex: "13/03/2025"
+
+        // Se a parte da data estiver nos defaults → mostra placeholder
+        if (DEFAULT_DATES.includes(datePart)) {
+            return "";
         }
-        // Converte de dd/mm/yyyy para yyyy-mm-dd (se vier nesse formato)
-        const [day, month, year] = value.split(" ")[0].split("/");
+
+        const [day, month, year] = datePart.split("/");
         return `${year}-${month}-${day}`;
     };
 
