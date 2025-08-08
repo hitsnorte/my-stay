@@ -251,7 +251,7 @@ function ReservationContent() {
                                 : `${data.protelGuestFirstName} ${data.protelGuestLastName}`}
                         </h1>
                         <div className="flex flex-row gap-4 items-center mt-4">
-                            <div className="flex flex-row items-center font-bold">
+                            <div className="flex flex-row items-center font-bold mr-2">
                                 <p className="text-5xl">{checkIn.day}</p>
                                 <div className="text-left">
                                     <p>{checkIn.weekDay}</p>
@@ -259,7 +259,7 @@ function ReservationContent() {
                                 </div>
                             </div>
                             <p>{numNights} {t.Reservation.Nights}</p>
-                            <div className="flex flex-row items-center font-bold">
+                            <div className="flex flex-row items-center font-bold ml-2">
                                 <div className="text-right">
                                     <p>{checkOut.weekDay}</p>
                                     <p>{checkOut.month}</p>

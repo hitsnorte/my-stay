@@ -242,7 +242,7 @@ export default function GuestProfile() {
             setShowModal(true);
             return;
         }
-        
+
         const missingFields = [];
 
         if (!firstName) missingFields.push("First Name");
@@ -535,6 +535,21 @@ export default function GuestProfile() {
         setMobile(dialCode + ' ' + value); // Adiciona o código de país apenas uma vez
     };
 
+    const DEFAULT_DATES = [
+        "01/01/1900 00:00:00",
+        "31/12/2050 00:00:00"
+    ];
+
+    // Função para exibir no input
+    const getDisplayDate = (value) => {
+        if (!value || DEFAULT_DATES.includes(value)) {
+            return ""; // deixa vazio para aparecer o placeholder
+        }
+        // Converte de dd/mm/yyyy para yyyy-mm-dd (se vier nesse formato)
+        const [day, month, year] = value.split(" ")[0].split("/");
+        return `${year}-${month}-${day}`;
+    };
+
     const formatInputDate = (value) => {
         // Remove tudo que não for número
         let input = value.replace(/\D/g, "");
@@ -572,6 +587,7 @@ export default function GuestProfile() {
         setExpirationDateError("");
         setDocumentExpirationDate(formattedDate);
     };
+
 
     return (
         <main>
@@ -633,7 +649,7 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.GuestDetails.DateOfBirth}</p>
                                 <input
                                     type="text"
-                                    value={birthDate}
+                                    value={getDisplayDate(birthDate)}
                                     onChange={(e) => setBirthDate(formatInputDate(e.target.value))}
                                     placeholder="aaaa-mm-dd"
                                     className="text-right focus:outline-none"
@@ -771,7 +787,7 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.PersonalID.IssueDate}</p>
                                 <input
                                     type="text"
-                                    value={documentIssueDate}
+                                    value={getDisplayDate(documentIssueDate)}
                                     onChange={(e) => setDocumentIssueDate(formatInputDate(e.target.value))}
                                     placeholder="aaaa-mm-dd"
                                     className="text-right focus:outline-none"
@@ -782,7 +798,7 @@ export default function GuestProfile() {
                                     <p>{t.GuestProfile.PersonalID.ExpiracyDate}*</p>
                                     <input
                                         type="text"
-                                        value={documentExpirationDate}
+                                        value={getDisplayDate(documentExpirationDate)}
                                         onChange={handleExpirationDateChange}
                                         placeholder="aaaa-mm-dd"
                                         className="text-right focus:outline-none"
