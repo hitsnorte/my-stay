@@ -781,10 +781,15 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.PersonalID.IssueDate}</p>
                                 <input
                                     type="text"
-                                    value={documentIssueDate}
+                                    // value={documentIssueDate}
+                                    // onChange={(e) => {
+                                    //     const formatted = formatInputDate(e.target.value);
+                                    //     setDocumentIssueDate(DEFAULT_DATES.includes(formatted) ? "" : formatted);
+                                    // }}
+                                    value={DEFAULT_DATES.includes(documentIssueDate) || !documentIssueDate ? "aaaa-mm-dd" : documentIssueDate}
                                     onChange={(e) => {
                                         const formatted = formatInputDate(e.target.value);
-                                        setDocumentIssueDate(DEFAULT_DATES.includes(formatted) ? "" : formatted);
+                                        setDocumentIssueDate(formatted);
                                     }}
                                     placeholder="aaaa-mm-dd"
                                     className="text-right focus:outline-none"
