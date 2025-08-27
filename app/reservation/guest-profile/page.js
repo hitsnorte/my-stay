@@ -635,10 +635,15 @@ export default function GuestProfile() {
                                 <p>{t.GuestProfile.GuestDetails.DateOfBirth}</p>
                                 <input
                                     type="text"
-                                    value={birthDate}
+                                    // value={birthDate}
+                                    // onChange={(e) => {
+                                    //     const formatted = formatInputDate(e.target.value);
+                                    //     setBirthDate(DEFAULT_DATES.includes(formatted) ? "" : formatted);
+                                    // }}
+                                    value={DEFAULT_DATES.includes(birthDate) || !birthDate ? "aaaa-mm-dd" : birthDate}
                                     onChange={(e) => {
                                         const formatted = formatInputDate(e.target.value);
-                                        setBirthDate(DEFAULT_DATES.includes(formatted) ? "" : formatted);
+                                        setBirthDate(formatted);
                                     }}
                                     placeholder="aaaa-mm-dd"
                                     className="text-right focus:outline-none"
