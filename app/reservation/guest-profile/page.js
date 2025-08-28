@@ -24,6 +24,10 @@ import "./style.css";
 
 import PopUpModal from "@/components/popup_modal/page";
 
+import { AiOutlineCalendar } from "react-icons/ai";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 const translations = { en, pt };
 
 // Função para formatar a data
@@ -106,6 +110,10 @@ export default function GuestProfile() {
     const [showModal, setShowModal] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
     const [wasSuccessful, setWasSuccessful] = useState(false);
+
+    const issueDateRef = useRef(null);
+    const expirationDateRef = useRef(null);
+    const birthDateRef = useRef(null);
 
     useEffect(() => {
         // Verifica o idioma armazenado no localStorage ao carregar a página
@@ -550,6 +558,12 @@ export default function GuestProfile() {
         return input;
     };
 
+    // Função que garante que o valor passado para o DatePicker seja um Date válido
+    const parseDate = (value) => {
+        const date = new Date(value);
+        return isNaN(date.getTime()) ? null : date;
+    };
+
     const [expirationDateError, setExpirationDateError] = useState("");
 
     const isDateValidAndNotPast = (dateStr) => {
@@ -633,21 +647,43 @@ export default function GuestProfile() {
                             </div>
                             <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                 <p>{t.GuestProfile.GuestDetails.DateOfBirth}</p>
-                                <input
-                                    type="text"
-                                    // value={birthDate}
-                                    // onChange={(e) => {
-                                    //     const formatted = formatInputDate(e.target.value);
-                                    //     setBirthDate(DEFAULT_DATES.includes(formatted) ? "" : formatted);
-                                    // }}
-                                    value={DEFAULT_DATES.includes(birthDate) || !birthDate ? "aaaa-mm-dd" : birthDate}
-                                    onChange={(e) => {
-                                        const formatted = formatInputDate(e.target.value);
-                                        setBirthDate(formatted);
-                                    }}
-                                    placeholder="aaaa-mm-dd"
-                                    className="text-right focus:outline-none"
-                                />
+
+                                <div className="flex items-center">
+                                    {/* Input visível */}
+                                    <input
+                                        type="text"
+                                        value={DEFAULT_DATES.includes(birthDate) || !birthDate ? "aaaa-mm-dd" : birthDate}
+                                        onChange={(e) => {
+                                            const formatted = formatInputDate(e.target.value);
+                                            setBirthDate(formatted);
+                                        }}
+                                        placeholder="aaaa-mm-dd"
+                                        className="text-right focus:outline-none"
+                                    />
+
+                                    {/* Ícone que abre o calendário */}
+                                    <AiOutlineCalendar
+                                        size={22}
+                                        className="ml-2 cursor-pointer text-gray-500 hover:text-orange-500"
+                                        onClick={() => birthDateRef.current?.setOpen(true)}
+                                    />
+
+                                    {/* DatePicker invisível para controlar o calendário */}
+                                    <DatePicker
+                                        ref={birthDateRef}
+                                        selected={parseDate(birthDate)}
+                                        onChange={(date) => {
+                                            const formatted = date ? date.toISOString().split("T")[0] : "";
+                                            setBirthDate(formatted);
+                                        }}
+                                        dateFormat="yyyy-MM-dd"
+                                        showMonthDropdown
+                                        showYearDropdown
+                                        dropdownMode="select"
+                                        withPortal={false}
+                                        className="hidden" // esconde o input do datepicker
+                                    />
+                                </div>
                             </div>
 
                             <div className="flex flex-row items-center justify-between border-b-2 pb-2 group focus-within:border-orange-500">
@@ -777,35 +813,89 @@ export default function GuestProfile() {
                                     className="text-right focus:outline-none"
                                 />
                             </div>
-                            <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
+                            <div className="flex flex-row justify-between items-center border-b-2 pb-2 group focus-within:border-orange-500 mb-10">
                                 <p>{t.GuestProfile.PersonalID.IssueDate}</p>
-                                <input
-                                    type="text"
-                                    // value={documentIssueDate}
-                                    // onChange={(e) => {
-                                    //     const formatted = formatInputDate(e.target.value);
-                                    //     setDocumentIssueDate(DEFAULT_DATES.includes(formatted) ? "" : formatted);
-                                    // }}
-                                    value={DEFAULT_DATES.includes(documentIssueDate) || !documentIssueDate ? "aaaa-mm-dd" : documentIssueDate}
-                                    onChange={(e) => {
-                                        const formatted = formatInputDate(e.target.value);
-                                        setDocumentIssueDate(formatted);
-                                    }}
-                                    placeholder="aaaa-mm-dd"
-                                    className="text-right focus:outline-none"
-                                />
+
+                                <div className="flex items-center">
+                                    {/* Input visível que você já tinha */}
+                                    <input
+                                        type="text"
+                                        value={
+                                            DEFAULT_DATES.includes(documentIssueDate) || !documentIssueDate
+                                                ? ""
+                                                : documentIssueDate
+                                        }
+                                        onChange={(e) => {
+                                            const formatted = formatInputDate(e.target.value);
+                                            setDocumentIssueDate(formatted);
+                                        }}
+                                        placeholder="aaaa-mm-dd"
+                                        className="text-right focus:outline-none"
+                                    />
+
+                                    {/* Ícone que abre o calendário */}
+                                    <AiOutlineCalendar
+                                        size={22}
+                                        className="ml-2 cursor-pointer text-gray-500 hover:text-orange-500"
+                                        onClick={() => issueDateRef.current?.setOpen(true)}
+                                    />
+
+                                    {/* DatePicker invisível, só usado para controlar o calendário */}
+                                    <DatePicker
+                                        ref={issueDateRef}
+                                        selected={parseDate(documentIssueDate)}
+                                        onChange={(date) => {
+                                            const formatted = date ? date.toISOString().split("T")[0] : "";
+                                            setDocumentIssueDate(formatted);
+                                        }}
+                                        dateFormat="yyyy-MM-dd"
+                                        showMonthDropdown        // permite selecionar o mês rapidamente
+                                        showYearDropdown         // permite selecionar o ano rapidamente
+                                        dropdownMode="select"    // dropdown nativo para mês/ano
+                                        withPortal={false}
+                                        className="hidden"       // esconde totalmente o input do datepicker
+                                    />
+                                </div>
                             </div>
                             <div>
                                 <div className="flex flex-row justify-between border-b-2 pb-2 group focus-within:border-orange-500">
                                     <p>{t.GuestProfile.PersonalID.ExpiracyDate}*</p>
-                                    <input
-                                        type="text"
-                                        value={documentExpirationDate}
-                                        onChange={handleExpirationDateChange}
-                                        placeholder="aaaa-mm-dd"
-                                        className="text-right focus:outline-none"
-                                    />
+
+                                    <div className="flex items-center">
+                                        {/* Input visível */}
+                                        <input
+                                            type="text"
+                                            value={documentExpirationDate}
+                                            onChange={handleExpirationDateChange}
+                                            placeholder="aaaa-mm-dd"
+                                            className="text-right focus:outline-none"
+                                        />
+
+                                        {/* Ícone que abre o calendário */}
+                                        <AiOutlineCalendar
+                                            size={22}
+                                            className="ml-2 cursor-pointer text-gray-500 hover:text-orange-500"
+                                            onClick={() => expirationDateRef.current?.setOpen(true)}
+                                        />
+
+                                        {/* DatePicker invisível para controlar o calendário */}
+                                        <DatePicker
+                                            ref={expirationDateRef}
+                                            selected={parseDate(documentExpirationDate)}
+                                            onChange={(date) => {
+                                                const formatted = date ? date.toISOString().split("T")[0] : "";
+                                                handleExpirationDateChange({ target: { value: formatted } });
+                                            }}
+                                            dateFormat="yyyy-MM-dd"
+                                            showMonthDropdown
+                                            showYearDropdown
+                                            dropdownMode="select"
+                                            withPortal={false}
+                                            className="hidden" // input do datepicker escondido
+                                        />
+                                    </div>
                                 </div>
+
                                 {expirationDateError && (
                                     <p className="text-red-600 text-sm mt-1">{expirationDateError}</p>
                                 )}
