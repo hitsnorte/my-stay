@@ -1,30 +1,24 @@
-# Etapa 1: Builder
-FROM node:20-alpine AS builder
+# Use an official Node.js runtime as a base image
+FROM node:20-buster
 
+# Set the working directory in the container
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+# Copy package files and install dependencies
+COPY package*.json ./
 RUN npm install
 
-COPY prisma ./prisma/
-RUN npx prisma generate
-
+# Copy entire project (including server.js and prisma folder)
 COPY . .
 
+# Generate Prisma client
+RUN npx prisma generate
+
+# Build your Next.js application
 RUN npm run build
 
-# Etapa 2: Runtime
-FROM node:20-alpine
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm install --omit=dev
-
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-
+# Expose the app port
 EXPOSE 3000
+
+# Start the application using your custom Express server
 CMD ["npm", "run", "start"]
