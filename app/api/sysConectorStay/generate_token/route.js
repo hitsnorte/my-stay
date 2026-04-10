@@ -60,6 +60,7 @@ export async function POST(request) {
         sendingPort: true,
         emailBody: true,
         emailSubject: true,
+        sendStayByEmail: true,
       },
     });
 
@@ -70,7 +71,7 @@ export async function POST(request) {
       );
     }
 
-    const { propertyServer, propertyPort, propertyID, replyEmail, replyPassword, sendingServer, sendingPort, emailBody, emailSubject } = property;
+    const { propertyServer, propertyPort, propertyID, replyEmail, replyPassword, sendingServer, sendingPort, emailBody, emailSubject, sendStayByEmail } = property;
     const uniqueId = uuidv4();
 
     // Função para transformar os dados recebidos para o novo formato
@@ -157,8 +158,8 @@ export async function POST(request) {
     }
 
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: expiresInSeconds });
-    // const link = `http://localhost:3000/reservation/reservation?token=${token}`;
-    const link = `https://stay.mypms.pt/reservation/reservation?token=${token}`;
+     const link = `http://localhost:3000/reservation/reservation?token=${token}`;
+    // const link = `https://stay.mypms.pt/reservation/reservation?token=${token}`;
 
     // Inserção no banco stayRecords
     const stayRecord = await prisma.stayRecords.create({
@@ -217,7 +218,64 @@ export async function POST(request) {
       html: `<p>${interpolatedBodyHTML.replace(/\n/g, "<br>")}</p>`,
     };
 
-    await transporter.sendMail(mailOptions);
+    // Check if email should be sent based on sendStayByEmail field
+    if (property.sendStayByEmail) {
+        // Logic to send email
+        console.log('Sending email as sendStayByEmail is enabled.');
+        await transporter.sendMail(mailOptions);
+    }
+
+    // Check chatbotsStay table for HiJiffy provider and active status
+    const chatbot = await prisma.chatbotsStay.findFirst({
+        where: {
+            propertyID: propertyID,
+            provider: 'HiJiffy',
+            active: true
+        },
+        select: {
+            hijiffyToken: true,
+            hijiffyCampaign: true
+        }
+    });
+
+    console.log('HiJiffy chatbot data:', chatbot);
+
+    if (chatbot) {
+        console.log('HiJiffy chatbot is active. Preparing to make API request.');
+        const apiUrl = `https://messenger-services.com/api/v1/pms/external?api_token=${chatbot.hijiffyToken}`;
+        const requestBody = {
+            campaign_code: chatbot.hijiffyCampaign,
+            data: {
+                reservation_id: body.protelReservationID, // Unique reservation identifier (REQUIRED)
+                first_name: body.protelGuestFirstName,   // The first name of the individual
+                last_name: body.protelGuestLastName,     // The last name of the individual
+                phone: body.protelGuestPhone,            // Contact phone number
+                email: body.email,                       // Contact email address
+                check_in: body.protelValidFrom,          // Check-in date
+                check_out: body.protelValidUntil,        // Check-out date
+                nationality: body.nationality,           // User's nationality
+                checkin_url: link
+            }
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (response.ok) {
+                console.log('API request to HiJiffy successful.', response.statusText);
+            } else {
+                console.error('API request to HiJiffy failed.', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error making API request to HiJiffy:', error);
+        }
+    }
 
     return new NextResponse(
       JSON.stringify({ message: "E-mail enviado com sucesso!", link, stayID: stayRecord.stayID }),

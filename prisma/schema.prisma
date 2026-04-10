@@ -21,7 +21,7 @@ model properties {
   propertyServer   String            @db.VarChar(40)
   propertyPort     String?           @db.VarChar(10)
   mpehotel         Int?
-  hotelName        String?           @db.VarChar(255)
+  hotelName        String?           @db.VarChar(100)
   hotelTermsEN     String?           @db.VarChar(2048)
   hotelPhone       String?           @db.VarChar(20)
   hotelEmail       String?           @db.VarChar(255)
@@ -37,13 +37,16 @@ model properties {
   hasStay          Boolean           @default(false)
   replyEmail       String?           @db.VarChar(255)
   replyPassword    String?           @db.VarChar(255)
-  sendingServer    String?           @db.VarChar(2048)
+  sendingServer    String?           @db.VarChar(100)
   sendingPort      Int?
   infoEmail        String?           @db.VarChar(255)
-  emailBody        String?           @default("") @db.VarChar(1055)
+  emailBody        String?           @default("") @db.VarChar(4000)
   emailSubject     String?           @default("") @db.VarChar(255)
   privacyPolicyEN  String?           @default("") @db.VarChar(1000)
   privacyPolicyPT  String?           @default("") @db.VarChar(1000)
+  hasRoomCloud     Boolean           @default(false)
+  sendStayByEmail  Boolean?          @default(false)
+  hasLockSys       Boolean           @default(false)
   usersProperties  usersProperties[]
 }
 
@@ -103,6 +106,7 @@ model users {
   expirationDate   DateTime?         @default(dbgenerated("'2222-01-01'")) @db.Date
   internalUser     String?           @db.VarChar(100)
   internalPassword String?           @db.VarChar(255)
+  user_roles       user_roles[]
   usersProperties  usersProperties[]
 }
 
@@ -127,4 +131,124 @@ model stayRecords {
   propertyID      Int
   token           String?  @db.VarChar(512)
   companionsIDS   String?  @db.VarChar(255)
+}
+
+model chatbotsStay {
+  propertyID      Int     @id
+  active          Boolean
+  provider        String? @db.Text
+  hijiffyToken    String? @db.Text
+  hijiffyCampaign String? @db.Text
+}
+
+model hotelTerms {
+  propertyID      Int     @id
+  termsAndCondPT  String? @db.VarChar(2000)
+  termsAndCondEN  String? @db.VarChar(2000)
+  termsAndCondES  String? @db.VarChar(2000)
+  privacyPolicyPT String? @db.VarChar(2000)
+  privacyPolicyEN String? @db.VarChar(2000)
+  privacyPolicyES String? @db.VarChar(2000)
+  miniTermsPT     String? @db.VarChar(1200)
+  miniTermsEN     String? @db.VarChar(1200)
+  miniTermsES     String? @db.VarChar(1200)
+}
+
+model lockSysTemplates {
+  templateID   Int     @id @default(autoincrement())
+  emailSubject String? @default("") @db.VarChar(500)
+  emailBody    String? @default("") @db.VarChar(8000)
+  language     String? @default("") @db.VarChar(3)
+}
+
+model maintenancePhoto {
+  ref        Int    @id @default(autoincrement())
+  image      String @db.LongText
+  propertyID Int?
+}
+
+model registrationRecords {
+  requestID       Int       @id @default(autoincrement())
+  requestBody     String?   @db.Text
+  requestType     String?   @db.VarChar(10)
+  requestDateTime DateTime? @db.DateTime(0)
+  responseStatus  String?   @db.VarChar(20)
+  responseBody    String?   @db.Text
+  propertyID      Int?
+  seen            Boolean?
+  uniqueKey       String?   @db.VarChar(255)
+  seenAt          DateTime? @db.DateTime(0)
+}
+
+model requestRecordsHousekeeping {
+  requestID       Int      @id @default(autoincrement())
+  requestBody     Json
+  requestType     String   @db.VarChar(8192)
+  requestDateTime DateTime @db.DateTime(0)
+  responseStatus  String?  @db.VarChar(20)
+  responseBody    String?  @db.Text
+  propertyID      Int
+}
+
+model requestRecordsReservationsOta {
+  requestID       Int      @id @default(autoincrement())
+  requestBody     Json
+  requestType     String   @db.VarChar(8192)
+  requestDateTime DateTime @db.DateTime(0)
+  responseStatus  String?  @db.VarChar(20)
+  responseBody    String?  @db.Text
+  propertyID      Int
+}
+
+model roles {
+  roleID      Int          @id @default(autoincrement())
+  name        String       @db.VarChar(50)
+  description String?      @default("") @db.VarChar(200)
+  user_roles  user_roles[]
+}
+
+model roomCloud {
+  id         Int     @id @default(autoincrement())
+  username   String? @default("") @db.VarChar(200)
+  password   String? @default("") @db.VarChar(255)
+  hotelID    String? @default("") @db.VarChar(50)
+  propertyID Int?    @unique(map: "propertyID") @default(-1)
+}
+
+model roomCloudLogs {
+  requestID      Int       @id @default(autoincrement())
+  hotelID        Int
+  requestBody    String?   @db.Text
+  responseStatus String?   @db.VarChar(50)
+  responseBody   String?   @db.Text
+  createdAt      DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model roomCloudPropUsers {
+  id         Int @id @default(autoincrement())
+  userID     Int @default(-1)
+  propertyID Int @default(-1)
+}
+
+model stayPropUsers {
+  id         Int @id @default(autoincrement())
+  userID     Int @default(-1)
+  propertyID Int @default(-1)
+}
+
+model stayTemplates {
+  templateID   Int     @id @default(autoincrement())
+  emailSubject String? @default("") @db.VarChar(500)
+  emailBody    String? @default("") @db.VarChar(8000)
+}
+
+model user_roles {
+  ref    Int   @id @default(autoincrement())
+  userID Int
+  roleID Int
+  roles  roles @relation(fields: [roleID], references: [roleID])
+  users  users @relation(fields: [userID], references: [userID])
+
+  @@index([roleID], map: "user_roles_roleID_fkey")
+  @@index([userID], map: "user_roles_userID_fkey")
 }

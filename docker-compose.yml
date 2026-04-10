@@ -1,38 +1,15 @@
-version: '3.8'
+version: "3.9"
 
 services:
-  # Serviço Next.js
-  nextjs:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  app:
+    build: .
+    container_name: stayv
     ports:
       - "3005:3000"
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-
-  # Serviço MySQL
-  db:
-    image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    volumes:
-      - db-data:/var/lib/mysql
-    ports:
-      - "3307:3306"
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      retries: 5
-      timeout: 5s
-
-volumes:
-  db-data:
+      NEXTAUTH_URL: "https://stay.mypms.pt/"
+      DATABASE_URL: "mysql://micro:Nextjs.2024@192.168.145.20:3306/extensions"
+      JWT_SECRET: "dikr3FJ9I2HG408GF24JPI3V9837049023yhroigsfa8s7af09auijhf3208fhi2o"
+      SECRET_KEY: "q4vf9p8n4907895f7m8d24m75c2q947m2398c574q9586c490q756c98q4m705imtugcfecvrhym04capwz3e2ewqaefwegfiuoamv4ros2nuyp0sjc3iutow924bn5ry943utrjmi"
+      NEXT_PUBLIC_SECRET_KEY: "fec3ee9596164653946d66b88a7b1d7041b1b73cb6337686743c984a173e92da"
+    restart: always
