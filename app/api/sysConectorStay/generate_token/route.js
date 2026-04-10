@@ -13,7 +13,7 @@ export async function POST(request) {
     const profileID = body.protelGuestID;
     const expDate = body.protelValidUntil;
 
-    // Validações
+    // Validações dos campos obrigatórios
     if (!userEmail) {
       return new NextResponse(
         JSON.stringify({ error: "O campo 'email' é obrigatório!" }),
